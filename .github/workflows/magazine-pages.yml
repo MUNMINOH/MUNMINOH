@@ -1,4 +1,4 @@
-# 빌딩러너 매거진을 GitHub Pages로 배포합니다.
+# CADENCE(빌딩러너) 매거진을 GitHub Pages로 배포합니다.
 # 배포할 때마다 공개 API에서 최신 지표를 받아 data/live.json에 넣습니다.
 # 저장소에 커밋하지 않고, 배포본에만 최신 데이터를 담습니다.
 name: 매거진 배포

@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>빌딩러너 매거진</title>
+<title>CADENCE 케이던스</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="빌딩러너: 빌딩과 상업용 부동산의 시장, 거래, 건축, 투자 이야기를 다루는 매거진">
+<meta name="description" content="CADENCE: 빌딩러너가 만드는 상업용 부동산 리뷰. 시장, 거래, 빌딩, 투자와 매일 갱신되는 금리·리츠 지표">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Black+Han+Sans&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Nanum+Myeongjo:wght@700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Nanum+Myeongjo:wght@700;800&display=swap">
 <style>
 /* Layout: 건물 단면처럼 층(카테고리)이 쌓인 매거진. 엘리베이터 버튼 내비 + 도면 일러스트 + 스펙 시트 + 실시간 지표 */
 :root {
@@ -118,14 +118,15 @@ button, input { font: inherit; color: inherit; }
 .mascot { width: clamp(64px, 11vw, 132px); height: auto; display: block; flex: none; }
 .brand-text { display: grid; gap: 10px; min-width: 0; }
 .wordmark {
-  font-family: "Black Han Sans", var(--f-body); font-weight: 400;
-  font-size: clamp(3.25rem, 10vw, 7.25rem); line-height: 0.9; letter-spacing: -0.01em; display: block;
+  font-family: var(--f-display); font-weight: 600; font-variation-settings: "wdth" 112;
+  font-size: clamp(2.5rem, 8vw, 5.75rem); line-height: 0.9; letter-spacing: 0.12em; margin-right: -0.12em;
+  display: block;
 }
-.wordmark span { color: var(--accent); }
-.wordmark-en {
-  font-family: var(--f-display); font-weight: 800; font-variation-settings: "wdth" 125;
-  font-size: clamp(0.75rem, 1.4vw, 1rem); letter-spacing: 0.32em; color: var(--muted);
-}
+.brand-sub { display: flex; align-items: flex-end; gap: 14px; color: var(--muted); font-size: var(--t-sm); }
+.brand-sub b { color: var(--ink); font-weight: 700; }
+.beat { width: clamp(110px, 18vw, 200px); height: auto; display: block; }
+.beat rect { fill: var(--ink-2); }
+.beat rect.on { fill: var(--accent); }
 .tagline { max-width: 23rem; display: grid; gap: 6px; padding-bottom: 4px; }
 .tagline strong { font-size: var(--t-lg); font-weight: 700; line-height: 1.4; }
 .tagline small { color: var(--muted); font-size: var(--t-sm); line-height: 1.55; }
@@ -395,22 +396,25 @@ footer .wrap { padding-block: 52px 40px; display: grid; gap: 32px; }
 <div class="util">
   <div class="wrap">
     <span id="today" class="num">2026.11.17 (화)</span>
-    <span>제47회 레이스 · 매주 목요일 출발</span>
+    <span>No. 47 · 매주 목요일 발행</span>
   </div>
 </div>
 
 <header class="masthead">
   <div class="wrap">
-    <a href="#home" class="brand" aria-label="빌딩러너 홈">
+    <a href="#home" class="brand" aria-label="CADENCE 홈">
       <img class="mascot" id="mascot" alt="" hidden>
       <span class="brand-text">
-        <span class="wordmark">빌딩러너<span>.</span></span>
-        <span class="wordmark-en">BUILDING RUNNER</span>
+        <span class="wordmark">CADENCE</span>
+        <span class="brand-sub">
+          <svg class="beat" viewBox="0 0 138 24" aria-hidden="true"><rect x="0" y="18" width="3" height="6"/><rect x="9" y="13" width="3" height="11"/><rect x="18" y="18" width="3" height="6"/><rect x="27" y="9" width="3" height="15"/><rect x="36" y="18" width="3" height="6"/><rect x="45" y="13" width="3" height="11"/><rect x="54" y="18" width="3" height="6"/><rect x="63" y="5" width="3" height="19"/><rect x="72" y="18" width="3" height="6"/><rect x="81" y="13" width="3" height="11"/><rect x="90" y="18" width="3" height="6"/><rect x="99" y="9" width="3" height="15"/><rect x="108" y="18" width="3" height="6"/><rect x="117" y="13" width="3" height="11"/><rect x="126" y="18" width="3" height="6"/><rect x="135" y="1" width="3" height="23" class="on"/></svg>
+          <span>by <b>빌딩러너</b></span>
+        </span>
       </span>
     </a>
     <div class="tagline">
-      <strong>빌딩 숲을 달리는 상업용 부동산 러닝 매거진</strong>
-      <small>시장의 페이스를 재고, 거래의 결승선을 기록합니다. 오피스 · 리테일 · 물류 · 데이터센터</small>
+      <strong>시장의 리듬을 읽는 상업용 부동산 리뷰</strong>
+      <small>오피스 · 리테일 · 물류 · 데이터센터의 거래와 금리, 그리고 그 흐름을 만드는 사람들</small>
     </div>
   </div>
 </header>
@@ -437,12 +441,12 @@ footer .wrap { padding-block: 52px 40px; display: grid; gap: 32px; }
 <section class="letter" aria-labelledby="nl-title">
   <div class="wrap">
     <div>
-      <h2 id="nl-title">목요일 아침, 러닝 브리핑</h2>
-      <p>한 주 동안 결승선을 통과한 빌딩 거래, 금리와 리츠의 랩타임, 에디터가 고른 코스 세 편을 메일로 보내 드립니다.</p>
+      <h2 id="nl-title">CADENCE 위클리</h2>
+      <p>매주 목요일 아침, 한 주의 빌딩 거래와 금리·리츠 흐름, 에디터가 고른 기사 세 편을 정리해 보내 드립니다.</p>
     </div>
     <form id="nl-form" novalidate>
       <input id="nl-email" type="email" placeholder="이메일 주소" aria-label="이메일 주소" required>
-      <button class="btn" type="submit">브리핑 받기</button>
+      <button class="btn" type="submit">구독하기</button>
       <p class="msg" id="nl-msg" role="status" hidden></p>
     </form>
   </div>
@@ -452,8 +456,8 @@ footer .wrap { padding-block: 52px 40px; display: grid; gap: 32px; }
   <div class="wrap">
     <div class="directory">
       <div>
-        <h2>코스 안내</h2>
-        <p class="foot-note">빌딩러너는 1층 출발선에서 6층 랩타임까지 달립니다. 원하는 구간을 눌러 바로 이동하세요.</p>
+        <h2>층별 안내</h2>
+        <p class="foot-note">CADENCE는 빌딩러너가 만드는 상업용 부동산 리뷰입니다. 주제를 층으로 나눠 두었으니 원하는 층을 눌러 이동하세요.</p>
       </div>
       <ul class="board" id="board"></ul>
     </div>
@@ -470,12 +474,12 @@ footer .wrap { padding-block: 52px 40px; display: grid; gap: 32px; }
 
 /* ================= 편집 콘텐츠 ================= */
 const CATS = {
-  market:   { f: "1F", name: "페이스 체크",  desc: "권역별 공실률과 임대료, 공급과 수요. 시장이 지금 어떤 속도로 달리는지 잽니다." },
-  deal:     { f: "2F", name: "결승선",      desc: "이번 주 손바뀜된 빌딩과 물류센터. 누가, 얼마에, 왜 결승선을 통과했는지 기록합니다." },
-  building: { f: "3F", name: "코스 탐방",   desc: "리모델링, 신축, 용도 전환. 건물이 가치를 바꾸는 코스를 직접 달려 봅니다." },
-  invest:   { f: "4F", name: "워밍업",      desc: "꼬마빌딩부터 법인 매입까지. 첫 빌딩 투자에 나서기 전에 하는 준비 운동." },
-  people:   { f: "5F", name: "페이스메이커", desc: "빌딩을 짓고, 채우고, 거래하는 사람들. 시장의 속도를 만드는 이들의 이야기." },
-  data:     { f: "6F", name: "랩타임",      desc: "금리, 리츠, 실거래. 매일 새로 찍히는 기록으로 상업용 부동산을 봅니다." }
+  market:   { f: "1F", name: "마켓",        desc: "권역별 공실률과 임대료, 공급과 수요. 시장이 지금 어떤 속도로 움직이는지 읽습니다." },
+  deal:     { f: "2F", name: "클로징",      desc: "이번 주 손바뀜된 빌딩과 물류센터. 누가, 얼마에, 왜 샀는지 거래의 마지막까지 따라갑니다." },
+  building: { f: "3F", name: "빌딩",        desc: "리모델링, 신축, 용도 전환. 건물이 가치를 바꾸는 방식을 들여다봅니다." },
+  invest:   { f: "4F", name: "투자 노트",    desc: "꼬마빌딩부터 법인 매입까지. 빌딩 투자를 준비하는 사람을 위한 실무 노트." },
+  people:   { f: "5F", name: "페이스메이커", desc: "빌딩을 짓고, 채우고, 거래하는 사람들. 시장의 속도를 만드는 이들을 만납니다." },
+  data:     { f: "6F", name: "랩타임",      desc: "금리, 리츠, 실거래. 매일 갱신되는 숫자로 상업용 부동산을 봅니다." }
 };
 
 const ARTICLES = [
@@ -528,7 +532,7 @@ const ARTICLES = [
     ]
   },
   {
-    id: 4, cat: "invest", art: "section", seed: 41, author: "빌딩러너 편집부", date: "2026.11.09", min: 9,
+    id: 4, cat: "invest", art: "section", seed: 41, author: "CADENCE 편집부", date: "2026.11.09", min: 9,
     title: "꼬마빌딩 매입 전에 반드시 확인할 7가지",
     dek: "50억~150억 원대 중소형 빌딩은 매물 정보가 적고, 매수자가 직접 확인해야 할 것이 많다. 계약서에 도장을 찍기 전 서류와 현장에서 볼 일곱 가지를 정리했다.",
     spec: [["대상", "매매가 50억~150억 원 중소형 빌딩"], ["확인 서류", "건축물대장 · 토지이용계획 · 등기부"], ["임대 자료", "렌트롤 · 임대차계약서 · 입금 내역"], ["실사 기간", "통상 2~4주"]],
@@ -624,7 +628,7 @@ const ARTICLES = [
     ]
   },
   {
-    id: 10, cat: "invest", art: "section", seed: 103, author: "빌딩러너 편집부", date: "2026.10.28", min: 8,
+    id: 10, cat: "invest", art: "section", seed: 103, author: "CADENCE 편집부", date: "2026.10.28", min: 8,
     title: "법인으로 빌딩을 사면 세금이 정말 줄어들까",
     dek: "‘빌딩은 법인으로 사야 한다’는 말은 반만 맞다. 개인과 법인 매입의 세금 구조를 비교하고, 법인이 오히려 불리한 경우를 정리했다.",
     spec: [["비교", "개인 매입 vs 법인 매입"], ["개인 소득세 최고세율", "45% (지방세 별도)"], ["법인세", "과세표준 구간별 누진세율"], ["주의", "과밀억제권역 신설 법인 취득세 중과"]],
@@ -713,7 +717,7 @@ function card(a) {
     <p>${esc(a.dek)}</p>
   </a>`;
 }
-function specSheet(a, title = "기록지") {
+function specSheet(a, title = "팩트 시트") {
   return `<div class="spec">
     <div class="spec-title"><span>${title}</span><span>${CATS[a.cat].f}</span></div>
     <dl>${a.spec.map(([k, v]) => v.startsWith("@")
@@ -879,42 +883,42 @@ function renderHome() {
   <section class="cover" aria-label="커버 스토리">
     <a href="#a${cover.id}" aria-hidden="true" tabindex="-1">${artBox(cover)}</a>
     <div class="cover-text">
-      <div class="meta"><span class="eyebrow">이번 주 메인 레이스</span>${tag(cover)}</div>
+      <div class="meta"><span class="eyebrow">커버 스토리</span>${tag(cover)}</div>
       <h1><a href="#a${cover.id}">${esc(cover.title)}</a></h1>
       <p class="dek">${esc(cover.dek)}</p>
-      <div class="meta"><span>${esc(cover.author)}</span><span class="num">${cover.date}</span><span>완주 ${cover.min}분</span></div>
+      <div class="meta"><span>${esc(cover.author)}</span><span class="num">${cover.date}</span><span>${cover.min}분 읽기</span></div>
       ${specSheet(cover, "2026년 3분기 서울 오피스 · 예시")}
     </div>
   </section>
 
   <section aria-label="오늘의 금리">
-    ${secHead("6F", "오늘의 랩타임: 금리와 환율", `<span class="src">${liveBadge(true)}</span>`)}
+    ${secHead("6F", "오늘의 금리와 환율", `<span class="src">${liveBadge(true)}</span>`)}
     <div id="live-rates">${ratesBlock()}</div>
   </section>
 
   <section class="latest" aria-label="최신 기사">
     <div>
-      ${secHead("", "새로 들어온 기록", link("#market", "페이스 체크 전체 보기"))}
+      ${secHead("", "최신 기사", link("#market", "마켓 전체 보기"))}
       <div class="grid">${latest.map(card).join("")}</div>
     </div>
     <aside class="rank">
-      ${secHead("", "많이 달린 기사")}
+      ${secHead("", "많이 읽은 기사")}
       <ol>${POPULAR.map(i => byId[i]).map(a => `<li><a href="#a${a.id}"><span><b>${esc(a.title)}</b><small>${esc(CATS[a.cat].name)} · ${a.min}분</small></span></a></li>`).join("")}</ol>
     </aside>
   </section>
 
   <section aria-label="빌딩 거래 기록">
-    <div class="sec-head"><h2><span class="fl">2F</span>결승선을 통과한 서울 빌딩<span id="deals-badge">${liveBadge(!!(LIVE && LIVE.deals))}</span></h2>${link("#deal", "결승선 기사 더 보기")}</div>
+    <div class="sec-head"><h2><span class="fl">2F</span>서울 빌딩 거래<span id="deals-badge">${liveBadge(!!(LIVE && LIVE.deals))}</span></h2>${link("#deal", "클로징 기사 더 보기")}</div>
     <div id="live-deals">${dealsBlock()}</div>
   </section>
 
   <section aria-label="상장 리츠 시세">
-    ${secHead("6F", "리츠 레이스: 상장 리츠 시세", `<span class="src">${liveBadge(true)}</span>`)}
+    ${secHead("6F", "상장 리츠 시세", `<span class="src">${liveBadge(true)}</span>`)}
     <div id="live-reits">${reitsBlock()}</div>
   </section>
 
   <section aria-label="시장 구조">
-    ${secHead("6F", "구간별 기록", link("#data", "랩타임 기사 더 보기"))}
+    ${secHead("6F", "권역과 섹터", link("#data", "랩타임 기사 더 보기"))}
     <div class="data">
       <div class="panel">
         <h3>권역별 오피스 공실률, 2026년 3분기${liveBadge(false)}</h3>
@@ -933,7 +937,7 @@ function renderHome() {
     <a class="feature" href="#a${people.id}">
       ${artBox(people)}
       <div class="feature-text">
-        <span class="eyebrow">페이스메이커 인터뷰</span>
+        <span class="eyebrow">인터뷰</span>
         <blockquote>“빌딩의 가치는 결국 그 안에 누가 있느냐로 정해집니다.”</blockquote>
         <p class="dek">${esc(people.dek)}</p>
         <span class="more">인터뷰 읽기 →</span>
@@ -942,7 +946,7 @@ function renderHome() {
   </section>
 
   <section aria-label="투자 가이드">
-    ${secHead("4F", "워밍업", link("#invest", "워밍업 전체 보기"))}
+    ${secHead("4F", "투자 노트", link("#invest", "투자 노트 전체 보기"))}
     <div class="grid two">${[4, 10].map(i => card(byId[i])).join("")}</div>
   </section>`;
 }
@@ -977,10 +981,10 @@ function renderCat(slug) {
   const list = ARTICLES.filter(a => a.cat === slug);
   const others = ARTICLES.filter(a => a.cat !== slug).slice(0, 3);
   const extra = slug === "data"
-    ? `<section>${secHead("", "오늘의 랩타임: 금리와 환율", `<span class="src">${liveBadge(true)}</span>`)}<div id="live-rates">${ratesBlock()}</div></section>
-       <section>${secHead("", "리츠 레이스: 상장 리츠 시세", `<span class="src">${liveBadge(true)}</span>`)}<div id="live-reits">${reitsBlock()}</div></section>`
+    ? `<section>${secHead("", "오늘의 금리와 환율", `<span class="src">${liveBadge(true)}</span>`)}<div id="live-rates">${ratesBlock()}</div></section>
+       <section>${secHead("", "상장 리츠 시세", `<span class="src">${liveBadge(true)}</span>`)}<div id="live-reits">${reitsBlock()}</div></section>`
     : slug === "deal"
-    ? `<section><div class="sec-head"><h2>결승선을 통과한 서울 빌딩<span id="deals-badge">${liveBadge(!!(LIVE && LIVE.deals))}</span></h2></div><div id="live-deals">${dealsBlock()}</div></section>`
+    ? `<section><div class="sec-head"><h2>서울 빌딩 거래<span id="deals-badge">${liveBadge(!!(LIVE && LIVE.deals))}</span></h2></div><div id="live-deals">${dealsBlock()}</div></section>`
     : "";
   view.innerHTML = `
   <section class="cat-head">
@@ -989,7 +993,7 @@ function renderCat(slug) {
   </section>
   <section><div class="grid">${list.map(card).join("")}</div></section>
   ${extra}
-  <section>${secHead("", "다른 구간도 달려 보기")}<div class="grid">${others.map(card).join("")}</div></section>`;
+  <section>${secHead("", "다른 섹션 보기")}<div class="grid">${others.map(card).join("")}</div></section>`;
 }
 
 function blockHtml(b, i) {
@@ -1003,7 +1007,7 @@ function blockHtml(b, i) {
 
 const SIZES = [1, 1.125, 1.25];
 let sizeIdx = 1;
-try { const v = +localStorage.getItem("br-size"); if (v >= 0 && v < SIZES.length) sizeIdx = v; } catch (e) {}
+try { const v = +localStorage.getItem("cadence-size"); if (v >= 0 && v < SIZES.length) sizeIdx = v; } catch (e) {}
 
 function renderArticle(id) {
   const a = byId[id];
@@ -1019,7 +1023,7 @@ function renderArticle(id) {
       ${tag(a)}
       <h1>${esc(a.title)}</h1>
       <p class="dek">${esc(a.dek)}</p>
-      <div class="byline"><b>${esc(a.author)}</b><span class="num">${a.date}</span><span>완주 ${a.min}분</span>
+      <div class="byline"><b>${esc(a.author)}</b><span class="num">${a.date}</span><span>${a.min}분 읽기</span>
         <span class="tools">
           <button class="pill" id="size-down" type="button" aria-label="글자 작게">가−</button>
           <button class="pill" id="size-up" type="button" aria-label="글자 크게">가+</button>
@@ -1032,17 +1036,17 @@ function renderArticle(id) {
       <aside class="aside">
         ${heads.length > 1 ? `<nav class="toc" aria-label="목차"><strong>이 기사의 순서</strong>${heads.map(([i, h]) => `<button type="button" data-to="sec-${i}">${esc(h)}</button>`).join("")}</nav>` : ""}
         ${specSheet(a)}
-        <p class="foot-note">파란색 기록은 매일 새로 받는 실제 지표이고, 나머지는 기사 구성을 위한 예시입니다.</p>
+        <p class="foot-note">파란색 값은 매일 갱신되는 실제 지표이고, 나머지는 기사 구성을 위한 예시입니다.</p>
       </aside>
     </div>
   </article>
-  <section>${secHead("", "다음 코스")}<div class="grid">${related.map(card).join("")}</div></section>`;
+  <section>${secHead("", "이어서 읽기")}<div class="grid">${related.map(card).join("")}</div></section>`;
 
   const prose = document.getElementById("prose");
   const setSize = d => {
     sizeIdx = Math.max(0, Math.min(SIZES.length - 1, sizeIdx + d));
     prose.style.fontSize = SIZES[sizeIdx] + "rem";
-    try { localStorage.setItem("br-size", String(sizeIdx)); } catch (e) {}
+    try { localStorage.setItem("cadence-size", String(sizeIdx)); } catch (e) {}
   };
   document.getElementById("size-down").addEventListener("click", () => setSize(-1));
   document.getElementById("size-up").addEventListener("click", () => setSize(1));
@@ -1075,7 +1079,7 @@ function renderSearch(q) {
 }
 
 function renderNotFound() {
-  view.innerHTML = `<section class="cat-head"><div class="big">B2</div><div><h1>코스를 벗어났습니다</h1><p>주소가 바뀌었거나 삭제된 기사입니다. <a href="#home" style="color:var(--accent)">출발선으로 돌아가기</a></p></div></section>`;
+  view.innerHTML = `<section class="cat-head"><div class="big">B2</div><div><h1>찾는 페이지가 없습니다</h1><p>주소가 바뀌었거나 삭제된 기사입니다. <a href="#home" style="color:var(--accent)">홈으로 돌아가기</a></p></div></section>`;
 }
 
 /* ================= 라우팅 ================= */
@@ -1392,7 +1396,7 @@ function init() {
   const mascot = document.getElementById("mascot");
   mascot.onload = () => { mascot.alt = "빌딩러너 캐릭터"; mascot.hidden = false; };
   mascot.src = "assets/character.png";
-  document.getElementById("floors").innerHTML = `<a class="floor-btn" href="#home" data-cat="__home"><span class="lamp">GO</span><span class="txt">출발선</span></a>` +
+  document.getElementById("floors").innerHTML = `<a class="floor-btn" href="#home" data-cat="__home"><span class="lamp">L</span><span class="txt">로비</span></a>` +
     Object.entries(CATS).map(([k, c]) => `<a class="floor-btn" href="#${k}" data-cat="${k}"><span class="lamp">${c.f}</span><span class="txt">${esc(c.name)}</span></a>`).join("");
   document.getElementById("board").innerHTML = Object.entries(CATS).slice().reverse()
     .map(([k, c]) => `<li><a href="#${k}"><span class="mono">${c.f}</span><b>${esc(c.name)}</b><span>${esc(c.desc)}</span></a></li>`).join("");
