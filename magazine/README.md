@@ -50,13 +50,17 @@ cd magazine && python -m http.server 8000   # http://localhost:8000
 
 빌딩러너 캐릭터 이미지를 `magazine/assets/character.png`로 넣으면 상단 로고 왼쪽에 자동으로 나타납니다. 배경이 투명한 PNG, 가로 400px 안팎을 권장합니다. 파일이 없으면 글자 로고만 보입니다.
 
-## 공개하기 (GitHub Pages + 내 도메인)
+## 공개하기 (GitHub Pages + cadencereview.com)
 
-1. 이 브랜치를 저장소 기본 브랜치에 병합합니다. 병합하면 `.github/workflows/magazine-pages.yml`이 사이트를 배포하고, 평일 09:10·18:10(KST)마다 지표를 새로 받아 다시 배포합니다.
-2. 저장소 Settings → Pages → Build and deployment → Source를 **GitHub Actions**로 바꿉니다.
-3. 같은 화면의 Custom domain에 도메인을 입력합니다 (예: `www.buildingrunner.com`).
-4. 도메인 업체의 DNS 설정에 아래 레코드를 추가합니다.
-   - `www` → CNAME → `<GitHub 사용자명>.github.io`
-   - 루트 도메인(@) → A 레코드 4개: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
-5. DNS가 퍼지면(보통 몇 분~몇 시간) Settings → Pages에서 **Enforce HTTPS**를 켭니다.
-6. 실거래 표를 실제 데이터로 바꾸려면 Settings → Secrets and variables → Actions에 `DATA_GO_KR_KEY`를 추가합니다.
+사이트는 `.github/workflows/magazine-pages.yml`이 GitHub Pages로 배포합니다. 기본 브랜치에 `magazine/`이 바뀌어 올라오면 배포하고, 평일 09:10·18:10(KST)마다 지표를 새로 받아 다시 배포합니다.
+
+처음 한 번만 할 일:
+
+1. 저장소 Settings → Pages → Build and deployment → Source를 **GitHub Actions**로 바꿉니다.
+2. Cloudflare Registrar 등에서 `cadencereview.com`을 구입합니다.
+3. 도메인 DNS에 아래 레코드를 추가합니다 (Cloudflare라면 프록시를 끈 DNS only).
+   - `@` → A → `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+   - `www` → CNAME → `munminoh.github.io`
+4. Settings → Pages → Custom domain에 `cadencereview.com`을 입력하고 저장합니다.
+5. 인증서가 발급되면 **Enforce HTTPS**를 켭니다.
+6. (선택) 실거래 표를 실제 데이터로 바꾸려면 Settings → Secrets and variables → Actions에 `DATA_GO_KR_KEY`를 추가합니다.
