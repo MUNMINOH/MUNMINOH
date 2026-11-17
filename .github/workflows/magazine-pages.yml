@@ -1,5 +1,6 @@
 # CADENCE(빌딩러너) 매거진을 GitHub Pages로 배포합니다.
-# 배포할 때마다 공개 API에서 최신 지표를 받아 data/live.json에 넣습니다.
+# 배포할 때마다 공개 API에서 최신 지표를 받아 data/live.json에 넣고,
+# scripts/build_site.py로 페이지별 주소·검색엔진용 본문·sitemap을 만들어 올립니다.
 # 저장소에 커밋하지 않고, 배포본에만 최신 데이터를 담습니다.
 name: 매거진 배포
 
@@ -10,7 +11,7 @@ on:
       - "magazine/**"
       - ".github/workflows/magazine-pages.yml"
   schedule:
-    - cron: "17 */3 * * *"   # 3시간마다 (뉴스·금리·리츠·실거래 갱신)
+    - cron: "17 */3 * * *"   # 3시간마다 (뉴스·금리·리츠·실거래·칼럼 갱신)
   workflow_dispatch:
 
 permissions:
@@ -42,11 +43,45 @@ jobs:
         # 수집이 실패해도 저장소에 있는 마지막 데이터로 배포한다
         run: python magazine/scripts/fetch_live.py || echo "::warning::지표 수집에 실패해 저장된 데이터로 배포합니다"
 
+      - name: 페이지 만들기 (SEO)
+        run: python magazine/scripts/build_site.py
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: magazine
+          path: _site
 
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # GitHub은 저장소에 60일 동안 커밋이 없으면 예약 실행을 멈춘다.
+  # 마지막 커밋 후 45일이 지나면 이슈를 열어 주인에게 알린다 (GitHub 알림·메일).
+  inactivity-notice:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: 자동 갱신 중지 예고 알림
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          last=$(git log -1 --format=%ct)
+          days=$(( ( $(date +%s) - last ) / 86400 ))
+          echo "마지막 커밋 후 ${days}일"
+          if [ "$days" -lt 45 ]; then exit 0; fi
+          title="[CADENCE] 자동 갱신이 곧 멈춥니다"
+          open=$(gh issue list -R "$REPO" --state open --search "$title in:title" --json number --jq 'length')
+          if [ "$open" != "0" ]; then echo "이미 알림 이슈가 열려 있음"; exit 0; fi
+          left=$(( 60 - days ))
+          gh issue create -R "$REPO" --title "$title" --body "@MUNMINOH 저장소에 마지막 커밋 후 ${days}일이 지났습니다. GitHub은 60일 동안 커밋이 없으면 예약 실행을 멈추므로, 약 ${left}일 뒤 cadence.bldgrunner.com의 뉴스·금리·실거래·칼럼 자동 갱신이 멈춥니다.
+
+          계속 갱신하려면 다음 중 하나를 해 주세요.
+          - 이 이슈를 닫기 전에 저장소에 아무 변경이나 커밋하기 (예: magazine/README.md 한 줄 수정)
+          - 이미 멈췄다면 Actions 탭 > '매거진 배포' > Enable workflow
+
+          사이트 자체는 멈춰도 계속 열리고, 숫자만 마지막 값에서 멈춥니다."
