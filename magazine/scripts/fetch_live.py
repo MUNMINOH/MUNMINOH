@@ -29,6 +29,7 @@ from pathlib import Path
 KST = dt.timezone(dt.timedelta(hours=9))
 OUT = Path(__file__).resolve().parent.parent / "data" / "live.json"
 UA = "Mozilla/5.0 (compatible; buildingrunner-bot/1.0)"
+PUBLISHED_URL = "https://cadence.bldgrunner.com/data/live.json"
 
 # ---------------------------------------------------------------- 공통
 def get(url: str, timeout: int = 20) -> bytes:
@@ -178,57 +179,78 @@ def num(s: str) -> float:
         return 0.0
 
 
-def fetch_deals(key: str, today: dt.date) -> dict | None:
-    months = []
-    d = today.replace(day=1)
-    for _ in range(2):  # 이번 달 + 지난달 (신고 기한 30일)
-        months.append(d.strftime("%Y%m"))
+def _fetch_month(key: str, ymd: str):
+    """한 달치 서울 25개 구 상업업무용 매매 신고. 실패한 구가 있으면 None."""
+    rows, errors = [], 0
+    for code, gu in SEOUL_GU.items():
+        q = urllib.parse.urlencode({"serviceKey": key, "LAWD_CD": code, "DEAL_YMD": ymd, "numOfRows": 1000, "pageNo": 1}, safe="%")
+        url = f"https://apis.data.go.kr/1613000/RTMSDataSvcNrgTrade/getRTMSDataSvcNrgTrade?{q}"
+        try:
+            root = ET.fromstring(get(url))
+            code_el = root.find(".//resultCode")
+            if code_el is not None and code_el.text not in ("00", "000"):
+                raise RuntimeError(root.findtext(".//resultMsg"))
+            for it in root.iter("item"):
+                item = {c.tag: (c.text or "") for c in it}
+                if pick(item, "cancel") == "O":
+                    continue  # 해제된 거래
+                if pick(item, "btype") not in ("일반", ""):
+                    continue  # 집합(구분상가 호실)은 빼고 건물 단위 거래만
+                amount = num(pick(item, "amount"))  # 만 원
+                if amount <= 0:
+                    continue
+                rows.append({
+                    "gu": gu, "dong": pick(item, "dong"), "use": pick(item, "use"), "zone": pick(item, "zone"),
+                    "buildingArea": num(pick(item, "bar")), "landArea": num(pick(item, "par")),
+                    "built": pick(item, "built"), "amount": amount, "buyer": pick(item, "buyer"), "seller": pick(item, "seller"),
+                    "date": f"{pick(item, 'year')}.{pick(item, 'month').zfill(2)}.{pick(item, 'day').zfill(2)}",
+                })
+        except Exception as e:
+            errors += 1
+            log(f"실거래 {gu} {ymd} 실패: {e}")
+        time.sleep(0.12)
+    log(f"실거래 {ymd}: 건물 단위 {len(rows)}건 (실패 구 {errors}곳)")
+    return rows if errors < 5 else None
+
+
+def _months_back(today: dt.date, n: int) -> list:
+    out, d = [], today.replace(day=1)
+    for _ in range(n):
+        out.append(d.strftime("%Y%m"))
         d = (d - dt.timedelta(days=1)).replace(day=1)
-    deals, errors = [], 0
-    for ymd in months:
-        for code, gu in SEOUL_GU.items():
-            q = urllib.parse.urlencode({"serviceKey": key, "LAWD_CD": code, "DEAL_YMD": ymd, "numOfRows": 1000, "pageNo": 1}, safe="%")
-            url = f"https://apis.data.go.kr/1613000/RTMSDataSvcNrgTrade/getRTMSDataSvcNrgTrade?{q}"
-            try:
-                root = ET.fromstring(get(url))
-                code_el = root.find(".//resultCode")
-                if code_el is not None and code_el.text not in ("00", "000"):
-                    raise RuntimeError(root.findtext(".//resultMsg"))
-                for it in root.iter("item"):
-                    item = {c.tag: (c.text or "") for c in it}
-                    if pick(item, "cancel") == "O":
-                        continue
-                    amount = num(pick(item, "amount"))  # 만원
-                    bar = num(pick(item, "bar"))
-                    if amount <= 0:
-                        continue
-                    deals.append({
-                        "gu": gu, "dong": pick(item, "dong"), "use": pick(item, "use"), "type": pick(item, "btype"),
-                        "zone": pick(item, "zone"), "buildingArea": bar, "landArea": num(pick(item, "par")),
-                        "built": pick(item, "built"), "floor": pick(item, "floor"),
-                        "amount": amount, "buyer": pick(item, "buyer"),
-                        "date": f"{pick(item, 'year')}.{pick(item, 'month').zfill(2)}.{pick(item, 'day').zfill(2)}",
-                        "perPyeong": round(amount / (bar / 3.3058)) if bar > 0 else None,
-                    })
-            except Exception as e:
-                errors += 1
-                log(f"실거래 {gu} {ymd} 실패: {e}")
-            time.sleep(0.15)
-    if not deals and errors:
+    return out
+
+
+def fetch_deals(key: str, today: dt.date, cache: dict) -> dict | None:
+    """최근 12개월치를 월별로 쌓는다. 매번 이번 달·지난달은 새로 받고(신고 기한 30일),
+    비어 있는 예전 달은 한 번에 2개월씩 채운다 (API 호출량 제한 때문)."""
+    want = _months_back(today, 12)
+    months = {m: v for m, v in (cache or {}).items() if m in want}
+    refresh = want[:2]
+    missing = [m for m in want[2:] if m not in months][:2]
+    for m in refresh + missing:
+        rows = _fetch_month(key, m)
+        if rows is not None:
+            months[m] = rows
+    if not months:
         return None
-    buildings = [x for x in deals if x["type"] in ("일반", "")]  # 집합(구분상가)이 아닌 건물 단위 거래
-    buildings.sort(key=lambda x: x["amount"], reverse=True)
+    rows = [r for m in sorted(months, reverse=True) for r in months[m]]
+    for r in rows:
+        r["perPyeong"] = round(r["amount"] / (r["buildingArea"] / 3.3058)) if r.get("buildingArea") else None
+    recent = [r for m in refresh for r in months.get(m, [])]
+    recent.sort(key=lambda x: x["amount"], reverse=True)
     by_gu, by_use = {}, {}
-    for x in buildings:
+    for x in recent:
         for table, k in ((by_gu, x["gu"]), (by_use, x["use"] or "기타")):
             g = table.setdefault(k, {"count": 0, "amount": 0})
             g["count"] += 1
             g["amount"] += x["amount"]
     return {
         "source": "국토교통부 상업업무용 부동산 매매 신고 자료",
-        "months": months, "count": len(buildings), "totalAmount": sum(x["amount"] for x in buildings),
-        "top": buildings[:12], "byGu": by_gu, "byUse": by_use,
-    }
+        "months": refresh, "count": len(recent), "totalAmount": sum(x["amount"] for x in recent),
+        "top": recent[:12], "byGu": by_gu, "byUse": by_use,
+        "history": {"months": sorted(months), "rows": rows},
+    }, months
 
 
 # ---------------------------------------------------------------- 뉴스 (제목·출처·링크만 저장)
@@ -364,7 +386,12 @@ def fetch_news(now: dt.datetime, prev: list) -> list:
 def main() -> int:
     now = dt.datetime.now(KST)
     prev = {}
-    if OUT.exists():
+    try:  # 배포된 사이트의 최신 데이터 (월별 실거래·뉴스 누적에 씀)
+        prev = json.loads(get(PUBLISHED_URL, timeout=15))
+        log("지난 데이터: 배포된 사이트에서 읽음")
+    except Exception as e:
+        log(f"지난 데이터: 배포본을 읽지 못해 저장소 파일 사용 ({e})")
+    if not prev and OUT.exists():
         try:
             prev = json.loads(OUT.read_text(encoding="utf-8"))
         except Exception:
@@ -373,15 +400,27 @@ def main() -> int:
     data = {"updatedAt": now.isoformat(timespec="minutes")}
     # 한 지표만 실패해도 나머지는 새 값으로, 실패한 지표는 지난 값으로 채운다
     data["rates"] = {**prev.get("rates", {}), **fetch_ecos(now.date())}
-    data["reits"] = fetch_reits(now.date()) or prev.get("reits", [])
+    # 종목별로 이번에 못 받은 것은 지난 값을 유지 (요청 제한 등)
+    got = {x["symbol"]: x for x in fetch_reits(now.date())}
+    old = {x["symbol"]: x for x in prev.get("reits", [])}
+    stale = (now.date() - dt.timedelta(days=14)).strftime("%Y%m%d")
+    data["reits"] = [got.get(sym) or old.get(sym) for sym, _, _ in REITS
+                     if (got.get(sym) or old.get(sym)) and (got.get(sym) or old.get(sym)).get("date", "") >= stale]
 
     key = (os.environ.get("DATA_GO_KR_KEY") or "").strip()
     log("실거래 서비스키: " + ("있음" if key else "없음 (DATA_GO_KR_KEY 비어 있음, 실거래 수집 건너뜀)"))
-    deals = fetch_deals(key, now.date()) if key else None
-    if deals is None and prev.get("deals"):
-        deals = prev["deals"]  # 이번에 실패하면 지난번 값을 유지
+    cache = {}
+    hist = (prev.get("deals") or {}).get("history") or {}
+    for r in hist.get("rows", []):
+        cache.setdefault(r["date"][:4] + r["date"][5:7], []).append({k: v for k, v in r.items() if k != "perPyeong"})
+    for m in hist.get("months", []):
+        cache.setdefault(m, [])
+    res = fetch_deals(key, now.date(), cache) if key else None
+    deals = res[0] if res else prev.get("deals")  # 이번에 실패하면 지난번 값을 유지
     if deals:
         data["deals"] = deals
+        h = deals.get("history", {})
+        log(f"실거래 누적: {len(h.get('months', []))}개월, {len(h.get('rows', []))}건")
 
     data["news"] = fetch_news(now, prev.get("news", []))
     by = {}

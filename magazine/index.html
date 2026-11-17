@@ -458,6 +458,51 @@ a.sns:hover { border-color: var(--accent); color: var(--accent); }
 .cover-text .headlines { margin-top: 4px; }
 .chart .bar.top { fill: var(--accent); }
 
+
+/* ---------- 건물주 가이드 ---------- */
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.fact:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.fact { background: var(--surface); padding: 22px 24px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.fact h3 { margin: 0; font-size: var(--t-md); font-weight: 700; line-height: 1.5; }
+.fact .fact-a { margin: 0; font-family: var(--f-head); font-weight: 800; font-size: var(--t-xl); line-height: 1.35; color: var(--accent); }
+.fact p { margin: 0; font-size: var(--t-sm); line-height: 1.7; color: var(--ink-2); }
+.fact .fact-src { font-size: var(--t-xs); color: var(--muted); }
+.fact .fact-src a { text-decoration: underline; text-underline-offset: 3px; }
+.calcs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.calc { background: var(--surface); border: 1px solid var(--line-strong); padding: 22px; display: grid; gap: 14px; min-width: 0; }
+.calc h3 { margin: 0; font-size: var(--t-lg); font-weight: 700; }
+.calc .calc-desc { margin: 0; color: var(--muted); font-size: var(--t-sm); }
+.calc .fields { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.calc .field input, .calc .field select { padding: 10px 12px; font-size: var(--t-sm); }
+.check { display: flex; gap: 8px; align-items: center; font-size: var(--t-sm); cursor: pointer; }
+.check input { width: 17px; height: 17px; accent-color: var(--accent); }
+.calc-out { margin: 4px 0 0; display: grid; grid-template-columns: auto 1fr; border-top: 1px solid var(--line-strong); }
+.calc-out dt, .calc-out dd { margin: 0; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: var(--t-sm); }
+.calc-out dt { color: var(--muted); padding-right: 10px; }
+.calc-out dd { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.calc-out dd small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+.calc-out dd.strong { color: var(--accent); }
+.calc-out dd.ok { color: var(--down); }
+.calc-out dd.warn { color: var(--up); }
+.guide-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.guide-links a { display: grid; gap: 6px; padding: 20px; border: 1px solid var(--line-strong); background: var(--surface); }
+.guide-links a:hover { background: var(--accent-soft); }
+.guide-links b { font-size: var(--t-md); }
+.guide-links span { font-size: var(--t-sm); color: var(--muted); line-height: 1.6; }
+
+/* ---------- 실거래 검색 ---------- */
+.explorer { display: grid; gap: 16px; }
+.filters { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.filters select { padding: 10px 12px; font-size: var(--t-sm); }
+.ex-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 14px; }
+.ex-summary div { background: var(--surface); padding: 14px 16px; display: grid; gap: 2px; }
+.ex-summary span { font-size: var(--t-xs); color: var(--muted); }
+.ex-summary b { font-family: var(--f-display); font-weight: 700; font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.more-btn { margin-top: 12px; }
+table.gustats { min-width: 560px; }
+table.mini { min-width: 560px; font-size: var(--t-xs); }
+table.mini th, table.mini td { padding: 8px 6px; }
+
 /* ---------- 반응형 ---------- */
 @media (max-width: 1000px) {
   .latest { grid-template-columns: minmax(0, 1fr); }
@@ -467,6 +512,8 @@ a.sns:hover { border-color: var(--accent); color: var(--accent); }
   .aside { position: static; }
   .toc { display: none; }
   .inq { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .calcs { grid-template-columns: minmax(0, 1fr); }
+  .filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .inq-side { position: static; }
 }
 @media (max-width: 760px) {
@@ -479,6 +526,8 @@ a.sns:hover { border-color: var(--accent); color: var(--accent); }
   main { gap: 56px; }
   .tools { margin-left: 0; }
   .cta { grid-template-columns: minmax(0, 1fr); padding: 26px 22px; }
+  .facts, .guide-links { grid-template-columns: minmax(0, 1fr); }
+  .ex-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 520px) {
   .wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
@@ -491,6 +540,7 @@ a.sns:hover { border-color: var(--accent); color: var(--accent); }
   .board span:last-child { display: none; }
   .ticker .live-dot span { display: none; }
   .fields { grid-template-columns: minmax(0, 1fr); }
+  .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cta-btns { grid-template-columns: minmax(0, 1fr); }
   .util .wrap > span:first-child { display: none; }
 }
@@ -572,11 +622,11 @@ const CATS = {
   market:   { f: "1F", name: "마켓",        art: "skyline", desc: "공실률, 임대료, 수요와 공급. 상업용 부동산 시장 소식을 모읍니다." },
   deal:     { f: "2F", name: "클로징",      art: "tower",   desc: "빌딩·물류센터·호텔 매각과 매입 소식, 그리고 국토교통부 실거래 신고 자료." },
   building: { f: "3F", name: "빌딩",        art: "remodel", desc: "개발, 리모델링, 재건축, 준공. 건물이 바뀌는 소식을 모읍니다." },
-  policy:   { f: "4F", name: "정책·금융",    art: "section", desc: "세금, 대출, 금리, 규제 소식과 국토교통부 보도자료." },
+  policy:   { f: "4F", name: "건물주 가이드", art: "section", desc: "빌딩을 사고, 보유하고, 임대할 때 꼭 확인할 세금·대출·임대차 기준과 계산기. 근거 법령을 함께 적었습니다." },
   players:  { f: "5F", name: "페이스메이커", art: "campus",  desc: "리츠, 자산운용사, 기관투자자. 시장의 속도를 만드는 플레이어들의 소식." },
   data:     { f: "6F", name: "랩타임",      art: "chart",   desc: "금리, 상장 리츠, 서울 빌딩 실거래. 매일 갱신되는 숫자." }
 };
-const ALIASES = { invest: "policy", people: "players" };   // 예전 주소
+const ALIASES = { invest: "policy", people: "players", guide: "policy" };   // 예전 주소
 const RATE_ORDER = ["base", "ktb3", "ktb10", "corp", "cd91", "usd"];
 const PYEONG = 3.3058;
 
@@ -890,9 +940,18 @@ function renderHome() {
     <div id="live-deals">${dealsBlock()}</div>
   </section>
 
-  <section aria-label="거래 구성">
-    ${secHead("2F", "어디서, 어떤 건물이 거래됐나", link("#deal", "클로징 전체"))}
-    ${dealCharts() || `<p class="loading">실거래 자료를 불러오는 중입니다.</p>`}
+  <section aria-label="구별 시세">
+    ${secHead("6F", "서울 구별 빌딩 시세", link("#data", "전체 구·월별 추이 보기"))}
+    ${guStats(8)}
+  </section>
+
+  <section aria-label="건물주 가이드">
+    ${secHead("4F", "건물주 가이드", link("#policy", "기준 정리와 계산기 전체"))}
+    <div class="guide-links">
+      <a href="#policy"><b>매입 비용 계산기</b><span>취득세 4.6%, 중개보수, 건물분 부가세까지 현금이 얼마나 더 드는지</span></a>
+      <a href="#policy"><b>수익률·대출(RTI) 계산기</b><span>지금 월세로 수익률은 몇 %인지, 임대업 대출 기준 1.5배를 넘는지</span></a>
+      <a href="#policy"><b>상가 임대차 보호 범위</b><span>환산보증금 기준과 5% 증액 상한, 10년 갱신요구권 적용 여부</span></a>
+    </div>
   </section>
 
   <section aria-label="상장 리츠">
@@ -910,13 +969,16 @@ function renderCat(slug) {
   const c = CATS[slug];
   const list = slug === "data" ? [] : newsOf(slug);
   const extra = {
-    deal: `<section>${secHead("", "서울 빌딩 거래", liveBadge())}<div id="live-deals">${dealsBlock()}</div></section>
+    deal: `<section>${secHead("", "서울 빌딩 실거래 검색", liveBadge())}${dealExplorer()}</section>
+           <section>${secHead("", "이번 달 큰 거래")}<div id="live-deals">${dealsBlock()}</div></section>
            <section>${secHead("", "어디서, 어떤 건물이 거래됐나")}${dealCharts()}</section>${ctaBlock()}`,
     players: `<section>${secHead("", "상장 리츠 시세", liveBadge())}<div id="live-reits">${reitsBlock()}</div></section>`,
     data: `<section>${secHead("", "오늘의 금리와 환율", liveBadge())}<div id="live-rates">${ratesBlock()}</div></section>
            <section>${secHead("", "상장 리츠 시세", liveBadge())}<div id="live-reits">${reitsBlock()}</div></section>
-           <section>${secHead("", "서울 빌딩 거래", liveBadge())}<div id="live-deals">${dealsBlock()}</div></section>
-           <section>${secHead("", "어디서, 어떤 건물이 거래됐나")}${dealCharts()}</section>`
+           <section>${secHead("", "서울 구별 빌딩 시세", liveBadge())}${guStats()}</section>
+           <section>${secHead("", "월별 빌딩 거래")}${monthTrend()}</section>
+           <section>${secHead("", "금액대별 거래 분포")}${priceBuckets()}</section>
+           <section>${secHead("", "서울 빌딩 실거래 검색")}${dealExplorer()}</section>`
   }[slug] || "";
   view.innerHTML = `
   <section class="cat-head">
@@ -1110,6 +1172,280 @@ function renderInquiry(type) {
   });
 }
 
+/* ================= 실거래 분석 (국토교통부 신고 자료, 최근 최대 12개월) ================= */
+const median = arr => { const a = arr.filter(v => v > 0).sort((x, y) => x - y); if (!a.length) return 0; const m = a.length >> 1; return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; };
+const histRows = () => (LIVE && LIVE.deals && LIVE.deals.history && LIVE.deals.history.rows) || [];
+const histMonths = () => (LIVE && LIVE.deals && LIVE.deals.history && LIVE.deals.history.months) || [];
+const landPy = r => r.landArea ? r.amount / (r.landArea / PYEONG) : 0;
+const gfaPy = r => r.buildingArea ? r.amount / (r.buildingArea / PYEONG) : 0;
+const monthLabel = m => `${m.slice(0, 4)}.${m.slice(4)}`;
+const periodLabel = () => { const ms = histMonths(); return ms.length ? `${monthLabel(ms[0])}~${monthLabel(ms[ms.length - 1])} (${ms.length}개월)` : ""; };
+const USE_GROUPS = [["업무", r => /업무/.test(r.use)], ["근린생활", r => /근린/.test(r.use)], ["판매", r => /판매/.test(r.use)], ["숙박", r => /숙박/.test(r.use)],
+  ["창고·공장", r => /창고|공장/.test(r.use)], ["기타", r => !/업무|근린|판매|숙박|창고|공장/.test(r.use)]];
+const BUCKETS = [["50억 미만", 0, 500000], ["50억~100억", 500000, 1000000], ["100억~300억", 1000000, 3000000], ["300억~1,000억", 3000000, 10000000], ["1,000억 이상", 10000000, Infinity]];
+const noHist = () => `<p class="loading">${LIVE_STATE === "loading" ? "실거래 자료를 불러오는 중입니다." : "실거래 자료가 아직 없습니다."}</p>`;
+
+function guStats(limit) {
+  const rows = histRows();
+  if (!rows.length) return noHist();
+  const by = {};
+  rows.forEach(r => (by[r.gu] = by[r.gu] || []).push(r));
+  let list = Object.entries(by).map(([gu, rs]) => ({ gu, n: rs.length, amt: median(rs.map(r => r.amount)), land: median(rs.map(landPy)), gfa: median(rs.map(gfaPy)) }))
+    .sort((a, b) => b.n - a.n);
+  if (limit) list = list.slice(0, limit);
+  return `<div class="table-scroll"><table class="gustats">
+    <thead><tr><th>구</th><th class="r">거래 건수</th><th class="r">중위 거래금액 (억 원)</th><th class="r">중위 토지 3.3㎡당 (만 원)</th><th class="r">중위 연면적 3.3㎡당 (만 원)</th></tr></thead>
+    <tbody>${list.map(x => `<tr><td><b>${esc(x.gu)}</b></td><td class="r">${x.n}</td><td class="r">${eok(x.amt)}</td><td class="r hl">${x.land ? fmt(x.land, 0) : "-"}</td><td class="r">${x.gfa ? fmt(x.gfa, 0) : "-"}</td></tr>`).join("")}</tbody>
+  </table></div>
+  <p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 서울, 건물 단위 거래 · ${periodLabel()} · 중위값은 거래를 금액순으로 줄 세웠을 때 가운데 값이라, 큰 거래 한두 건에 덜 흔들립니다. 최근 1~2개월은 신고 기한(30일) 때문에 계속 늘어납니다.</p>`;
+}
+
+function monthTrend() {
+  const rows = histRows(), ms = histMonths();
+  if (!rows.length || !ms.length) return noHist();
+  const by = {};
+  rows.forEach(r => { const m = r.date.slice(0, 4) + r.date.slice(5, 7); (by[m] = by[m] || []).push(r); });
+  const data = ms.map(m => ({ m, n: (by[m] || []).length, land: median((by[m] || []).map(landPy)) }));
+  const W = 560, H = 220, L = 40, R = 16, T = 16, B = 36, bw = (W - L - R) / data.length;
+  const maxN = Math.max(...data.map(d => d.n), 1);
+  const y = n => T + (H - T - B) * (1 - n / maxN);
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="월별 빌딩 거래 건수">`;
+  [0, 0.5, 1].forEach(f => { const v = Math.round(maxN * f); s += `<line class="gridl" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`; });
+  data.forEach((d, i) => {
+    const x = L + i * bw + bw * 0.18, w = bw * 0.64;
+    s += `<rect class="bar${i === data.length - 1 ? "" : ""}" x="${x}" y="${y(d.n)}" width="${w}" height="${H - B - y(d.n)}"><title>${monthLabel(d.m)} ${d.n}건</title></rect>`;
+    s += `<text x="${x + w / 2}" y="${H - B + 16}" text-anchor="middle">${+d.m.slice(4)}월</text>`;
+    if (data.length <= 12) s += `<text class="val" x="${x + w / 2}" y="${y(d.n) - 5}" text-anchor="middle">${d.n}</text>`;
+  });
+  s += `</svg>`;
+  return `${s}<div class="table-scroll"><table class="mini"><thead><tr><th>월</th>${data.map(d => `<th class="r">${+d.m.slice(4)}월</th>`).join("")}</tr></thead>
+    <tbody><tr><td>중위 토지 3.3㎡당 (만 원)</td>${data.map(d => `<td class="r">${d.land ? fmt(d.land, 0) : "-"}</td>`).join("")}</tr></tbody></table></div>
+    <p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 서울 건물 단위 거래, 계약월 기준 · 최근 달은 신고가 다 들어오지 않아 건수가 적게 보일 수 있습니다.</p>`;
+}
+
+function priceBuckets() {
+  const rows = histRows();
+  if (!rows.length) return noHist();
+  const total = rows.length;
+  const colors = ["var(--accent)", "var(--seg-2)", "var(--seg-3)", "var(--seg-4)", "var(--bar)"];
+  const list = BUCKETS.map(([k, lo, hi], i) => ({ k, n: rows.filter(r => r.amount >= lo && r.amount < hi).length, c: colors[i] }));
+  return `<div class="stack" role="img" aria-label="금액대별 거래 비중">${list.map(x => `<div style="flex:${x.n || 0.0001};background:${x.c}" title="${x.k} ${x.n}건"></div>`).join("")}</div>
+    <ul class="legend">${list.map(x => `<li><i style="background:${x.c}"></i><span>${x.k}</span><span class="num">${x.n}건</span><span class="pct">${Math.round(x.n / total * 100)}%</span></li>`).join("")}</ul>
+    <p class="foot-note">서울 건물 단위 거래 ${fmt(total, 0)}건 · ${periodLabel()}</p>`;
+}
+
+/* 실거래 검색 */
+const EXP = { gu: "", use: "", bucket: "", period: 12, sort: "date", shown: 30 };
+function dealExplorer() {
+  const rows = histRows();
+  if (!rows.length) return noHist();
+  const gus = [...new Set(rows.map(r => r.gu))].sort();
+  const opt = (v, t, cur) => `<option value="${esc(v)}"${String(v) === String(cur) ? " selected" : ""}>${esc(t)}</option>`;
+  return `<div class="explorer" id="explorer">
+    <div class="filters">
+      <div class="field"><label for="ex-gu">구</label><select id="ex-gu">${opt("", "서울 전체", EXP.gu)}${gus.map(g => opt(g, g, EXP.gu)).join("")}</select></div>
+      <div class="field"><label for="ex-use">용도</label><select id="ex-use">${opt("", "전체", EXP.use)}${USE_GROUPS.map(([k]) => opt(k, k, EXP.use)).join("")}</select></div>
+      <div class="field"><label for="ex-bucket">금액대</label><select id="ex-bucket">${opt("", "전체", EXP.bucket)}${BUCKETS.map(([k]) => opt(k, k, EXP.bucket)).join("")}</select></div>
+      <div class="field"><label for="ex-period">기간</label><select id="ex-period">${[3, 6, 12].map(n => opt(n, `최근 ${n}개월`, EXP.period)).join("")}</select></div>
+      <div class="field"><label for="ex-sort">정렬</label><select id="ex-sort">${opt("date", "최근 계약순", EXP.sort)}${opt("amount", "거래금액 큰 순", EXP.sort)}${opt("land", "토지 평당가 높은 순", EXP.sort)}</select></div>
+    </div>
+    <div id="ex-out"></div>
+  </div>`;
+}
+function explorerRows() {
+  const ms = histMonths().slice(-EXP.period);
+  const from = ms.length ? monthLabel(ms[0]) : "";
+  let rows = histRows().filter(r => r.date.slice(0, 7) >= from);
+  if (EXP.gu) rows = rows.filter(r => r.gu === EXP.gu);
+  if (EXP.use) { const f = USE_GROUPS.find(([k]) => k === EXP.use)[1]; rows = rows.filter(f); }
+  if (EXP.bucket) { const [, lo, hi] = BUCKETS.find(([k]) => k === EXP.bucket); rows = rows.filter(r => r.amount >= lo && r.amount < hi); }
+  const key = { date: r => r.date, amount: r => r.amount, land: r => landPy(r) }[EXP.sort];
+  return rows.slice().sort((a, b) => key(b) > key(a) ? 1 : key(b) < key(a) ? -1 : 0);
+}
+function renderExplorer() {
+  const out = document.getElementById("ex-out");
+  if (!out) return;
+  const rows = explorerRows();
+  const shown = rows.slice(0, EXP.shown);
+  out.innerHTML = `<div class="ex-summary">
+      <div><span>거래</span><b>${fmt(rows.length, 0)}건</b></div>
+      <div><span>중위 거래금액</span><b>${rows.length ? eok(median(rows.map(r => r.amount))) + "억" : "-"}</b></div>
+      <div><span>중위 토지 3.3㎡당</span><b>${rows.length ? fmt(median(rows.map(landPy)), 0) + "만" : "-"}</b></div>
+      <div><span>중위 연면적 3.3㎡당</span><b>${rows.length ? fmt(median(rows.map(gfaPy)), 0) + "만" : "-"}</b></div>
+    </div>
+    ${rows.length ? `<div class="table-scroll"><table class="deals">
+      <thead><tr><th>계약일</th><th>위치</th><th>용도</th><th class="r">대지 (평)</th><th class="r">연면적 (평)</th><th class="r">준공</th><th class="r">거래금액 (억 원)</th><th class="r">토지 3.3㎡당 (만 원)</th><th class="r">연면적 3.3㎡당 (만 원)</th><th>매도→매수</th></tr></thead>
+      <tbody>${shown.map(r => `<tr>
+        <td class="num">${esc(r.date)}</td>
+        <td><b>${esc(r.gu)} ${esc(r.dong)}</b><small>${esc(r.zone || "")}</small></td>
+        <td>${esc(useLabel(r.use))}</td>
+        <td class="r">${r.landArea ? fmt(r.landArea / PYEONG, 1) : "-"}</td>
+        <td class="r">${r.buildingArea ? fmt(r.buildingArea / PYEONG, 1) : "-"}</td>
+        <td class="r">${esc(r.built || "-")}</td>
+        <td class="r"><b>${eok(r.amount)}</b></td>
+        <td class="r hl">${landPy(r) ? fmt(landPy(r), 0) : "-"}</td>
+        <td class="r">${gfaPy(r) ? fmt(gfaPy(r), 0) : "-"}</td>
+        <td>${esc(r.seller || "-")}→${esc(r.buyer || "-")}</td>
+      </tr>`).join("")}</tbody></table></div>
+      ${rows.length > shown.length ? `<button class="pill more-btn" id="ex-more" type="button">${fmt(rows.length - shown.length, 0)}건 더 보기</button>` : ""}`
+      : `<p class="empty">조건에 맞는 거래가 없습니다. 기간을 늘리거나 조건을 넓혀 보세요.</p>`}
+    <p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 서울 건물 단위(일반) 거래 · 건물명과 지번은 공개되지 않습니다 · 해제된 거래는 뺐습니다.</p>`;
+  const more = document.getElementById("ex-more");
+  if (more) more.addEventListener("click", () => { EXP.shown += 30; renderExplorer(); });
+}
+function bindExplorer() {
+  const box = document.getElementById("explorer");
+  if (!box) return;
+  [["ex-gu", "gu"], ["ex-use", "use"], ["ex-bucket", "bucket"], ["ex-period", "period"], ["ex-sort", "sort"]].forEach(([id, k]) => {
+    document.getElementById(id).addEventListener("change", e => { EXP[k] = k === "period" ? +e.target.value : e.target.value; EXP.shown = 30; renderExplorer(); });
+  });
+  renderExplorer();
+}
+
+/* ================= 건물주 가이드: 기준 정리 + 계산기 ================= */
+const LAW = name => `https://www.law.go.kr/법령/${encodeURIComponent(name)}`;
+const FACTS_CHECKED = "2026.11.17";
+const FACTS = [
+  { q: "상가·빌딩을 사면 취득세는 얼마인가요?", a: "매매가의 4.6%", d: "취득세 4% + 지방교육세 0.4% + 농어촌특별세 0.2%. 주택이 아닌 건물·토지의 유상 취득 기준이며, 취득일부터 60일 안에 신고·납부합니다. 법인이 수도권 과밀억제권역에서 취득하는 경우 등은 중과될 수 있습니다.", law: "지방세법" },
+  { q: "빌딩 매매 중개보수는 얼마까지인가요?", a: "거래금액의 0.9% 이내에서 협의", d: "주택이 아닌 건물·토지의 상한요율입니다. 상한이지 고정 요율이 아니라 협의로 정합니다. 임대차는 보증금 + 월세×100(합계 5천만 원 미만이면 ×70)을 거래금액으로 봅니다. 중개사무소가 일반과세자면 부가세가 별도로 붙습니다.", law: "공인중개사법 시행규칙" },
+  { q: "건물을 사고팔 때 부가세도 내나요?", a: "토지분 면세, 건물분 10%", d: "매매대금을 토지와 건물 가액으로 나눠 건물분에만 부가세가 붙습니다. 임대사업을 통째로 넘기는 포괄양수도 요건을 갖추면 건물분 부가세 없이 거래할 수 있습니다. 계약서에 토지·건물 가액을 나눠 적는 것이 중요합니다.", law: "부가가치세법" },
+  { q: "임차인이 계약 갱신을 요구하면 거절할 수 있나요?", a: "최초 계약 포함 10년까지는 원칙적으로 갱신", d: "임차인은 계약 만료 6개월 전부터 1개월 전 사이에 갱신을 요구할 수 있고, 전체 임대차기간 10년 범위에서 인정됩니다. 차임 연체 등 법에 정한 사유가 있으면 거절할 수 있습니다.", law: "상가건물 임대차보호법" },
+  { q: "월세는 한 번에 얼마까지 올릴 수 있나요?", a: "환산보증금 기준 이하면 5%까지", d: "환산보증금(보증금 + 월세×100)이 지역 기준 이하인 임대차는 증액 상한이 5%입니다. 서울 기준은 9억 원입니다. 기준을 넘으면 5% 상한은 적용되지 않지만, 10년 갱신요구권과 권리금 회수 기회 보호는 그대로 적용됩니다. 아래 계산기로 확인할 수 있습니다.", law: "상가건물 임대차보호법 시행령" },
+  { q: "빌딩 담보로 임대업 대출을 받을 때 기준은?", a: "RTI 1.5배 이상 (비주택)", d: "RTI는 연간 임대소득을 연간 대출 이자로 나눈 값입니다. 은행권 가이드라인상 비주택 임대업 대출은 1.5배 이상이어야 신규 취급하며, 은행에 따라 더 엄격할 수 있습니다. 예: 연 이자 1억 원이면 연 임대소득 1.5억 원 이상.", law: "", src: "은행연합회 여신심사 가이드라인" },
+  { q: "빌딩도 종합부동산세를 내나요?", a: "부속토지 공시가격 합계 80억 원 초과 시", d: "상가·사무실 부속토지 같은 별도합산토지는 공시가격 합계가 80억 원을 넘으면 종합부동산세 대상이 됩니다. 건물분에는 종부세가 없고 재산세만 부과됩니다.", law: "종합부동산세법" }
+];
+
+function factCards() {
+  return `<div class="facts">${FACTS.map(f => `<article class="fact">
+      <h3>${esc(f.q)}</h3>
+      <p class="fact-a">${esc(f.a)}</p>
+      <p>${esc(f.d)}</p>
+      <p class="fact-src">근거: ${f.law ? `<a href="${LAW(f.law)}" target="_blank" rel="noopener">${esc(f.law)} ↗</a>` : esc(f.src)}</p>
+    </article>`).join("")}</div>
+    <p class="foot-note">${FACTS_CHECKED} 기준으로 법령과 공개 자료를 확인해 정리했습니다. 세율과 기준은 바뀔 수 있으니 계약 전에 국가법령정보센터(근거 링크), 세무사, 관할 기관에서 다시 확인하세요. 개별 상황에 대한 세무·법률 자문이 아닙니다.</p>`;
+}
+
+const num0 = id => { const v = parseFloat(String(document.getElementById(id)?.value || "").replace(/,/g, "")); return isFinite(v) ? v : 0; };
+const won = man => man >= 10000 ? `${fmt(man / 10000, 2)}억 원` : `${fmt(man, 0)}만 원`;   // 만 원 단위 입력
+const pct = (v, d = 2) => isFinite(v) ? `${v.toFixed(d)}%` : "-";
+
+function calcBlock() {
+  const corp = LIVE && LIVE.rates && LIVE.rates.corp;
+  const rateHint = corp ? `참고: 오늘 회사채(AA-) 3년 금리 ${corp.value.toFixed(2)}% (한국은행)` : "실제 대출 금리는 은행에 확인하세요.";
+  return `<div class="calcs">
+    <form class="calc" id="calc-buy" novalidate>
+      <h3>매입 비용 계산기</h3>
+      <p class="calc-desc">매매가 외에 현금으로 더 준비해야 하는 돈을 계산합니다.</p>
+      <div class="fields">
+        ${fld("cb-price", "매매가", unit("cb-price", "억 원", "예: 100", "decimal"), { req: 1 })}
+        ${fld("cb-loan", "대출 예정액", unit("cb-loan", "억 원", "예: 50", "decimal"))}
+        ${fld("cb-bldg", "건물 가액 비율", unit("cb-bldg", "%", "예: 30", "decimal"), { help: "계약서상 건물분 비율. 모르면 비워 두세요." })}
+        ${fld("cb-fee", "중개보수율", unit("cb-fee", "%", "상한 0.9", "decimal"), { help: "비워 두면 상한 0.9%로 계산" })}
+      </div>
+      <label class="check"><input type="checkbox" id="cb-pp"> 포괄양수도로 거래 (건물분 부가세 없음)</label>
+      <dl class="calc-out" id="cb-out"></dl>
+    </form>
+
+    <form class="calc" id="calc-yield" novalidate>
+      <h3>수익률·대출(RTI) 계산기</h3>
+      <p class="calc-desc">지금 임대료로 수익률이 얼마인지, 임대업 대출 기준(RTI 1.5배)을 넘는지 봅니다.</p>
+      <div class="fields">
+        ${fld("cy-price", "매매가", unit("cy-price", "억 원", "예: 100", "decimal"), { req: 1 })}
+        ${fld("cy-dep", "보증금 합계", unit("cy-dep", "만 원", "예: 30000", "decimal"))}
+        ${fld("cy-rent", "월세 합계", unit("cy-rent", "만 원", "예: 3000", "decimal"), { req: 1 })}
+        ${fld("cy-loan", "대출액", unit("cy-loan", "억 원", "예: 50", "decimal"))}
+        ${fld("cy-rate", "대출 금리", unit("cy-rate", "%", "예: 4.5", "decimal"), { full: 1, help: rateHint })}
+      </div>
+      <dl class="calc-out" id="cy-out"></dl>
+    </form>
+
+    <form class="calc" id="calc-lease" novalidate>
+      <h3>상가 임대차 보호 범위 확인</h3>
+      <p class="calc-desc">임대차가 환산보증금 기준 안인지, 어떤 보호가 적용되는지 확인합니다.</p>
+      <div class="fields">
+        ${fld("cl-dep", "보증금", unit("cl-dep", "만 원", "예: 10000", "decimal"), { req: 1 })}
+        ${fld("cl-rent", "월세", unit("cl-rent", "만 원", "예: 500", "decimal"), { req: 1 })}
+        ${fld("cl-area", "지역", `<select id="cl-area">
+          <option value="90000">서울특별시 (9억 원)</option>
+          <option value="69000">과밀억제권역(서울 제외)·부산 (6억 9천만 원)</option>
+          <option value="54000">광역시·세종·파주·화성·안산·용인·김포·광주(경기) (5억 4천만 원)</option>
+          <option value="37000">그 밖의 지역 (3억 7천만 원)</option></select>`, { full: 1 })}
+      </div>
+      <dl class="calc-out" id="cl-out"></dl>
+    </form>
+  </div>
+  <p class="foot-note">계산은 이 화면 안에서만 이뤄지고 입력값은 어디에도 저장되지 않습니다. 세전 금액이며 관리비, 공실, 감가상각, 양도세 등은 반영하지 않았습니다.</p>`;
+}
+
+function bindCalcs() {
+  const out = (id, rows) => { const el = document.getElementById(id); if (el) el.innerHTML = rows.map(([k, v, cls]) => `<dt>${k}</dt><dd${cls ? ` class="${cls}"` : ""}>${v}</dd>`).join(""); };
+  const buy = () => {
+    const price = num0("cb-price") * 10000, loan = num0("cb-loan") * 10000, bldg = num0("cb-bldg") / 100;
+    const feeRate = (document.getElementById("cb-fee").value.trim() ? num0("cb-fee") : 0.9) / 100;
+    if (!price) return out("cb-out", [["", "매매가를 입력하면 계산합니다."]]);
+    const acq = price * 0.046, fee = price * feeRate, feeVat = fee * 0.1;
+    const vat = document.getElementById("cb-pp").checked ? 0 : price * bldg * 0.1;
+    const extra = acq + fee + feeVat;
+    out("cb-out", [
+      ["취득세 등 (4.6%)", won(acq)],
+      [`중개보수 (${(feeRate * 100).toFixed(2)}%)`, won(fee)],
+      ["중개보수 부가세 (10%)", won(feeVat)],
+      ["건물분 부가세", vat ? `${won(vat)} <small>사업자면 매입세액 공제로 환급 가능</small>` : (bldg ? "없음 (포괄양수도)" : "건물 비율 입력 시 계산")],
+      ["부대비용 합계 (부가세 제외)", won(extra), "strong"],
+      ["필요 자기자본", loan ? `${won(price + extra - loan)} <small>매매가 + 부대비용 − 대출, 보증금 승계분은 빼고 보세요</small>` : "대출액 입력 시 계산", "strong"]
+    ]);
+  };
+  const yld = () => {
+    const price = num0("cy-price") * 10000, dep = num0("cy-dep"), rent = num0("cy-rent"), loan = num0("cy-loan") * 10000, rate = num0("cy-rate") / 100;
+    if (!price || !rent) return out("cy-out", [["", "매매가와 월세를 입력하면 계산합니다."]]);
+    const annual = rent * 12, interest = loan * rate, equity = price - dep - loan;
+    const rti = interest ? annual / interest : 0;
+    out("cy-out", [
+      ["연 임대수입", won(annual)],
+      ["표면 수익률", pct(annual / price * 100)],
+      ["보증금 반영 수익률", pct(annual / (price - dep) * 100)],
+      ["연 대출 이자", interest ? won(interest) : "대출·금리 입력 시 계산"],
+      ["RTI (임대수입 ÷ 이자)", interest ? `${rti.toFixed(2)}배 <small>${rti >= 1.5 ? "비주택 기준 1.5배 이상" : "비주택 기준 1.5배 미만, 대출 한도가 줄 수 있음"}</small>` : "-", interest ? (rti >= 1.5 ? "ok" : "warn") : ""],
+      ["투입 자기자본", equity > 0 ? won(equity) : "-"],
+      ["자기자본 수익률 (이자 차감)", equity > 0 ? pct((annual - interest) / equity * 100) : "-", "strong"]
+    ]);
+  };
+  const lease = () => {
+    const dep = num0("cl-dep"), rent = num0("cl-rent"), cap = +document.getElementById("cl-area").value;
+    if (!dep && !rent) return out("cl-out", [["", "보증금과 월세를 입력하면 확인합니다."]]);
+    const conv = dep + rent * 100, within = conv <= cap;
+    out("cl-out", [
+      ["환산보증금", `${won(conv)} <small>보증금 + 월세×100</small>`],
+      ["지역 기준", won(cap)],
+      ["판정", within ? "기준 이하" : "기준 초과", within ? "ok" : "warn"],
+      ["월세 증액 5% 상한", within ? "적용" : "적용 안 됨"],
+      ["10년 계약갱신요구권", "적용"],
+      ["권리금 회수 기회 보호", "적용"]
+    ]);
+  };
+  [["calc-buy", buy], ["calc-yield", yld], ["calc-lease", lease]].forEach(([id, fn]) => {
+    const f = document.getElementById(id);
+    if (!f) return;
+    f.addEventListener("input", fn); f.addEventListener("change", fn); f.addEventListener("submit", e => e.preventDefault());
+    fn();
+  });
+}
+
+function renderGuide() {
+  const c = CATS.policy;
+  const list = newsOf("policy");
+  view.innerHTML = `
+  <section class="cat-head">
+    <div class="big">${c.f}</div>
+    <div><h1>${esc(c.name)}</h1><p>${esc(c.desc)}</p></div>
+  </section>
+  <section>${secHead("", "건물주가 가장 많이 묻는 기준")}${factCards()}</section>
+  <section>${secHead("", "계산기")}${calcBlock()}</section>
+  <section>${secHead("", "서울 구별 빌딩 시세", link("#data", "랩타임에서 더 보기"))}${guStats(10)}</section>
+  <section>${secHead("", "세금·대출·규제 뉴스")}${list.length ? `<div class="grid">${list.map(newsCard).join("")}</div>${newsNote}` : newsEmpty()}</section>`;
+  bindCalcs();
+}
+
 /* ================= 라우팅 ================= */
 function setActive(slug) {
   document.querySelectorAll(".floor-btn").forEach(b => {
@@ -1125,15 +1461,18 @@ function route(keep) {
   h = ALIASES[h] || h;
   if (/^a\d+$/.test(h)) h = "home";   // 예전 기사 주소
   const isInquiry = h === "inquiry" || h === "sell" || h === "buy";
-  if (keep === true && isInquiry && h === lastHash) return;
+  const hasInputs = isInquiry || h === "policy";
+  if (keep === true && hasInputs && h === lastHash && document.querySelector("#view form, #view .calc")) return;
   let active = null;
   if (!h || h === "home") { renderHome(); active = "__home"; }
+  else if (h === "policy") { renderGuide(); active = h; }
   else if (CATS[h]) { renderCat(h); active = h; }
   else if (isInquiry) { renderInquiry(h === "buy" ? "매수" : "매도"); active = "inquiry"; }
   else renderNotFound();
   setActive(active);
   if (keep !== true || h !== lastHash) window.scrollTo(0, 0);
   lastHash = h;
+  bindExplorer();
   drawAll();
 }
 
