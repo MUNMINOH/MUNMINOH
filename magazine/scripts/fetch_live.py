@@ -277,6 +277,11 @@ NEWS_FEEDS = [
     ("연합뉴스", "https://www.yna.co.kr/rss/economy.xml", None),
     ("조선비즈", "https://biz.chosun.com/arc/outboundfeeds/rss/category/real_estate/?outputType=xml", None),
     ("아시아경제", "https://www.asiae.co.kr/rss/realestate.htm", None),
+    ("파이낸셜뉴스", "https://www.fnnews.com/rss/r20/fn_realnews_realestate.xml", None),
+    ("머니투데이", "https://rss.mt.co.kr/mt_news.xml", None),
+    ("동아일보", "https://rss.donga.com/economy.xml", None),
+    ("경향신문", "https://www.khan.co.kr/rss/rssdata/economy_news.xml", None),
+    ("한겨레", "https://www.hani.co.kr/rss/economy/", None),
 ]
 NEWS_QUERIES = ["오피스 빌딩 매각", "꼬마빌딩 매매", "물류센터 매각", "상업용 부동산", "리츠 오피스", "오피스 공실률",
                 "빌딩 리모델링", "호텔 매각", "상업용 부동산 PF", "데이터센터 부지 매입", "지식산업센터 공실"]
@@ -399,10 +404,19 @@ def fetch_news(now: dt.datetime, prev: list) -> list:
         if not key or key in seen or (x.get("date") and x["date"] < cutoff):
             continue
         g = (_bigrams(x["title"]), _figures(x["title"]))
-        if any(_similar(g, h) for h in grams):
-            continue  # 같은 사건을 여러 언론사가 쓴 기사는 하나만 남긴다
+        dup = next((i for i, h in enumerate(grams) if _similar(g, h)), None)
+        if dup is not None:
+            # 같은 사건을 여러 언론사가 쓴 기사는 하나만 남긴다.
+            # 남긴 기사가 구글 뉴스 링크이고 이 기사가 언론사 원문 링크면 원문으로 바꾼다.
+            if _is_gnews(out[dup]["link"]) and not _is_gnews(x["link"]):
+                out[dup] = {**x, "section": out[dup].get("section") or x.get("section")}
+            continue
         seen.add(key); out.append(x); grams.append(g)
     return out[:120]
+
+
+def _is_gnews(link: str) -> bool:
+    return "news.google.com" in (link or "")
 
 
 def _bigrams(title: str) -> set:
@@ -531,6 +545,7 @@ def main() -> int:
     for x in data["news"]:
         by[x["section"]] = by.get(x["section"], 0) + 1
     log(f"뉴스 합계 {len(data['news'])}건 {by}")
+    log(f"뉴스 원문 링크 {sum(not _is_gnews(x['link']) for x in data['news'])}건 / 구글 뉴스 링크 {sum(_is_gnews(x['link']) for x in data['news'])}건")
     for x in data["news"][:8]:
         log(f"  [{x['section']}] {x['date'][:16]} {x['source']} | {x['title']}")
 
