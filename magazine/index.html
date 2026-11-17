@@ -1431,9 +1431,20 @@ function bindCalcs() {
   });
 }
 
+function guideNews() {
+  const list = newsOf("policy");
+  return list.length ? `<div class="grid">${list.map(newsCard).join("")}</div>${newsNote}` : newsEmpty();
+}
+// 데이터가 늦게 도착해도 계산기 입력은 그대로 두고 데이터 칸만 다시 채운다
+function refreshGuide() {
+  const gu = document.getElementById("guide-gu"), nw = document.getElementById("guide-news");
+  if (gu) gu.innerHTML = guStats(10);
+  if (nw) { nw.innerHTML = guideNews(); drawAll(); }
+  const corp = LIVE && LIVE.rates && LIVE.rates.corp, hint = document.querySelector("#calc-yield .field.full small");
+  if (corp && hint) hint.textContent = `참고: 오늘 회사채(AA-) 3년 금리 ${corp.value.toFixed(2)}% (한국은행)`;
+}
 function renderGuide() {
   const c = CATS.policy;
-  const list = newsOf("policy");
   view.innerHTML = `
   <section class="cat-head">
     <div class="big">${c.f}</div>
@@ -1441,8 +1452,8 @@ function renderGuide() {
   </section>
   <section>${secHead("", "건물주가 가장 많이 묻는 기준")}${factCards()}</section>
   <section>${secHead("", "계산기")}${calcBlock()}</section>
-  <section>${secHead("", "서울 구별 빌딩 시세", link("#data", "랩타임에서 더 보기"))}${guStats(10)}</section>
-  <section>${secHead("", "세금·대출·규제 뉴스")}${list.length ? `<div class="grid">${list.map(newsCard).join("")}</div>${newsNote}` : newsEmpty()}</section>`;
+  <section>${secHead("", "서울 구별 빌딩 시세", link("#data", "랩타임에서 더 보기"))}<div id="guide-gu">${guStats(10)}</div></section>
+  <section>${secHead("", "세금·대출·규제 뉴스")}<div id="guide-news">${guideNews()}</div></section>`;
   bindCalcs();
 }
 
@@ -1462,7 +1473,7 @@ function route(keep) {
   if (/^a\d+$/.test(h)) h = "home";   // 예전 기사 주소
   const isInquiry = h === "inquiry" || h === "sell" || h === "buy";
   const hasInputs = isInquiry || h === "policy";
-  if (keep === true && hasInputs && h === lastHash && document.querySelector("#view form, #view .calc")) return;
+  if (keep === true && hasInputs && h === lastHash && document.querySelector("#view form, #view .calc")) { refreshGuide(); return; }
   let active = null;
   if (!h || h === "home") { renderHome(); active = "__home"; }
   else if (h === "policy") { renderGuide(); active = h; }
