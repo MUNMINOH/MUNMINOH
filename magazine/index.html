@@ -503,6 +503,20 @@ table.gustats { min-width: 560px; }
 table.mini { min-width: 560px; font-size: var(--t-xs); }
 table.mini th, table.mini td { padding: 8px 6px; }
 
+
+/* ---------- 칼럼 ---------- */
+.thumb { background: var(--ink); }
+.thumb.noimg { background: var(--art-sky); }
+.thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb .play { position: absolute; left: 12px; bottom: 12px; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: rgba(0,0,0,0.6); color: #fff; font-size: 14px; }
+.col-card h3 a:hover { color: var(--accent); }
+.col-card:hover h3 { color: inherit; }
+.col-links { display: flex; gap: 14px; flex-wrap: wrap; font-size: var(--t-sm); font-weight: 600; }
+.col-links a { color: var(--accent); }
+.col-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.col-tabs { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
+.pill.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
 /* ---------- 반응형 ---------- */
 @media (max-width: 1000px) {
   .latest { grid-template-columns: minmax(0, 1fr); }
@@ -624,9 +638,10 @@ const CATS = {
   building: { f: "3F", name: "빌딩",        art: "remodel", desc: "개발, 리모델링, 재건축, 준공. 건물이 바뀌는 소식을 모읍니다." },
   policy:   { f: "4F", name: "건물주 가이드", art: "section", desc: "빌딩을 사고, 보유하고, 임대할 때 꼭 확인할 세금·대출·임대차 기준과 계산기. 근거 법령을 함께 적었습니다." },
   players:  { f: "5F", name: "페이스메이커", art: "campus",  desc: "리츠, 자산운용사, 기관투자자. 시장의 속도를 만드는 플레이어들의 소식." },
-  data:     { f: "6F", name: "랩타임",      art: "chart",   desc: "금리, 상장 리츠, 서울 빌딩 실거래. 매일 갱신되는 숫자." }
+  data:     { f: "6F", name: "랩타임",      art: "chart",   desc: "금리, 상장 리츠, 서울 빌딩 실거래. 매일 갱신되는 숫자." },
+  column:   { f: "7F", name: "칼럼",        art: "section", desc: "빌딩러너가 블로그와 유튜브에 쓴 글과 영상을 모았습니다." }
 };
-const ALIASES = { invest: "policy", people: "players", guide: "policy" };   // 예전 주소
+const ALIASES = { invest: "policy", people: "players", guide: "policy", columns: "column" };   // 예전 주소
 const RATE_ORDER = ["base", "ktb3", "ktb10", "corp", "cd91", "usd"];
 const PYEONG = 3.3058;
 
@@ -910,11 +925,16 @@ function renderLive() {
 function renderHome() {
   const all = news();
   const latest = all.slice(0, 6);
-  const bySec = Object.keys(CATS).filter(k => k !== "data").map(k => [k, newsOf(k)[0]]).filter(([, n]) => n);
+  const bySec = Object.keys(CATS).filter(k => k !== "data" && k !== "column").map(k => [k, newsOf(k)[0]]).filter(([, n]) => n);
   const molit = all.filter(n => n.source === "국토교통부").slice(0, 5);
 
   view.innerHTML = `
   ${coverBlock()}
+
+  <section aria-label="빌딩러너 칼럼">
+    ${secHead("7F", "빌딩러너 칼럼", link("#column", "칼럼 전체 보기"))}
+    ${columnGrid(3)}
+  </section>
 
   <section aria-label="오늘의 금리">
     ${secHead("6F", "오늘의 금리와 환율", liveBadge())}
@@ -992,12 +1012,14 @@ function renderCat(slug) {
 function renderSearch(q) {
   const term = q.trim().toLowerCase();
   const hits = news().filter(n => (n.title + " " + n.source).toLowerCase().includes(term));
+  const colHits = columnItems().filter(c => (c.title + " " + (c.summary || "")).toLowerCase().includes(term));
   setActive(null);
   view.innerHTML = `
   <section class="cat-head">
     <div class="big">?</div>
-    <div><h1>‘${esc(q)}’ 검색 결과</h1><p>최근 3주 동안 모은 뉴스에서 ${hits.length}건을 찾았습니다.</p></div>
+    <div><h1>‘${esc(q)}’ 검색 결과</h1><p>빌딩러너 칼럼 ${colHits.length}건, 최근 3주 뉴스 ${hits.length}건을 찾았습니다.</p></div>
   </section>
+  ${colHits.length ? `<section>${secHead("7F", "빌딩러너 칼럼")}<div class="grid">${colHits.map(columnCard).join("")}</div></section>` : ""}
   <section>${hits.length ? `<div class="grid">${hits.map(newsCard).join("")}</div>${newsNote}` :
     `<p class="empty">일치하는 뉴스가 없습니다. ‘오피스’, ‘물류센터’, ‘리츠’처럼 짧은 단어로 다시 검색해 보세요.</p>`}</section>`;
   drawAll();
@@ -1457,6 +1479,74 @@ function renderGuide() {
   bindCalcs();
 }
 
+/* ================= 빌딩러너 칼럼 (블로그 글 + 유튜브 영상) ================= */
+const COL_FILTER = { type: "all" };
+const colKey = t => String(t || "").replace(/#\S+/g, "").replace(/[^0-9A-Za-z가-힣]/g, "").replace(/요$/, "").slice(0, 14);
+// 같은 주제의 블로그 글과 쇼츠를 한 칼럼으로 묶는다
+function columnItems() {
+  const raw = (LIVE && Array.isArray(LIVE.columns)) ? LIVE.columns : [];
+  const blogs = raw.filter(x => x.type === "blog"), vids = raw.filter(x => x.type === "youtube");
+  const used = new Set();
+  const items = blogs.map(b => {
+    const k = colKey(b.title);
+    const v = vids.find(v => !used.has(v.link) && k.length >= 8 && (colKey(v.title).startsWith(k.slice(0, 10)) || k.startsWith(colKey(v.title).slice(0, 10))));
+    if (v) used.add(v.link);
+    return { ...b, video: v || null };
+  });
+  vids.filter(v => !used.has(v.link)).forEach(v => items.push({ ...v, video: null }));
+  return items.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+}
+const cleanVideoTitle = t => String(t || "").replace(/\s*#\S+/g, "").trim();
+function columnCard(c) {
+  const isVideo = c.type === "youtube";
+  const thumb = isVideo ? c.thumb : (c.video && c.video.thumb);
+  const main = c.link;
+  return `<article class="card col-card">
+    <a class="col-media" href="${esc(main)}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+      ${thumb ? `<div class="art thumb"><img src="${esc(thumb)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.thumb').classList.add('noimg');this.remove()">${isVideo ? `<span class="play">▶</span>` : ""}</div>` : artBox("section", hashSeed(c.title))}
+    </a>
+    <div class="meta"><span class="tag"><span class="f">7F</span>칼럼</span><span>${isVideo ? "빌딩러너 유튜브" : "빌딩러너 블로그"}</span><span class="num">${newsDate(c.date).split(" ")[0]}</span></div>
+    <h3><a href="${esc(main)}" target="_blank" rel="noopener">${esc(isVideo ? cleanVideoTitle(c.title) : c.title)}</a></h3>
+    ${c.summary ? `<p>${esc(c.summary)}</p>` : ""}
+    <div class="col-links">
+      <a href="${esc(main)}" target="_blank" rel="noopener">${isVideo ? "영상 보기" : "글 읽기"} ↗</a>
+      ${c.video ? `<a href="${esc(c.video.link)}" target="_blank" rel="noopener">▶ 쇼츠로 보기 ↗</a>` : ""}
+    </div>
+  </article>`;
+}
+function columnsEmpty() {
+  return `<p class="loading">${LIVE_STATE === "loading" ? "빌딩러너 칼럼을 불러오는 중입니다." : "아직 모인 칼럼이 없습니다."}</p>`;
+}
+function columnGrid(limit) {
+  let items = columnItems();
+  if (COL_FILTER.type === "blog") items = items.filter(x => x.type === "blog");
+  if (COL_FILTER.type === "youtube") items = items.filter(x => x.type === "youtube" || x.video);
+  if (limit) items = items.slice(0, limit);
+  return items.length ? `<div class="grid">${items.map(columnCard).join("")}</div>` : columnsEmpty();
+}
+const colSource = `<p class="foot-note">빌딩러너 <a href="${esc(SOCIAL.find(s => s.id === "blog").url)}" target="_blank" rel="noopener">네이버 블로그</a>와 <a href="${esc(SOCIAL.find(s => s.id === "youtube").url)}" target="_blank" rel="noopener">유튜브</a>에 올라온 글과 영상을 자동으로 모읍니다. 새 글은 3시간 안에 반영됩니다.</p>`;
+function renderColumns() {
+  const c = CATS.column;
+  const tab = (t, label) => `<button type="button" class="pill${COL_FILTER.type === t ? " on" : ""}" data-col="${t}" aria-pressed="${COL_FILTER.type === t}">${label}</button>`;
+  view.innerHTML = `
+  <section class="cat-head">
+    <div class="big">${c.f}</div>
+    <div><h1>${esc(c.name)}</h1><p>${esc(c.desc)}</p></div>
+  </section>
+  <section>
+    <div class="col-tabs">${tab("all", "전체")}${tab("blog", "블로그 글")}${tab("youtube", "영상")}</div>
+    <div id="col-grid">${columnGrid()}</div>
+    ${colSource}
+  </section>
+  ${ctaBlock()}`;
+  view.querySelectorAll("[data-col]").forEach(b => b.addEventListener("click", () => {
+    COL_FILTER.type = b.dataset.col;
+    view.querySelectorAll("[data-col]").forEach(x => { const on = x.dataset.col === COL_FILTER.type; x.classList.toggle("on", on); x.setAttribute("aria-pressed", on); });
+    document.getElementById("col-grid").innerHTML = columnGrid();
+    drawAll();
+  }));
+}
+
 /* ================= 라우팅 ================= */
 function setActive(slug) {
   document.querySelectorAll(".floor-btn").forEach(b => {
@@ -1477,6 +1567,7 @@ function route(keep) {
   let active = null;
   if (!h || h === "home") { renderHome(); active = "__home"; }
   else if (h === "policy") { renderGuide(); active = h; }
+  else if (h === "column") { renderColumns(); active = h; }
   else if (CATS[h]) { renderCat(h); active = h; }
   else if (isInquiry) { renderInquiry(h === "buy" ? "매수" : "매도"); active = "inquiry"; }
   else renderNotFound();
