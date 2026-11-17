@@ -1489,7 +1489,8 @@ function columnItems() {
   const used = new Set();
   const items = blogs.map(b => {
     const k = colKey(b.title);
-    const v = vids.find(v => !used.has(v.link) && k.length >= 8 && (colKey(v.title).startsWith(k.slice(0, 10)) || k.startsWith(colKey(v.title).slice(0, 10))));
+    const common = (a, b) => { let i = 0; while (i < a.length && a[i] === b[i]) i++; return i; };
+    const v = vids.find(v => !used.has(v.link) && common(k, colKey(v.title)) >= 8);
     if (v) used.add(v.link);
     return { ...b, video: v || null };
   });
