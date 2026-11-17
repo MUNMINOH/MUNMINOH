@@ -50,17 +50,24 @@ cd magazine && python -m http.server 8000   # http://localhost:8000
 
 빌딩러너 캐릭터 이미지를 `magazine/assets/character.png`로 넣으면 상단 로고 왼쪽에 자동으로 나타납니다. 배경이 투명한 PNG, 가로 400px 안팎을 권장합니다. 파일이 없으면 글자 로고만 보입니다.
 
-## 공개하기 (GitHub Pages + cadencereview.com)
+## 공개하기 (GitHub Pages + cadence.bldgrunner.com)
+
+주소 구조: 빌딩러너 본 도메인 `bldgrunner.com` 아래에 매거진을 `cadence.bldgrunner.com`으로 둡니다. 본 사이트가 생기기 전까지 `bldgrunner.com`은 CADENCE로 넘깁니다.
 
 사이트는 `.github/workflows/magazine-pages.yml`이 GitHub Pages로 배포합니다. 기본 브랜치에 `magazine/`이 바뀌어 올라오면 배포하고, 평일 09:10·18:10(KST)마다 지표를 새로 받아 다시 배포합니다.
 
-처음 한 번만 할 일:
+### 도메인 연결 (Cloudflare 기준, 처음 한 번)
 
-1. 저장소 Settings → Pages → Build and deployment → Source를 **GitHub Actions**로 바꿉니다.
-2. Cloudflare Registrar 등에서 `cadencereview.com`을 구입합니다.
-3. 도메인 DNS에 아래 레코드를 추가합니다 (Cloudflare라면 프록시를 끈 DNS only).
-   - `@` → A → `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
-   - `www` → CNAME → `munminoh.github.io`
-4. Settings → Pages → Custom domain에 `cadencereview.com`을 입력하고 저장합니다.
-5. 인증서가 발급되면 **Enforce HTTPS**를 켭니다.
-6. (선택) 실거래 표를 실제 데이터로 바꾸려면 Settings → Secrets and variables → Actions에 `DATA_GO_KR_KEY`를 추가합니다.
+1. Cloudflare에서 `bldgrunner.com`을 구입합니다. 자동 갱신은 켜 둡니다.
+2. **매거진 주소**: DNS → Records → Add record
+   - Type `CNAME`, Name `cadence`, Target `munminoh.github.io`, Proxy status **DNS only**(회색 구름)
+3. GitHub 저장소 Settings → Pages → Custom domain에 `cadence.bldgrunner.com`을 입력하고 Save. 인증서가 나오면 **Enforce HTTPS**를 켭니다.
+4. **본 도메인 넘기기** (본 사이트가 생기기 전까지)
+   - DNS에 Type `A`, Name `@`, IPv4 `192.0.2.1`, Proxy status **Proxied**(주황 구름)를 추가합니다. 실제 서버가 없는 자리 표시용 주소이고, 아래 규칙이 요청을 넘깁니다.
+   - 같은 방식으로 Name `www`도 추가합니다.
+   - Rules → Redirect Rules → Create rule: 조건 **All incoming requests**, URL redirect **Static**, URL `https://cadence.bldgrunner.com`, 상태 코드 `302`(나중에 본 사이트를 열 수 있게 임시 이동), Preserve query string 체크.
+5. (선택) 한글 보조 도메인 `빌딩러너.com`을 샀다면 4번과 같은 방법으로 넘깁니다.
+
+### 실거래 서비스키
+
+Settings → Secrets and variables → Actions → **Repository secrets**에 `DATA_GO_KR_KEY`로 저장합니다. 배포 로그에 "실거래 서비스키: 있음"이 나오면 연결된 것입니다.
