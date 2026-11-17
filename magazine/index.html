@@ -1089,7 +1089,7 @@ function renderInquiry(type) {
       </div>
 
       <div class="fields" data-for="매도">
-        ${fld("s-addr", "건물 위치", `<input id="s-addr" name="s-addr" placeholder="예: 서울 강남구 역삼동">`, { req: 1, help: "구·동까지만 적어도 됩니다." })}
+        ${fld("s-addr", "건물 주소 (지번)", `<input id="s-addr" name="s-addr" autocomplete="off" placeholder="예: 서울 강남구 역삼동 123-45">`, { req: 1, full: 1, help: "정확한 지번까지 적어 주세요. 등기부와 건축물대장으로 건물을 확인하는 데 씁니다." })}
         ${fld("s-price", "희망 매도가", unit("s-price", "억 원", "예: 120", "text"))}
       </div>
 
@@ -1160,7 +1160,7 @@ function renderInquiry(type) {
     const need = (id, ok, text) => { if (!ok) { problems.push([id, text]); } };
     need("f-name", val("f-name"), "이름을 적어 주세요.");
     need("f-phone", val("f-phone").replace(/\D/g, "").length >= 9, "연락처를 적어 주세요. 예: 010-1234-5678");
-    if (k === "매도") need("s-addr", val("s-addr"), "건물 위치를 적어 주세요.");
+    if (k === "매도") need("s-addr", /\d/.test(val("s-addr")) && val("s-addr").length >= 6, "건물 주소를 지번까지 정확히 적어 주세요. 예: 서울 강남구 역삼동 123-45");
     else { need("b-area", val("b-area"), "희망 지역을 적어 주세요."); need("b-budget", val("b-budget"), "예산을 대략이라도 적어 주세요."); }
     need("f-agree", document.getElementById("f-agree").checked, "개인정보 수집·이용에 동의해 주세요.");
     if (problems.length) {
