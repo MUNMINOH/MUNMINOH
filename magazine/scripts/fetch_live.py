@@ -238,10 +238,12 @@ def main() -> int:
             prev = {}
 
     data = {"updatedAt": now.isoformat(timespec="minutes")}
-    data["rates"] = fetch_ecos(now.date()) or prev.get("rates", {})
+    # 한 지표만 실패해도 나머지는 새 값으로, 실패한 지표는 지난 값으로 채운다
+    data["rates"] = {**prev.get("rates", {}), **fetch_ecos(now.date())}
     data["reits"] = fetch_reits(now.date()) or prev.get("reits", [])
 
-    key = os.environ.get("DATA_GO_KR_KEY")
+    key = (os.environ.get("DATA_GO_KR_KEY") or "").strip()
+    log("실거래 서비스키: " + ("있음" if key else "없음 (DATA_GO_KR_KEY 비어 있음, 실거래 수집 건너뜀)"))
     deals = fetch_deals(key, now.date()) if key else None
     if deals is None and prev.get("deals"):
         deals = prev["deals"]  # 이번에 실패하면 지난번 값을 유지
