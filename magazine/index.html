@@ -1,0 +1,1239 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>STOREY 빌딩 매거진</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="빌딩과 상업용 부동산의 시장, 거래, 건축, 투자 이야기를 다루는 매거진">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Nanum+Myeongjo:wght@700;800&display=swap">
+<style>
+/* Layout: 건물 단면처럼 층(카테고리)이 쌓인 매거진. 엘리베이터 버튼 내비 + 도면(입면도) 일러스트 + 스펙 시트 */
+:root {
+  --bg: #E7EBEA;
+  --surface: #F4F6F5;
+  --ink: #14191C;
+  --ink-2: #39434A;
+  --muted: #5E696F;
+  --line: #C3CBCA;
+  --accent: #2B3FC4;
+  --accent-soft: rgba(43, 63, 196, 0.12);
+  --on-accent: #FFFFFF;
+  --bar: #9AA6AB;
+  --seg-2: #7584E0;
+  --seg-3: #6E7B81;
+  --seg-4: #B4BEC1;
+
+  --art-sky: #DCE2E2;
+  --art-grid: rgba(20, 25, 28, 0.06);
+  --art-far: #C5CDCD;
+  --art-body: #F3F5F4;
+  --art-glass: #A7B6C3;
+  --art-ground: #C9D0CF;
+
+  --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-head: "Nanum Myeongjo", "AppleMyungjo", "Batang", serif;
+  --f-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --s-xs: 0.75rem;
+  --s-sm: 0.875rem;
+  --s-md: 1rem;
+  --s-lg: 1.25rem;
+  --s-xl: 1.625rem;
+  --s-2xl: 2.25rem;
+  --s-3xl: clamp(2rem, 4.2vw, 3.25rem);
+
+  --max: 1240px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1316; --surface: #171C20; --ink: #E5E9E9; --ink-2: #BCC5C8; --muted: #8F9A9F; --line: #2A3237;
+    --accent: #8C9BFF; --accent-soft: rgba(140, 155, 255, 0.14); --on-accent: #0B0F24;
+    --bar: #56636A; --seg-2: #5462B8; --seg-3: #7A878D; --seg-4: #3A454B;
+    --art-sky: #161C21; --art-grid: rgba(229, 233, 233, 0.05); --art-far: #20282E; --art-body: #283037;
+    --art-glass: #3B4D63; --art-ground: #12171B;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1316; --surface: #171C20; --ink: #E5E9E9; --ink-2: #BCC5C8; --muted: #8F9A9F; --line: #2A3237;
+  --accent: #8C9BFF; --accent-soft: rgba(140, 155, 255, 0.14); --on-accent: #0B0F24;
+  --bar: #56636A; --seg-2: #5462B8; --seg-3: #7A878D; --seg-4: #3A454B;
+  --art-sky: #161C21; --art-grid: rgba(229, 233, 233, 0.05); --art-far: #20282E; --art-body: #283037;
+  --art-glass: #3B4D63; --art-ground: #12171B;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: var(--s-md);
+  line-height: 1.65;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: var(--bg);
+}
+a { color: inherit; text-decoration: none; }
+img, canvas, svg { max-width: 100%; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+button, input { font: inherit; color: inherit; }
+
+.wrap {
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.eyebrow {
+  font-family: var(--f-mono); font-size: var(--s-xs); letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted);
+}
+
+/* ---------- 상단 ---------- */
+.util {
+  border-bottom: 1px solid var(--line);
+  font-size: var(--s-xs); color: var(--muted);
+}
+.util .wrap { display: flex; justify-content: space-between; gap: 16px; padding-block: 8px; flex-wrap: wrap; }
+.util .mono { letter-spacing: 0.04em; }
+
+.masthead .wrap {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+  padding-block: 28px 20px; flex-wrap: wrap;
+}
+.wordmark {
+  font-family: var(--f-display); font-weight: 850; font-stretch: 125%;
+  font-variation-settings: "wdth" 125;
+  font-size: clamp(3rem, 11vw, 8.5rem); line-height: 0.82; letter-spacing: -0.03em;
+  display: block;
+}
+.wordmark span { color: var(--accent); }
+.tagline { max-width: 22rem; display: grid; gap: 6px; padding-bottom: 6px; }
+.tagline strong { font-family: var(--f-head); font-size: var(--s-lg); font-weight: 800; line-height: 1.35; }
+.tagline small { color: var(--muted); font-size: var(--s-sm); }
+
+/* ---------- 엘리베이터 내비 ---------- */
+.nav {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9;
+  background: var(--bg);
+  border-block: 1px solid var(--ink);
+}
+.nav .wrap { display: flex; align-items: center; gap: 16px; padding-block: 8px; }
+.floors {
+  display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; flex: 1 1 auto; min-width: 0;
+}
+.floors::-webkit-scrollbar { display: none; }
+.floor-btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px;
+  border-radius: 999px; white-space: nowrap; font-weight: 600; font-size: var(--s-sm);
+  transition: background-color .15s ease;
+}
+.floor-btn:hover { background: var(--accent-soft); }
+.floor-btn .lamp {
+  width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  border: 1.5px solid var(--ink-2); font-family: var(--f-mono); font-size: 11px; font-weight: 500;
+  transition: background-color .15s ease, box-shadow .15s ease, color .15s ease;
+}
+.floor-btn[aria-current="page"] .lamp {
+  background: var(--accent); border-color: var(--accent); color: var(--on-accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+.search { display: flex; align-items: center; flex: 0 0 auto; }
+.search input {
+  width: 11rem; padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface); font-size: var(--s-sm);
+}
+.search input::placeholder { color: var(--muted); }
+
+/* ---------- 지표 띠 ---------- */
+.ticker { border-bottom: 1px solid var(--line); background: var(--surface); }
+.ticker .wrap { display: flex; align-items: center; gap: 16px; padding-block: 10px; }
+.ticker-label { flex: 0 0 auto; }
+.ticker-items { display: flex; gap: 28px; overflow-x: auto; scrollbar-width: thin; min-width: 0; font-size: var(--s-sm); }
+.tick { white-space: nowrap; display: flex; gap: 8px; align-items: baseline; }
+.tick b { font-family: var(--f-mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+.tick .chg { font-family: var(--f-mono); font-size: var(--s-xs); color: var(--muted); }
+
+/* ---------- 공통 섹션 ---------- */
+main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 64px; padding-block: 32px 72px; }
+main > * { min-width: 0; }
+.sec-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+  border-top: 2px solid var(--ink); padding-top: 12px; margin-bottom: 24px; flex-wrap: wrap;
+}
+.sec-head h2 { margin: 0; font-family: var(--f-head); font-weight: 800; font-size: var(--s-xl); line-height: 1.3; }
+.sec-head h2 .mono { font-size: var(--s-sm); color: var(--accent); margin-right: 10px; vertical-align: 2px; font-family: var(--f-mono); }
+.sec-head a { font-size: var(--s-sm); color: var(--muted); }
+.sec-head a:hover { color: var(--accent); }
+
+.art { position: relative; aspect-ratio: 16 / 10; background: var(--art-sky); overflow: hidden; max-width: 100%; }
+.art canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+.tag {
+  display: inline-flex; align-items: center; gap: 6px; font-size: var(--s-xs); font-weight: 600; color: var(--ink-2);
+}
+.tag .f {
+  font-family: var(--f-mono); font-weight: 500; font-size: 10.5px; border: 1px solid currentColor;
+  border-radius: 999px; padding: 0 6px; line-height: 17px; color: var(--accent);
+}
+.meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; color: var(--muted); font-size: var(--s-xs); }
+
+/* ---------- 커버 ---------- */
+.cover { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 40px; align-items: start; }
+.cover .art { aspect-ratio: 4 / 3; }
+.cover-text { display: grid; gap: 16px; min-width: 0; }
+.cover h1 {
+  margin: 0; font-family: var(--f-head); font-weight: 800; font-size: var(--s-3xl);
+  line-height: 1.22; letter-spacing: -0.01em; text-wrap: balance;
+}
+.cover h1 a:hover { color: var(--accent); }
+.dek { margin: 0; color: var(--ink-2); font-size: 1.0625rem; line-height: 1.7; }
+
+.spec {
+  border: 1px solid var(--ink); background: var(--surface);
+  font-size: var(--s-sm);
+}
+.spec-title {
+  display: flex; justify-content: space-between; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--ink);
+  font-family: var(--f-mono); font-size: var(--s-xs); letter-spacing: 0.06em; text-transform: uppercase;
+}
+.spec dl { margin: 0; display: grid; grid-template-columns: auto 1fr; }
+.spec dt, .spec dd { padding: 7px 12px; border-bottom: 1px solid var(--line); margin: 0; }
+.spec dt { color: var(--muted); white-space: nowrap; }
+.spec dd { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-size: 0.8125rem; }
+.spec dl > :nth-last-child(-n+2) { border-bottom: 0; }
+
+/* ---------- 카드 그리드 ---------- */
+.latest { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 40px; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 36px 24px; }
+.grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.card { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.card h3 {
+  margin: 4px 0 0; font-family: var(--f-head); font-weight: 800; font-size: 1.1875rem; line-height: 1.4;
+  text-wrap: balance;
+}
+.card p { margin: 0; color: var(--ink-2); font-size: var(--s-sm); line-height: 1.6;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.card:hover h3 { color: var(--accent); }
+.card .art { transition: filter .2s ease; }
+.card:hover .art { filter: contrast(1.06); }
+
+.rank { display: grid; align-content: start; gap: 0; }
+.rank h2 { font-family: var(--f-head); font-weight: 800; font-size: var(--s-lg); margin: 0 0 8px; }
+.rank ol { list-style: none; margin: 0; padding: 0; counter-reset: r; }
+.rank li { counter-increment: r; border-top: 1px solid var(--line); }
+.rank li a { display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 14px 0; }
+.rank li a::before {
+  content: counter(r); font-family: var(--f-display); font-weight: 800; font-size: 1.5rem; line-height: 1;
+  color: var(--accent); font-variation-settings: "wdth" 80;
+}
+.rank li b { font-weight: 600; font-size: var(--s-sm); line-height: 1.5; display: block; }
+.rank li a:hover b { color: var(--accent); }
+.rank li small { color: var(--muted); font-size: var(--s-xs); }
+
+/* ---------- 거래 표 ---------- */
+.table-scroll { overflow-x: auto; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+table { width: 100%; border-collapse: collapse; font-size: var(--s-sm); min-width: 760px; }
+th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+th { font-family: var(--f-mono); font-weight: 500; font-size: var(--s-xs); color: var(--muted); letter-spacing: 0.04em; }
+td.num, th.num { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+td.hl { color: var(--accent); font-weight: 500; }
+.zone { font-family: var(--f-mono); font-size: 11px; border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
+.note { color: var(--muted); font-size: var(--s-xs); margin: 10px 0 0; }
+
+/* ---------- 데이터 ---------- */
+.data { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 40px; }
+.panel { min-width: 0; display: grid; gap: 12px; align-content: start; }
+.panel h3 { margin: 0; font-size: var(--s-md); font-weight: 600; }
+.chart text { font-family: var(--f-mono); font-size: 12px; fill: var(--muted); }
+.chart .lbl { fill: var(--ink); font-family: var(--f-body); font-size: 13px; font-weight: 500; }
+.chart .val { fill: var(--ink); paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+.chart .bar { fill: var(--bar); }
+.chart .gridl { stroke: var(--line); stroke-width: 1; }
+.chart .ref { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.chart .reft { fill: var(--accent); paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+.stack { display: flex; height: 36px; gap: 2px; }
+.stack div { min-width: 0; }
+.legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.legend li { display: grid; grid-template-columns: 12px 1fr auto auto; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: var(--s-sm); }
+.legend i { width: 12px; height: 12px; display: block; }
+.legend .mono { text-align: right; min-width: 4.5em; }
+.legend .pct { color: var(--muted); font-size: var(--s-xs); min-width: 3.5em; }
+
+/* ---------- 피플 ---------- */
+.feature { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; background: var(--surface); border: 1px solid var(--line); }
+.feature .art { aspect-ratio: auto; min-height: 320px; }
+.feature-text { padding: 32px; display: grid; gap: 14px; align-content: center; min-width: 0; }
+.feature blockquote {
+  margin: 0; font-family: var(--f-head); font-weight: 800; font-size: clamp(1.375rem, 2.6vw, 2rem); line-height: 1.4; text-wrap: balance;
+}
+.feature a.more { color: var(--accent); font-weight: 600; font-size: var(--s-sm); }
+
+/* ---------- 뉴스레터 ---------- */
+.letter { background: var(--ink); color: var(--bg); }
+.letter .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; padding-block: 48px; align-items: center; }
+.letter h2 { margin: 0 0 8px; font-family: var(--f-head); font-weight: 800; font-size: var(--s-2xl); line-height: 1.3; }
+.letter p { margin: 0; opacity: 0.8; }
+.letter form { display: flex; gap: 8px; flex-wrap: wrap; }
+.letter input {
+  flex: 1 1 14rem; min-width: 0; padding: 13px 16px; background: transparent; color: var(--bg);
+  border: 1px solid currentColor; border-radius: 999px;
+}
+.letter input::placeholder { color: var(--bg); opacity: 0.6; }
+.btn {
+  padding: 13px 22px; border-radius: 999px; border: 0; background: var(--accent); color: var(--on-accent);
+  font-weight: 600; cursor: pointer;
+}
+.btn:hover { filter: brightness(1.08); }
+.letter .msg { flex-basis: 100%; font-size: var(--s-sm); margin: 4px 0 0; opacity: 1; }
+
+/* ---------- 층별 안내 (푸터) ---------- */
+footer .wrap { padding-block: 48px 40px; display: grid; gap: 32px; }
+.directory { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 32px; }
+.directory h2 { margin: 0; font-family: var(--f-display); font-variation-settings: "wdth" 125; font-weight: 850; font-size: 2.5rem; line-height: 1; letter-spacing: -0.02em; }
+.board { list-style: none; margin: 0; padding: 0; border: 1px solid var(--ink); }
+.board li + li { border-top: 1px solid var(--line); }
+.board a { display: grid; grid-template-columns: 52px 120px 1fr; gap: 12px; padding: 10px 14px; align-items: baseline; }
+.board a:hover { background: var(--accent-soft); }
+.board .mono { color: var(--accent); font-weight: 500; }
+.board b { font-weight: 600; }
+.board span:last-child { color: var(--muted); font-size: var(--s-sm); }
+.fine { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; color: var(--muted); font-size: var(--s-xs); border-top: 1px solid var(--line); padding-top: 16px; }
+
+/* ---------- 카테고리 페이지 ---------- */
+.cat-head { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; border-bottom: 2px solid var(--ink); padding-bottom: 28px; }
+.cat-head .big {
+  font-family: var(--f-display); font-weight: 850; font-variation-settings: "wdth" 125;
+  font-size: clamp(4rem, 12vw, 9rem); line-height: 0.8; color: var(--accent); letter-spacing: -0.04em;
+}
+.cat-head h1 { margin: 0; font-family: var(--f-head); font-weight: 800; font-size: var(--s-3xl); line-height: 1.2; }
+.cat-head p { margin: 8px 0 0; color: var(--ink-2); max-width: 38rem; }
+
+/* ---------- 기사 페이지 ---------- */
+.a-head { display: grid; gap: 16px; max-width: 52rem; }
+.a-head h1 { margin: 0; font-family: var(--f-head); font-weight: 800; font-size: clamp(1.875rem, 4.4vw, 3.25rem); line-height: 1.25; text-wrap: balance; }
+.a-head .dek { font-size: var(--s-lg); line-height: 1.65; }
+.byline { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-size: var(--s-sm); color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.byline b { color: var(--ink); font-weight: 600; }
+.copy {
+  margin-left: auto; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface);
+  cursor: pointer; font-size: var(--s-xs);
+}
+.copy:hover { border-color: var(--accent); color: var(--accent); }
+.a-art { aspect-ratio: 21 / 9; }
+.a-body { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 56px; align-items: start; }
+.prose { max-width: 40rem; font-size: 1.0625rem; line-height: 1.85; min-width: 0; }
+.prose p { margin: 0 0 1.25em; }
+.prose h2 { font-family: var(--f-head); font-weight: 800; font-size: var(--s-xl); line-height: 1.4; margin: 1.8em 0 0.6em; text-wrap: balance; }
+.prose blockquote { margin: 1.6em 0; padding: 4px 0 4px 20px; border-left: 3px solid var(--accent); }
+.prose blockquote p { font-family: var(--f-head); font-weight: 700; font-size: 1.25rem; line-height: 1.6; margin: 0 0 8px; }
+.prose blockquote cite { font-style: normal; font-size: var(--s-sm); color: var(--muted); }
+.prose ol { padding-left: 0; list-style: none; counter-reset: c; margin: 0 0 1.25em; display: grid; gap: 14px; }
+.prose ol li { counter-increment: c; display: grid; grid-template-columns: 34px 1fr; gap: 6px; }
+.prose ol li::before { content: counter(c); font-family: var(--f-mono); color: var(--accent); font-weight: 500; }
+.prose ol li b { display: block; }
+.disclaimer { font-size: var(--s-sm); color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; margin-top: 2em; }
+.aside { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); display: grid; gap: 16px; min-width: 0; }
+.back { font-size: var(--s-sm); color: var(--muted); }
+.back:hover { color: var(--accent); }
+
+.empty { padding: 48px 0; color: var(--muted); }
+
+/* ---------- 반응형 ---------- */
+@media (max-width: 1000px) {
+  .latest { grid-template-columns: minmax(0, 1fr); }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .a-body { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .aside { position: static; }
+}
+@media (max-width: 760px) {
+  .cover, .data, .feature, .letter .wrap, .directory { grid-template-columns: minmax(0, 1fr); }
+  .cover { gap: 20px; }
+  .feature .art { min-height: 220px; }
+  .feature-text { padding: 24px 20px; }
+  .search input { width: 7.5rem; }
+  .board a { grid-template-columns: 44px 80px 1fr; }
+  .cat-head { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  main { gap: 48px; }
+}
+@media (max-width: 520px) {
+  .grid, .grid.two { grid-template-columns: minmax(0, 1fr); }
+  .floor-btn { padding-right: 8px; }
+  .floor-btn .txt { display: none; }
+  .floor-btn[aria-current="page"] .txt { display: inline; }
+  .tagline { padding-bottom: 0; }
+  .a-art { aspect-ratio: 16 / 10; }
+  .board span:last-child { display: none; }
+  .board a { grid-template-columns: 44px 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="util">
+  <div class="wrap">
+    <span id="today" class="mono">2026.11.17 TUE</span>
+    <span>Vol. 47 · 매주 목요일 발행 · 데모 매거진</span>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <a href="#home" class="wordmark" aria-label="STOREY 홈">STOREY<span>.</span></a>
+    <div class="tagline">
+      <strong>빌딩과 상업용 부동산, 한 층씩 깊게 읽습니다</strong>
+      <small>오피스 · 리테일 · 물류 · 데이터센터 시장과 거래, 건축과 투자 이야기</small>
+    </div>
+  </div>
+</header>
+
+<nav class="nav" aria-label="카테고리">
+  <div class="wrap">
+    <div class="floors" id="floors"></div>
+    <form class="search" id="search-form" role="search">
+      <label for="q" class="eyebrow" hidden>기사 검색</label>
+      <input id="q" type="search" placeholder="기사 검색" autocomplete="off">
+    </form>
+  </div>
+</nav>
+
+<div class="ticker" aria-label="시장 지표">
+  <div class="wrap">
+    <span class="ticker-label eyebrow">3Q 지표 · 예시</span>
+    <div class="ticker-items" id="ticker"></div>
+  </div>
+</div>
+
+<main id="view" class="wrap"></main>
+
+<section class="letter" aria-labelledby="nl-title">
+  <div class="wrap">
+    <div>
+      <h2 id="nl-title">목요일 아침, 이번 주 빌딩 거래를 메일로</h2>
+      <p>한 주 동안 손바뀜된 빌딩과 권역별 지표, 에디터가 고른 기사 세 편을 정리해 보내 드립니다.</p>
+    </div>
+    <form id="nl-form" novalidate>
+      <input id="nl-email" type="email" placeholder="이메일 주소" aria-label="이메일 주소" required>
+      <button class="btn" type="submit">뉴스레터 구독</button>
+      <p class="msg" id="nl-msg" role="status" hidden></p>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="directory">
+      <div>
+        <h2>층별 안내</h2>
+        <p class="note">STOREY는 주제를 층으로 나눠 배치합니다. 원하는 층을 눌러 이동하세요.</p>
+      </div>
+      <ul class="board" id="board"></ul>
+    </div>
+    <div class="fine">
+      <span>STOREY 빌딩 매거진 · 데모 사이트</span>
+      <span>이 사이트의 기사, 인물, 건물, 거래 내역과 수치는 모두 화면 구성을 보여 주기 위한 가상의 예시입니다.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(() => {
+"use strict";
+
+/* ================= 데이터 ================= */
+const CATS = {
+  market:   { f: "1F", name: "마켓",      desc: "권역별 공실률과 임대료, 공급과 수요. 상업용 부동산 시장의 흐름을 읽습니다." },
+  deal:     { f: "2F", name: "딜",        desc: "이번 주 손바뀜된 빌딩과 물류센터. 누가, 얼마에, 왜 샀는지 따라갑니다." },
+  building: { f: "3F", name: "빌딩",      desc: "리모델링, 신축, 용도 전환. 건물이 가치를 바꾸는 방식을 들여다봅니다." },
+  invest:   { f: "4F", name: "투자 가이드", desc: "꼬마빌딩부터 법인 매입까지. 처음 빌딩을 사는 사람을 위한 실무 노트." },
+  people:   { f: "5F", name: "피플",      desc: "빌딩을 짓고, 채우고, 거래하는 사람들의 이야기." },
+  data:     { f: "6F", name: "데이터",     desc: "캡레이트, 거래액, 공실률. 숫자로 보는 상업용 부동산." }
+};
+
+const ARTICLES = [
+  {
+    id: 1, cat: "market", art: "skyline", seed: 11, author: "정하린 기자", date: "2026.11.13", min: 8,
+    title: "공실률 2%대의 역설, 서울 오피스는 왜 여전히 비싼가",
+    dek: "자연공실률을 밑도는 강남권 공실, 늘어나는 도심 신규 공급, 4%대 중반에 멈춘 캡레이트. 3분기 서울 오피스 시장을 세 가지 숫자로 읽었다.",
+    spec: [["서울 평균 공실률", "3.1%"], ["GBD 공실률", "2.3%"], ["CBD 공실률", "4.1%"], ["GBD 실질임대료(NOC)", "3.3㎡당 23.4만 원"], ["3분기 오피스 거래액", "5.8조 원"], ["오피스 평균 캡레이트", "4.6%"]],
+    body: [
+      "업계에서 오피스 시장의 ‘자연공실률’로 보는 수준은 5% 안팎이다. 임차인이 이사하고, 리모델링이 진행되고, 계약이 바뀌는 데 필요한 최소한의 빈 공간이다. 올해 3분기 강남권역(GBD)의 공실률은 이보다 한참 낮은 2%대에 머물렀다. 사무실을 찾는 기업 입장에서는 고를 수 있는 매물이 사실상 없다는 뜻이다.",
+      { h: "임대인 우위 시장은 계속된다" },
+      "공실이 귀해지자 임대 조건도 달라졌다. 몇 년 전만 해도 흔했던 렌트프리(무상임대) 기간은 눈에 띄게 줄었고, 일부 프라임 빌딩은 재계약 시점에 명목임대료를 한 번에 크게 올렸다. 실질임대료(NOC) 기준으로 보면 GBD 프라임 오피스는 3.3㎡당 23만 원을 넘어섰다.",
+      { q: "지금 강남에서 한 층에 500평 이상을 붙여 쓰려면 1년 전부터 움직여야 합니다. 그래도 원하는 빌딩에 들어간다는 보장은 없어요.", by: "한 임차대행사 관계자" },
+      "도심권역(CBD)은 분위기가 조금 다르다. 을지로·종로 일대 재개발로 대형 신축이 연이어 준공되면서 공실률이 4%대로 올라섰다. 다만 신축 빌딩이 주변 빌딩의 임차인을 흡수하는 ‘이전 수요’가 대부분이어서, 권역 전체의 수요가 꺾였다고 보기는 어렵다는 분석이 많다.",
+      { h: "가격은 금리가 아니라 희소성이 받친다" },
+      "가격 흐름도 눈여겨볼 만하다. 기준금리가 고점에서 내려왔지만 오피스 캡레이트는 4%대 중반에서 크게 움직이지 않았다. 조달금리와 수익률의 간격이 좁은데도 거래가 이어지는 이유로 시장은 대체 불가능성을 꼽는다. 도심 핵심 입지에 새로 지을 땅이 거의 없다는 사실이 가격의 하단을 받치고 있다.",
+      "변수는 2027년 이후의 공급이다. 도심과 여의도에 예정된 대형 프로젝트가 계획대로 준공되면, 지금의 임대인 우위 구도는 권역별로 다르게 흔들릴 수 있다. 숫자가 좋을 때일수록 권역과 빌딩 등급을 나눠 보는 습관이 필요하다."
+    ]
+  },
+  {
+    id: 2, cat: "deal", art: "tower", seed: 23, author: "오승민 기자", date: "2026.11.12", min: 6,
+    title: "테헤란로 이면 중소형 빌딩, 토지 평당 2억 원대 중반에 손바뀜",
+    dek: "역삼동의 지상 9층 업무시설이 312억 원에 팔렸다. 매수자는 사옥을 찾던 중견기업. 강남 중소형 빌딩 시장에서 법인 실사용 수요가 가격을 끌어올리고 있다.",
+    spec: [["위치", "서울 강남구 역삼동"], ["용도", "업무·근린생활시설"], ["규모", "지하 2층~지상 9층"], ["대지면적", "412㎡ (124.6평)"], ["연면적", "2,690㎡ (813.7평)"], ["준공", "2004년"], ["거래가", "312억 원"], ["토지 3.3㎡당", "2억 5,040만 원"], ["연면적 3.3㎡당", "3,834만 원"], ["매수자", "국내 중견기업 (사옥용)"]],
+    body: [
+      "서울 강남구 역삼동 테헤란로 이면에 있는 지하 2층~지상 9층 규모 업무시설이 312억 원에 거래됐다. 대지면적 124.6평을 기준으로 환산한 토지 3.3㎡당 가격은 약 2억 5,000만 원. 같은 블록에서 2년 전 이뤄진 거래보다 20%가량 높은 수준이다.",
+      { h: "투자자보다 실사용자가 비싸게 산다" },
+      "매수자는 강남 이전을 추진하던 국내 중견기업이다. 사옥을 찾는 법인은 임대수익률보다 입지와 상징성, 직원 출퇴근 여건을 먼저 본다. 같은 빌딩을 두고도 순수 투자자가 계산한 적정가와 실사용 법인이 감당할 수 있는 가격 사이에 차이가 생기는 이유다.",
+      "이번 거래도 마찬가지였다. 매각 자문을 맡은 한 중개법인 관계자는 “투자 목적의 매수 후보들은 연 3%대 초반의 임대수익률을 근거로 300억 원 아래를 제시했지만, 사옥 수요가 붙으면서 가격이 정리됐다”고 말했다.",
+      { q: "강남 300억 원 안팎 빌딩 시장은 지금 사옥 수요가 가격을 정합니다. 임차인이 빠져나가는 공실 리스크도 사옥 매수자에게는 오히려 장점이 되죠.", by: "중개법인 관계자" },
+      { h: "준공 20년 차, 매수 이후가 관건" },
+      "2004년 준공된 건물이라 설비 교체 비용은 매수자의 몫이다. 엘리베이터와 공조 설비, 외벽 단열 보강까지 감안하면 추가로 수십억 원이 들어갈 것으로 보인다. 연면적 기준 3.3㎡당 3,834만 원이라는 매입가에 개보수 비용을 더하면 실제 취득 원가는 4,000만 원대 중반까지 올라간다.",
+      "업계는 연말까지 비슷한 규모의 강남 사옥용 매물이 3~4건 더 시장에 나올 것으로 보고 있다. 금리 하락기에 접어들면 투자 수요까지 다시 붙을 수 있어, 테헤란로 이면 중소형 빌딩의 가격 하단은 당분간 단단할 전망이다."
+    ]
+  },
+  {
+    id: 3, cat: "building", art: "remodel", seed: 37, author: "이유진 기자", date: "2026.11.10", min: 7,
+    title: "준공 31년 빌딩의 두 번째 삶, 성수동 리모델링으로 임대료 40% 올렸다",
+    dek: "신축하면 오히려 면적이 줄어드는 건물이 있다. 1995년에 지은 성수동 6층 빌딩은 허물지 않고 고쳐 쓰는 길을 택했다.",
+    spec: [["위치", "서울 성동구 성수동2가"], ["준공 / 리모델링", "1995년 / 2026년"], ["규모", "지하 1층~지상 6층"], ["연면적", "1,980㎡ (599평)"], ["공사 기간", "11개월"], ["공사비", "3.3㎡당 약 620만 원"], ["임대료 (전)", "3.3㎡당 7.2만 원"], ["임대료 (후)", "3.3㎡당 10.1만 원"]],
+    body: [
+      "성수동2가의 6층짜리 빌딩은 지난여름 공사 가림막을 걷어냈다. 1995년 준공된 이 건물은 원래 1층 인쇄소와 위층 소규모 사무실이 들어선 평범한 근린생활시설이었다. 11개월 리모델링을 마친 지금은 1층에 브랜드 쇼룸, 위층에 디자인 스튜디오와 스타트업이 들어와 있다.",
+      { h: "허물면 손해인 건물" },
+      "소유주가 신축 대신 리모델링을 택한 이유는 용적률이다. 이 건물은 지어질 당시 기준으로 허가를 받아, 현재 적용되는 용적률보다 더 많은 면적을 확보하고 있었다. 허물고 새로 지으면 연면적이 15%가량 줄어든다는 계산이 나왔다. 기존 골조를 살리면 면적을 지키면서 공사 기간과 비용도 줄일 수 있었다.",
+      "공사는 구조 보강, 외피 교체, 수직 동선 개선에 집중했다. 기둥과 보에 탄소섬유 보강을 더했고, 낡은 타일 외벽은 걷어내고 큰 유리창과 금속 패널로 바꿨다. 엘리베이터는 한 대에서 두 대로 늘렸고, 1층은 필로티처럼 개방해 길에서 안이 들여다보이게 했다.",
+      { q: "임차인이 처음 보는 건 1층과 엘리베이터, 화장실입니다. 돈을 어디에 써야 하는지는 그 세 곳이 알려 줘요.", by: "설계를 맡은 건축사사무소 소장" },
+      { h: "숫자로 본 결과" },
+      "공사비는 3.3㎡당 약 620만 원. 같은 규모로 신축했을 때 예상 공사비의 절반 정도다. 리모델링 전 3.3㎡당 7만 2,000원이던 임대료는 재임대 후 10만 1,000원으로 40% 올랐다. 공실 기간을 포함해도 소유주는 공사비 회수에 7년 안팎이 걸릴 것으로 본다.",
+      "오래된 중소형 빌딩이 많은 성수·을지로·문래 일대에서는 비슷한 문의가 늘고 있다. 다만 구조 안전진단 결과에 따라 보강 비용이 크게 달라지는 만큼, 매입 단계에서부터 리모델링 가능성을 함께 검토하는 것이 좋다."
+    ]
+  },
+  {
+    id: 4, cat: "invest", art: "section", seed: 41, author: "STOREY 편집부", date: "2026.11.09", min: 9,
+    title: "꼬마빌딩 매입 전에 반드시 확인할 7가지",
+    dek: "50억~150억 원대 중소형 빌딩은 매물 정보가 적고, 매수자가 직접 확인해야 할 것이 많다. 계약서에 도장을 찍기 전 서류와 현장에서 볼 일곱 가지를 정리했다.",
+    spec: [["대상", "매매가 50억~150억 원 중소형 빌딩"], ["확인 서류", "건축물대장 · 토지이용계획 · 등기부"], ["임대 자료", "렌트롤 · 임대차계약서 · 입금 내역"], ["실사 기간", "통상 2~4주"]],
+    body: [
+      "꼬마빌딩은 보통 연면적 3,000㎡ 이하, 매매가 수십억에서 150억 원 안팎의 중소형 빌딩을 가리킨다. 대형 오피스처럼 전문 실사 보고서가 붙어 나오는 경우가 드물어, 매수자가 직접 챙겨야 할 것이 많다. 아래 일곱 가지는 계약 전에 최소한으로 확인할 항목이다.",
+      { list: [
+        ["건축물대장의 ‘위반건축물’ 표시", "불법 증축이나 용도 무단 변경이 있으면 이행강제금이 매년 부과되고, 대출 한도에도 영향을 준다. 옥상 가건물과 테라스 확장이 흔한 사례다."],
+        ["용도지역과 남은 용적률", "토지이용계획확인원으로 용도지역을 확인하고, 현재 건물이 법정 용적률을 얼마나 쓰고 있는지 계산한다. 여유가 있으면 증축이나 신축으로 가치를 키울 수 있다."],
+        ["렌트롤과 실제 입금 내역", "매도인이 제시한 임대료 표가 실제 통장 입금과 일치하는지 확인한다. 매각 직전에 시세보다 높게 맞춰 둔 임대차 계약이 섞여 있는 경우가 있다."],
+        ["주차 대수와 법정 기준", "용도를 바꾸거나 증축하면 주차 기준이 다시 적용된다. 주차장이 부족하면 계획한 용도 변경이 막힐 수 있다."],
+        ["엘리베이터·소방 설비의 연식", "엘리베이터 교체와 소방 설비 보강은 수억 원 단위의 비용이다. 점검 기록과 교체 시기를 매매가 협상에 반영한다."],
+        ["도로 접면과 건축선 후퇴", "건물이 접한 도로 폭에 따라 신축 시 건축선이 뒤로 물러날 수 있다. 지금 면적을 나중에 그대로 다시 짓지 못할 수도 있다는 뜻이다."],
+        ["대출 가능 금액과 RTI", "개인 임대사업자는 임대업이자상환비율(RTI) 기준을 충족해야 원하는 만큼 대출을 받을 수 있다. 임대수익이 이자보다 충분히 커야 한다."]
+      ] },
+      { h: "실사는 2~4주를 잡는다" },
+      "위 항목은 서류 확인으로 끝나지 않는다. 현장에서 임차인을 직접 만나 계약 조건과 이전 계획을 들어 보고, 설비는 전문 업체 점검을 받는 것이 좋다. 실사 기간을 넉넉히 두지 않으면 협상에서 확인할 기회를 놓친다.",
+      { disclaimer: "이 글은 일반적인 정보 제공을 위한 예시 콘텐츠입니다. 실제 매입 결정 전에는 공인중개사, 감정평가사, 세무·법률 전문가의 검토를 받으세요." }
+    ]
+  },
+  {
+    id: 5, cat: "people", art: "lobby", seed: 53, author: "김태오 기자", date: "2026.11.06", min: 10,
+    title: "“빌딩의 가치는 결국 임차인이 만든다” 오피스 리싱 15년, 한서진 상무",
+    dek: "자산운용사에서 오피스 11개 동의 임대를 맡고 있는 한서진 상무(가상 인물)를 만나 공실 2% 시대의 임대 전략을 물었다.",
+    spec: [["이름", "한서진 (가상 인물)"], ["소속", "자산운용사 임대마케팅본부"], ["경력", "오피스 리싱 15년"], ["담당 자산", "오피스 11개 동"], ["관리 연면적", "약 42만㎡"]],
+    body: [
+      "한서진 상무의 하루는 임차인 미팅으로 시작해 임차인 미팅으로 끝난다. 15년 동안 서울 3대 권역의 오피스 임대를 맡아 온 그는 “요즘처럼 빈 사무실이 없는 시기에도 임차인을 만나는 시간은 줄지 않았다”고 말했다.",
+      { h: "공실이 거의 없는데 리싱 담당자는 무슨 일을 하나." },
+      "빈 층을 채우는 일보다 지금 있는 임차인이 떠나지 않게 하는 일이 더 많아졌습니다. 공실이 적다고 임차인이 영원히 머무는 게 아니에요. 계약 만기 2년 전부터 확장 계획, 인력 변화, 본사 이전 검토 여부를 계속 확인합니다.",
+      { h: "임대료를 올리기 좋은 시기 아닌가." },
+      "올릴 수는 있습니다. 그런데 한 번에 많이 올리면 다음 사이클에서 그대로 돌려받아요. 2010년대 중반에 공실률이 10%를 넘었을 때, 무리하게 올렸던 빌딩부터 임차인이 빠졌습니다. 저는 시장 임대료보다 조금 낮게 가더라도 우량 임차인과 장기 계약을 맺는 쪽을 택합니다.",
+      { q: "빌딩의 가치는 결국 그 안에 누가 있느냐로 정해집니다. 좋은 임차인이 좋은 임차인을 부르거든요.", by: "한서진 상무" },
+      { h: "임차인이 요즘 가장 많이 요구하는 것은." },
+      "회의실과 라운지 같은 공용 공간, 그리고 에너지 성능입니다. 글로벌 기업은 본사 지침에 따라 친환경 인증이 없는 빌딩에는 아예 입주하지 못하는 경우도 있어요. 설비 투자를 미룬 빌딩은 공실률이 낮은 지금도 협상력이 약합니다.",
+      { disclaimer: "이 인터뷰의 인물과 소속은 매거진 구성을 보여 주기 위해 만든 가상의 예시입니다." }
+    ]
+  },
+  {
+    id: 6, cat: "data", art: "chart", seed: 61, author: "데이터팀", date: "2026.11.05", min: 6,
+    title: "캡레이트 4.5%의 벽, 금리와 오피스 수익률 사이",
+    dek: "국고채 금리는 내려왔지만 오피스 캡레이트는 4%대 중반에서 버티고 있다. 대출 금리와 수익률이 거의 같은 ‘네거티브 레버리지’ 구간에서 매수자는 무엇을 보고 사는가.",
+    spec: [["오피스 캡레이트 (3Q)", "4.6%"], ["국고채 3년", "2.9%"], ["캡레이트 스프레드", "1.7%p"], ["담보대출 금리 범위", "4.3~4.8%"]],
+    body: [
+      "캡레이트(Cap Rate)는 빌딩의 연간 순영업소득(NOI)을 매매가로 나눈 값이다. 100억 원짜리 빌딩이 1년에 4억 6,000만 원의 순수익을 낸다면 캡레이트는 4.6%다. 값이 낮을수록 같은 수익에 더 비싼 값을 치렀다는 뜻이다.",
+      { h: "스프레드 1.7%p가 뜻하는 것" },
+      "3분기 서울 오피스 평균 캡레이트는 4.6%, 국고채 3년물 금리는 2.9% 수준이다. 무위험 자산 대비 오피스가 주는 추가 수익, 즉 스프레드는 1.7%p다. 과거 저금리 시기의 3%p 안팎과 비교하면 여전히 좁다.",
+      "더 큰 문제는 대출 금리다. 오피스 담보대출 금리가 4%대 중후반에 형성되면서 캡레이트와 거의 같아졌다. 빌려서 살수록 자기자본 수익률이 떨어지는 구간이다. 그런데도 거래가 이어지는 건 매수자들이 현재 수익률보다 임대료 상승과 처분 시점의 가격을 더 크게 보고 있어서다.",
+      { q: "지금 오피스를 사는 사람들은 4.6%를 사는 게 아니라 5년 뒤의 임대료를 삽니다.", by: "한 리츠 운용역" },
+      "금리가 추가로 내려가면 스프레드가 넓어지면서 매수 여력이 커진다. 반대로 공급이 몰리는 권역에서 임대료가 꺾이면, 지금의 가격은 빠르게 부담이 된다. 같은 4.6%라도 권역과 빌딩의 임대료 전망에 따라 전혀 다른 숫자가 되는 이유다."
+    ]
+  },
+  {
+    id: 7, cat: "market", art: "retail", seed: 71, author: "윤가은 기자", date: "2026.11.04", min: 7,
+    title: "성수·한남·연남, 리테일 상권 지도를 다시 그리다",
+    dek: "팝업스토어가 상권의 판도를 바꾸고 있다. 1층 임대료는 오르고 계약 기간은 짧아졌다. 서울 3대 신흥 상권의 1층 시장을 걸어서 확인했다.",
+    spec: [["성수 1층 임대료", "3.3㎡당 약 28만 원"], ["한남 1층 임대료", "3.3㎡당 약 31만 원"], ["연남 1층 임대료", "3.3㎡당 약 17만 원"], ["팝업 평균 계약", "2~4주"]],
+    body: [
+      "성수동 연무장길의 한 1층 점포는 올해에만 주인이 열한 번 바뀌었다. 정확히는 임차인이 아니라 팝업스토어가 바뀌었다. 2주에서 4주 단위로 브랜드가 들어왔다 나가고, 그 사이 공간 운영사가 임대료를 받는다.",
+      { h: "월세에서 일세로" },
+      "팝업 수요가 커지면서 1층 상가의 가격 체계가 달라졌다. 일반 임대차 기준 성수 1층 임대료는 3.3㎡당 28만 원 안팎이지만, 팝업 대관료를 일 단위로 환산하면 그 몇 배에 이른다. 소유주 입장에서는 장기 임차인보다 단기 대관이 더 큰 수익을 낼 수 있게 됐다.",
+      "한남동은 고급 브랜드의 플래그십이 중심이다. 대로변보다 이면 골목의 단독 건물을 통째로 빌리는 방식이 늘었고, 1층 임대료는 3.3㎡당 30만 원을 넘어섰다. 연남동은 상대적으로 낮은 임대료를 무기로 식음료 점포가 꾸준히 들어오고 있다.",
+      { q: "요즘 브랜드는 매장을 파는 곳이 아니라 보여 주는 곳으로 씁니다. 그래서 골목 하나 차이로 임대료가 두 배씩 벌어져요.", by: "리테일 전문 중개사" },
+      { h: "빌딩 투자자가 볼 것" },
+      "팝업 수익은 높지만 불안정하다. 대관이 끊기는 기간이 길어지면 연 수익이 오히려 일반 임대보다 낮아질 수 있다. 상권의 유행이 옮겨 가는 속도도 빠르다. 리테일 빌딩을 살 때는 현재 팝업 수익보다 장기 임차가 가능한 입지인지를 먼저 따져 볼 필요가 있다."
+    ]
+  },
+  {
+    id: 8, cat: "deal", art: "warehouse", seed: 83, author: "오승민 기자", date: "2026.11.03", min: 6,
+    title: "물류센터 거래 다시 늘었다, 수도권 남부로 몰리는 이유",
+    dek: "공급 과잉으로 2년 가까이 얼어붙었던 물류센터 시장이 움직이기 시작했다. 이천의 연면적 3만 평 저온 복합 센터가 1,950억 원에 팔렸다.",
+    spec: [["위치", "경기 이천시"], ["규모", "지하 1층~지상 4층 (램프식)"], ["연면적", "99,170㎡ (30,000평)"], ["저온 비중", "35%"], ["거래가", "1,950억 원"], ["연면적 3.3㎡당", "650만 원"], ["매수자", "해외 투자자 합작 펀드"]],
+    body: [
+      "경기 이천시의 지상 4층 램프식 물류센터가 1,950억 원에 거래됐다. 연면적 3만 평, 3.3㎡당 650만 원이다. 매수자는 해외 연기금과 국내 운용사가 함께 만든 합작 펀드다. 상온과 저온 창고가 섞인 복합 센터로, 저온 비중이 35%에 이른다.",
+      { h: "공급 절벽이 가격을 되돌렸다" },
+      "2022~2023년 수도권에 물류센터가 한꺼번에 준공되면서 공실이 쌓였고, 거래는 거의 끊겼다. 이후 공사비 상승과 금융 비용 부담으로 신규 착공이 급감했다. 새 공급이 줄자 기존 센터의 공실이 빠르게 소진됐고, 매수자들이 다시 시장에 들어왔다.",
+      "수도권 남부, 특히 이천·용인·안성 일대가 주목받는 이유는 고속도로망이다. 영동·중부·경부고속도로가 교차해 수도권 전역과 충청권을 반나절 안에 연결할 수 있다. 저온 물류는 배송 시간에 민감해 입지 프리미엄이 더 크다.",
+      { q: "저온 센터는 아무 데나 지을 수 없습니다. 전력과 인력, 도로가 모두 맞아야 하니 남부권에 수요가 몰릴 수밖에 없어요.", by: "물류 전문 운용사 관계자" },
+      "다만 서북부와 동부권은 여전히 공실이 남아 있어, 권역별 온도 차가 크다. 물류센터 투자는 이제 ‘물류’라는 섹터가 아니라 개별 입지와 임차인의 신용도를 보고 판단하는 시장이 됐다."
+    ]
+  },
+  {
+    id: 9, cat: "building", art: "datacenter", seed: 97, author: "이유진 기자", date: "2026.10.30", min: 8,
+    title: "데이터센터는 왜 도심 가까이 오려고 하나",
+    dek: "AI 연산 수요가 데이터센터의 입지를 바꾸고 있다. 땅값이 비싼 수도권으로 들어오려는 이유와, 그 앞을 가로막는 전력 문제를 짚었다.",
+    spec: [["예시 수전 용량", "40MW"], ["예시 연면적", "약 33,000㎡"], ["PUE 목표", "1.3 이하"], ["냉각 방식", "수랭식 + 외기냉방"]],
+    body: [
+      "데이터센터는 오랫동안 땅값이 싸고 전력이 넉넉한 지방이 유리하다고 여겨졌다. AI 서비스가 늘면서 셈법이 달라졌다. 사용자와 가까울수록 응답 속도가 빨라지고, 고객사 엔지니어가 직접 장비를 관리하기도 쉽다. 수도권 데이터센터의 임대 단가가 지방보다 높게 형성되는 이유다.",
+      { h: "부동산이 아니라 전력을 산다" },
+      "데이터센터 개발에서 가장 먼저 확보해야 하는 것은 땅이 아니라 전력이다. 40MW 규모 센터 하나가 쓰는 전력은 중소 도시 한 곳의 사용량과 맞먹는다. 수도권 변전소 용량에는 한계가 있어, 부지를 확보하고도 전력 공급 승인을 받지 못해 몇 년씩 사업이 멈추는 사례가 적지 않다.",
+      "그래서 시장에서는 이미 전력 인입이 확정된 부지가 웃돈을 받고 거래된다. 기존 공장이나 통신 시설처럼 대용량 수전 설비를 갖춘 부지를 데이터센터로 바꾸는 개발도 늘고 있다.",
+      { q: "데이터센터 부지 가격의 절반은 땅이 아니라 전력 인입 확정서에 붙어 있다고 보면 됩니다.", by: "데이터센터 개발사 관계자" },
+      { h: "건물은 거대한 냉장고" },
+      "AI용 서버는 발열이 크다. 공기로 식히는 방식만으로는 부족해 서버 랙 가까이 냉각수를 보내는 수랭식 설비가 확산되고 있다. 전력 효율 지표인 PUE를 1.3 이하로 맞추는 것이 최근 신축 센터의 기본 목표다. 건물의 층고와 바닥 하중, 설비 공간이 일반 오피스와 전혀 다르기 때문에 용도 전환도 쉽지 않다."
+    ]
+  },
+  {
+    id: 10, cat: "invest", art: "section", seed: 103, author: "STOREY 편집부", date: "2026.10.28", min: 8,
+    title: "법인으로 빌딩을 사면 세금이 정말 줄어들까",
+    dek: "‘빌딩은 법인으로 사야 한다’는 말은 반만 맞다. 개인과 법인 매입의 세금 구조를 비교하고, 법인이 오히려 불리한 경우를 정리했다.",
+    spec: [["비교", "개인 매입 vs 법인 매입"], ["개인 소득세 최고세율", "45% (지방세 별도)"], ["법인세", "과세표준 구간별 누진세율"], ["주의", "과밀억제권역 신설 법인 취득세 중과"]],
+    body: [
+      "임대수익이 큰 빌딩을 개인 명의로 가지면 임대소득이 다른 소득과 합산돼 종합소득세가 부과된다. 소득이 많은 사람은 최고 45%(지방소득세 별도) 구간에 걸린다. 법인 명의라면 임대소득에 법인세가 붙고, 세율이 개인 최고세율보다 낮은 구간이 넓다. 법인 매입이 절세 수단으로 거론되는 이유다.",
+      { h: "법인에 남긴 돈은 아직 내 돈이 아니다" },
+      "문제는 법인이 번 돈을 개인이 꺼내 쓸 때다. 배당이나 급여로 가져가면 그때 다시 소득세가 붙는다. 수익을 법인에 쌓아 두고 재투자할 계획이라면 법인이 유리하지만, 생활비로 꺼내 써야 한다면 세금 차이는 생각보다 작아진다.",
+      { h: "취득 단계에서 중과되는 경우" },
+      "수도권 과밀억제권역 안에서 설립한 지 5년이 안 된 법인이 그 권역 안의 부동산을 취득하면 취득세가 중과된다. 서울 대부분이 여기에 해당한다. 이를 피하려고 권역 밖에 법인을 세우는 경우도 있지만, 실제 사업 실체가 없으면 문제가 될 수 있다.",
+      { q: "법인 매입은 절세 상품이 아니라 운영 방식의 선택입니다. 10년 뒤 이 돈을 어떻게 쓸지부터 정해야 해요.", by: "부동산 전문 세무사" },
+      "결론적으로 법인 매입은 임대수익을 오래 쌓아 재투자하거나, 자녀에게 지분을 나눠 승계를 준비하려는 경우에 의미가 크다. 단기간에 사고팔거나 수익을 바로 써야 한다면 개인 명의가 단순하고 유리할 수 있다.",
+      { disclaimer: "세율과 중과 요건은 법 개정에 따라 바뀝니다. 이 글은 일반적인 구조를 설명하는 예시 콘텐츠이며, 실제 매입 전에는 반드시 세무 전문가와 상담하세요." }
+    ]
+  },
+  {
+    id: 11, cat: "market", art: "campus", seed: 113, author: "정하린 기자", date: "2026.10.24", min: 7,
+    title: "판교와 마곡, ‘제4의 오피스 권역’ 자리를 두고 겨루다",
+    dek: "판교는 공실률 1%대로 강남보다 빡빡하고, 마곡은 연구소 수요를 기다리는 중이다. 서울 3대 권역 바깥에서 벌어지는 두 업무지구의 엇갈린 성적표.",
+    spec: [["판교 공실률", "1.6%"], ["마곡 공실률", "7.8%"], ["판교 주요 임차 업종", "IT · 게임 · 플랫폼"], ["마곡 주요 임차 업종", "R&D · 바이오 · 연구소"]],
+    body: [
+      "오피스 시장에서 흔히 말하는 서울 3대 권역은 도심(CBD), 강남(GBD), 여의도(YBD)다. 최근 몇 년 사이 여기에 판교를 더해 4대 권역으로 부르는 보고서가 늘었다. 공실률과 임대료만 보면 판교는 이미 3대 권역 못지않다.",
+      { h: "판교, 강남보다 빈자리가 없다" },
+      "3분기 판교 오피스 공실률은 1.6%다. IT·게임 기업이 몰려 있고, 대기업 계열사가 통째로 빌딩을 쓰는 경우가 많아 시장에 나오는 면적 자체가 적다. 강남에서 자리를 찾지 못한 기술 기업이 판교로 오고, 판교에서 자리를 찾지 못한 기업이 다시 강남으로 가는 순환이 생겼다.",
+      { h: "마곡, 연구소가 채울 시간" },
+      "마곡은 사정이 다르다. 대기업 연구소와 바이오 기업을 유치하며 성장했지만, 최근 몇 년간 지식산업센터와 오피스가 대거 공급되면서 공실률이 7%대로 올라섰다. 임대인들은 렌트프리 기간을 늘리고 인테리어 지원을 내걸며 임차인을 모으고 있다.",
+      { q: "마곡은 수요가 없는 게 아니라 공급이 먼저 도착한 겁니다. 공항 접근성과 연구 인프라는 다른 권역이 따라오기 어려워요.", by: "업무지구 전문 리서치 담당자" },
+      "두 권역의 차이는 결국 임차인의 업종 구성에서 나온다. 기술 기업의 인력 확장이 이어지는 한 판교의 강세는 계속될 가능성이 높고, 마곡은 바이오·제조 연구 수요가 얼마나 빨리 따라오느냐에 따라 회복 시점이 갈릴 것이다."
+    ]
+  },
+  {
+    id: 12, cat: "data", art: "bars", seed: 127, author: "데이터팀", date: "2026.10.21", min: 5,
+    title: "숫자로 보는 3분기 상업용 부동산 거래",
+    dek: "3분기 상업용 부동산 거래액은 9.4조 원. 오피스가 60%를 넘게 차지했고, 물류는 회복세로 돌아섰다. 섹터별 거래액을 한눈에 정리했다.",
+    spec: [["총 거래액", "9.4조 원"], ["오피스", "5.8조 원"], ["물류", "1.6조 원"], ["리테일", "0.9조 원"], ["호텔·기타", "1.1조 원"]],
+    body: [
+      "3분기 국내 상업용 부동산 거래액은 9.4조 원으로 집계됐다. 오피스가 5.8조 원으로 전체의 약 62%를 차지했고, 물류 1.6조 원, 호텔·기타 1.1조 원, 리테일 0.9조 원이 뒤를 이었다.",
+      { h: "오피스: 대형 거래 몇 건이 판을 만든다" },
+      "오피스 거래액의 절반 이상은 1,000억 원 이상 대형 거래 몇 건에서 나왔다. 도심 신축 빌딩과 리츠의 자산 편입이 큰 비중을 차지했다. 거래 건수 자체는 중소형 빌딩이 훨씬 많지만, 금액으로는 대형 거래의 영향력이 크다.",
+      { h: "물류: 얼었던 시장이 풀린다" },
+      "물류센터 거래액은 전 분기보다 크게 늘었다. 신규 공급이 줄면서 기존 센터의 공실이 해소된 영향이다. 저온 센터와 수도권 남부 입지에 매수 수요가 집중됐다.",
+      { h: "리테일과 호텔" },
+      "리테일은 대형 쇼핑몰보다 성수·한남 같은 가두 상권의 중소형 빌딩 위주로 거래가 이뤄졌다. 호텔은 외국인 관광객 회복에 힘입어 도심 비즈니스호텔을 중심으로 매수 문의가 이어졌다.",
+      { disclaimer: "이 기사의 수치는 화면 구성을 보여 주기 위한 예시입니다." }
+    ]
+  }
+];
+
+const TICKER = [
+  ["서울 오피스 공실률", "3.1%", "▼0.2%p"],
+  ["GBD 공실률", "2.3%", "▼0.1%p"],
+  ["CBD 공실률", "4.1%", "▲0.4%p"],
+  ["GBD NOC", "23.4만 원/3.3㎡", "▲1.8%"],
+  ["오피스 캡레이트", "4.6%", "–"],
+  ["국고채 3년", "2.9%", "▼0.1%p"],
+  ["3Q 오피스 거래액", "5.8조 원", "▲12%"]
+];
+
+const DEALS = [
+  { name: "역삼동 업무시설 A", zone: "GBD", use: "오피스", area: 813.7, price: 312, buyer: "국내 중견기업 (사옥)", when: "2026.11", link: 2 },
+  { name: "을지로2가 업무시설 B", zone: "CBD", use: "오피스", area: 21450, price: 8900, buyer: "국내 상장 리츠", when: "2026.11" },
+  { name: "성수동2가 근린생활시설 D", zone: "성수", use: "리테일", area: 599, price: 268, buyer: "개인", when: "2026.11" },
+  { name: "이천 물류센터 E", zone: "경기 남부", use: "물류", area: 30000, price: 1950, buyer: "해외 합작 펀드", when: "2026.10", link: 8 },
+  { name: "여의도동 업무시설 C", zone: "YBD", use: "오피스", area: 9880, price: 3420, buyer: "자산운용사 펀드", when: "2026.10" },
+  { name: "삼평동 업무시설 F", zone: "판교", use: "오피스", area: 6120, price: 2050, buyer: "국내 IT기업 (사옥)", when: "2026.10" }
+];
+
+const VACANCY = [["판교", 1.6], ["GBD", 2.3], ["YBD", 2.9], ["CBD", 4.1], ["마곡", 7.8]];
+const SEOUL_AVG = 3.1;
+const MIX = [["오피스", 5.8, "var(--accent)"], ["물류", 1.6, "var(--seg-2)"], ["호텔·기타", 1.1, "var(--seg-3)"], ["리테일", 0.9, "var(--seg-4)"]];
+const POPULAR = [4, 2, 10, 1, 6];
+
+const byId = Object.fromEntries(ARTICLES.map(a => [a.id, a]));
+
+/* ================= 유틸 ================= */
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = n => n.toLocaleString("ko-KR", { maximumFractionDigits: 1 });
+const view = document.getElementById("view");
+
+function tag(a) {
+  const c = CATS[a.cat];
+  return `<span class="tag"><span class="f">${c.f}</span>${esc(c.name)}</span>`;
+}
+function artBox(a, cls = "") {
+  return `<div class="art ${cls}"><canvas data-kind="${a.art}" data-seed="${a.seed}" aria-hidden="true"></canvas></div>`;
+}
+function card(a) {
+  return `<a class="card" href="#a${a.id}">
+    ${artBox(a)}
+    <div class="meta">${tag(a)}<span class="mono">${a.date}</span></div>
+    <h3>${esc(a.title)}</h3>
+    <p>${esc(a.dek)}</p>
+  </a>`;
+}
+function specSheet(a, title = "SPEC SHEET") {
+  return `<div class="spec">
+    <div class="spec-title"><span>${title}</span><span>${CATS[a.cat].f}</span></div>
+    <dl>${a.spec.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
+  </div>`;
+}
+function secHead(f, title, href, linkText) {
+  return `<div class="sec-head"><h2><span class="mono">${f}</span>${esc(title)}</h2>${href ? `<a href="${href}">${esc(linkText)} →</a>` : ""}</div>`;
+}
+
+/* ================= 화면 ================= */
+function renderHome() {
+  const cover = byId[1];
+  const latest = [2, 3, 7, 8, 9, 11].map(i => byId[i]);
+  const people = byId[5];
+
+  view.innerHTML = `
+  <section class="cover" aria-label="커버 스토리">
+    <a href="#a${cover.id}">${artBox(cover)}</a>
+    <div class="cover-text">
+      <div class="meta"><span class="eyebrow">Cover Story</span>${tag(cover)}</div>
+      <h1><a href="#a${cover.id}">${esc(cover.title)}</a></h1>
+      <p class="dek">${esc(cover.dek)}</p>
+      <div class="meta"><span>${esc(cover.author)}</span><span class="mono">${cover.date}</span><span>${cover.min}분 읽기</span></div>
+      ${specSheet(cover, "3Q 2026 · Seoul Office")}
+    </div>
+  </section>
+
+  <section class="latest" aria-label="최신 기사">
+    <div>
+      ${secHead("NEW", "최신 기사", "#market", "마켓 전체 보기")}
+      <div class="grid">${latest.map(card).join("")}</div>
+    </div>
+    <aside class="rank">
+      <div class="sec-head" style="margin-bottom:8px"><h2><span class="mono">TOP</span>많이 읽은 기사</h2></div>
+      <ol>${POPULAR.map(i => byId[i]).map(a => `<li><a href="#a${a.id}"><span><b>${esc(a.title)}</b><small>${esc(CATS[a.cat].name)} · ${a.min}분</small></span></a></li>`).join("")}</ol>
+    </aside>
+  </section>
+
+  <section aria-label="이번 주 거래 기록">
+    ${secHead("2F", "이번 주 거래 기록", "#deal", "딜 기사 더 보기")}
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>건물</th><th>권역</th><th>용도</th><th class="num">연면적 (평)</th><th class="num">거래가 (억 원)</th><th class="num">연면적 3.3㎡당 (만 원)</th><th>매수 주체</th><th>시기</th></tr></thead>
+        <tbody>${DEALS.map(d => `<tr>
+          <td>${d.link ? `<a href="#a${d.link}"><b>${esc(d.name)}</b> ↗</a>` : esc(d.name)}</td>
+          <td><span class="zone">${esc(d.zone)}</span></td>
+          <td>${esc(d.use)}</td>
+          <td class="num">${fmt(d.area)}</td>
+          <td class="num">${fmt(d.price)}</td>
+          <td class="num hl">${fmt(Math.round(d.price * 10000 / d.area))}</td>
+          <td>${esc(d.buyer)}</td>
+          <td class="mono">${d.when}</td>
+        </tr>`).join("")}</tbody>
+      </table>
+    </div>
+    <p class="note">건물명은 익명 처리했습니다. 거래 내역과 수치는 데모용 예시입니다. 3.3㎡당 가격 = 거래가 ÷ 연면적(평).</p>
+  </section>
+
+  <section aria-label="데이터">
+    ${secHead("6F", "숫자로 보는 시장", "#data", "데이터 기사 더 보기")}
+    <div class="data">
+      <div class="panel">
+        <h3>권역별 오피스 공실률 · 2026년 3분기 (예시)</h3>
+        ${vacancyChart()}
+      </div>
+      <div class="panel">
+        <h3>3분기 섹터별 거래액 · 총 9.4조 원 (예시)</h3>
+        ${mixChart()}
+        <a class="back" href="#a12">섹터별 거래 분석 읽기 →</a>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="피플">
+    ${secHead("5F", "피플", "#people", "인터뷰 더 보기")}
+    <a class="feature" href="#a${people.id}">
+      ${artBox(people)}
+      <div class="feature-text">
+        <span class="eyebrow">Interview</span>
+        <blockquote>“빌딩의 가치는 결국 그 안에 누가 있느냐로 정해집니다.”</blockquote>
+        <p class="dek">${esc(people.dek)}</p>
+        <span class="more">인터뷰 읽기 →</span>
+      </div>
+    </a>
+  </section>
+
+  <section aria-label="투자 가이드">
+    ${secHead("4F", "투자 가이드", "#invest", "가이드 전체 보기")}
+    <div class="grid two">${[4, 10].map(i => card(byId[i])).join("")}</div>
+  </section>`;
+}
+
+function vacancyChart() {
+  const W = 560, rowH = 40, top = 8, left = 64, right = 56;
+  const H = top + VACANCY.length * rowH + 28;
+  const max = 10, x = v => left + (v / max) * (W - left - right);
+  const ticks = [0, 2, 4, 6, 8, 10];
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="권역별 공실률 막대 그래프">`;
+  ticks.forEach(t => {
+    s += `<line class="gridl" x1="${x(t)}" x2="${x(t)}" y1="${top}" y2="${H - 24}"/>`;
+    s += `<text x="${x(t)}" y="${H - 8}" text-anchor="middle">${t}%</text>`;
+  });
+  s += `<line class="ref" x1="${x(SEOUL_AVG)}" x2="${x(SEOUL_AVG)}" y1="${top - 4}" y2="${H - 24}"/>`;
+  s += `<text class="reft" x="${x(SEOUL_AVG) + 6}" y="${top + 4}">서울 평균 ${SEOUL_AVG}%</text>`;
+  VACANCY.forEach(([k, v], i) => {
+    const y = top + i * rowH + 8;
+    s += `<text class="lbl" x="${left - 12}" y="${y + 17}" text-anchor="end">${k}</text>`;
+    s += `<rect class="bar" x="${x(0)}" y="${y}" width="${x(v) - x(0)}" height="24"/>`;
+    s += `<text class="val" x="${x(v) + 8}" y="${y + 17}">${v.toFixed(1)}%</text>`;
+  });
+  return s + `</svg>`;
+}
+function mixChart() {
+  const total = MIX.reduce((t, m) => t + m[1], 0);
+  return `<div class="stack" role="img" aria-label="섹터별 거래액 비중">${MIX.map(([k, v, c]) => `<div style="flex:${v};background:${c}" title="${k} ${v}조 원"></div>`).join("")}</div>
+  <ul class="legend">${MIX.map(([k, v, c]) => `<li><i style="background:${c}"></i><span>${k}</span><span class="mono">${v.toFixed(1)}조</span><span class="mono pct">${Math.round(v / total * 100)}%</span></li>`).join("")}</ul>`;
+}
+
+function renderCat(slug) {
+  const c = CATS[slug];
+  const list = ARTICLES.filter(a => a.cat === slug);
+  const others = ARTICLES.filter(a => a.cat !== slug).slice(0, 3);
+  view.innerHTML = `
+  <section class="cat-head">
+    <div class="big">${c.f}</div>
+    <div><h1>${esc(c.name)}</h1><p>${esc(c.desc)}</p></div>
+  </section>
+  <section><div class="grid">${list.map(card).join("")}</div></section>
+  <section>${secHead("↕", "다른 층 둘러보기")}<div class="grid">${others.map(card).join("")}</div></section>`;
+}
+
+function blockHtml(b) {
+  if (typeof b === "string") return `<p>${esc(b)}</p>`;
+  if (b.h) return `<h2>${esc(b.h)}</h2>`;
+  if (b.q) return `<blockquote><p>“${esc(b.q)}”</p><cite>${esc(b.by)}</cite></blockquote>`;
+  if (b.list) return `<ol>${b.list.map(([t, d]) => `<li><span><b>${esc(t)}</b>${esc(d)}</span></li>`).join("")}</ol>`;
+  if (b.disclaimer) return `<p class="disclaimer">${esc(b.disclaimer)}</p>`;
+  return "";
+}
+
+function renderArticle(id) {
+  const a = byId[id];
+  if (!a) { renderNotFound(); return; }
+  const c = CATS[a.cat];
+  const related = ARTICLES.filter(x => x.id !== a.id && x.cat === a.cat)
+    .concat(ARTICLES.filter(x => x.id !== a.id && x.cat !== a.cat)).slice(0, 3);
+  view.innerHTML = `
+  <article style="display:grid;gap:32px">
+    <header class="a-head">
+      <a class="back" href="#${a.cat}">← ${c.f} ${esc(c.name)}</a>
+      ${tag(a)}
+      <h1>${esc(a.title)}</h1>
+      <p class="dek">${esc(a.dek)}</p>
+      <div class="byline"><b>${esc(a.author)}</b><span class="mono">${a.date}</span><span>${a.min}분 읽기</span>
+        <button class="copy" id="copy-link" type="button">링크 복사</button></div>
+    </header>
+    ${artBox(a, "a-art")}
+    <div class="a-body">
+      <div class="prose">${a.body.map(blockHtml).join("")}</div>
+      <aside class="aside">${specSheet(a)}<p class="note">스펙 시트의 수치는 예시입니다.</p></aside>
+    </div>
+  </article>
+  <section>${secHead("NEXT", "다음에 읽을 기사")}<div class="grid">${related.map(card).join("")}</div></section>`;
+
+  const btn = document.getElementById("copy-link");
+  btn.addEventListener("click", () => {
+    const url = location.href;
+    const done = t => { btn.textContent = t; setTimeout(() => (btn.textContent = "링크 복사"), 2200); };
+    try {
+      navigator.clipboard.writeText(url).then(() => done("링크를 복사했습니다"), () => done(url));
+    } catch (e) { done(url); }
+  });
+}
+
+function renderSearch(q) {
+  const term = q.trim().toLowerCase();
+  const hits = ARTICLES.filter(a => [a.title, a.dek, CATS[a.cat].name, ...a.body.map(b => typeof b === "string" ? b : (b.h || b.q || ""))]
+    .join(" ").toLowerCase().includes(term));
+  setActive(null);
+  view.innerHTML = `
+  <section class="cat-head">
+    <div class="big">?</div>
+    <div><h1>‘${esc(q)}’ 검색 결과</h1><p>기사 ${hits.length}건을 찾았습니다.</p></div>
+  </section>
+  <section>${hits.length ? `<div class="grid">${hits.map(card).join("")}</div>` :
+    `<p class="empty">일치하는 기사가 없습니다. ‘공실률’, ‘물류’, ‘리모델링’처럼 짧은 단어로 다시 검색해 보세요.</p>`}</section>`;
+  drawAll();
+}
+
+function renderNotFound() {
+  view.innerHTML = `<section class="cat-head"><div class="big">B2</div><div><h1>찾는 페이지가 없습니다</h1><p>주소가 바뀌었거나 삭제된 기사입니다. <a href="#home" style="color:var(--accent)">홈으로 돌아가기</a></p></div></section>`;
+}
+
+/* ================= 라우팅 ================= */
+function setActive(slug) {
+  document.querySelectorAll(".floor-btn").forEach(b => {
+    if (b.dataset.cat === slug) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+  });
+}
+function route() {
+  const h = location.hash.replace(/^#/, "");
+  let active = null;
+  if (!h || h === "home") { renderHome(); active = "__home"; }
+  else if (CATS[h]) { renderCat(h); active = h; }
+  else if (/^a\d+$/.test(h)) { const a = byId[+h.slice(1)]; renderArticle(+h.slice(1)); active = a ? a.cat : null; }
+  else renderNotFound();
+  setActive(active);
+  window.scrollTo(0, 0);
+  drawAll();
+}
+
+/* ================= 입면도 일러스트 (canvas) ================= */
+function rng(seed) {
+  let s = (seed * 2654435761) >>> 0 || 1;
+  return () => { s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; };
+}
+function palette() {
+  const cs = getComputedStyle(document.documentElement);
+  const g = n => cs.getPropertyValue(n).trim();
+  return { sky: g("--art-sky"), grid: g("--art-grid"), far: g("--art-far"), body: g("--art-body"), glass: g("--art-glass"),
+    ground: g("--art-ground"), ink: g("--ink"), muted: g("--muted"), accent: g("--accent"), line: g("--line"), surface: g("--surface") };
+}
+
+function windowsGrid(g, x, y, w, h, floorH, C, R, opt = {}) {
+  const rows = Math.max(1, Math.floor(h / floorH));
+  const cols = opt.cols || Math.max(2, Math.round(w / (floorH * (opt.ratio || 1.1))));
+  const cw = w / cols, ch = h / rows;
+  const px = Math.max(1, cw * (opt.gapX ?? 0.16)), py = Math.max(1, ch * (opt.gapY ?? 0.26));
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const lit = opt.lit && R() < opt.lit;
+      g.fillStyle = lit ? C.accent : C.glass;
+      g.globalAlpha = lit ? 0.85 : 1;
+      g.fillRect(x + c * cw + px / 2, y + r * ch + py / 2, cw - px, ch - py);
+    }
+  }
+  g.globalAlpha = 1;
+}
+function box(g, x, y, w, h, C, fill) {
+  g.fillStyle = fill || C.body;
+  g.fillRect(x, y, w, h);
+  g.strokeStyle = C.ink; g.lineWidth = 1;
+  g.strokeRect(Math.round(x) + 0.5, Math.round(y) + 0.5, Math.round(w) - 1, Math.round(h));
+}
+function dim(g, x, yTop, yBot, label, C, fs) {
+  g.strokeStyle = C.accent; g.fillStyle = C.accent; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(x, yTop); g.lineTo(x, yBot);
+  g.moveTo(x - 4, yTop); g.lineTo(x + 4, yTop); g.moveTo(x - 4, yBot); g.lineTo(x + 4, yBot); g.stroke();
+  g.save(); g.translate(x + 6 + fs * 0.4, (yTop + yBot) / 2); g.rotate(-Math.PI / 2);
+  g.font = `500 ${fs}px "IBM Plex Mono", monospace`; g.textAlign = "center"; g.fillText(label, 0, 0); g.restore();
+}
+function farLayer(g, w, gl, C, R, n, hMax) {
+  let x = -10;
+  g.fillStyle = C.far;
+  while (x < w) {
+    const bw = w * (0.05 + R() * 0.09), bh = gl * (0.15 + R() * hMax);
+    g.fillRect(x, gl - bh, bw, bh);
+    x += bw + w * 0.005;
+  }
+}
+
+const ARTISTS = {
+  skyline(g, w, h, gl, C, R, fh) {
+    farLayer(g, w, gl, C, R, 0, 0.55);
+    let x = w * 0.02; const items = [];
+    while (x < w * 0.98) {
+      const bw = w * (0.06 + R() * 0.08); const bh = gl * (0.22 + R() * 0.5);
+      items.push([x, bw, bh]); x += bw + w * (0.012 + R() * 0.02);
+    }
+    const hero = Math.floor(items.length / 2);
+    items[hero][2] = gl * 0.86; items[hero][1] = Math.max(items[hero][1], w * 0.11);
+    items.forEach(([bx, bw, bh], i) => {
+      box(g, bx, gl - bh, bw, bh, C);
+      windowsGrid(g, bx + 3, gl - bh + 4, bw - 6, bh - 6, fh, C, R, { lit: i === hero ? 0.12 : 0.02 });
+    });
+    const [hx, hw, hh] = items[hero];
+    g.strokeStyle = C.accent; g.lineWidth = 2; g.strokeRect(hx + 1, gl - hh + 1, hw - 2, hh - 1);
+    return { x: hx + hw + 10, top: gl - hh, label: `H ${Math.round(hh / fh) * 4}m · ${Math.round(hh / fh)}F` };
+  },
+  tower(g, w, h, gl, C, R, fh) {
+    farLayer(g, w, gl, C, R, 0, 0.35);
+    const nb = [[0.08, 0.16, 0.42], [0.26, 0.12, 0.3], [0.64, 0.14, 0.5], [0.8, 0.15, 0.34]];
+    nb.forEach(([px, pw, ph]) => { box(g, w * px, gl - gl * ph, w * pw, gl * ph, C); windowsGrid(g, w * px + 3, gl - gl * ph + 4, w * pw - 6, gl * ph - 6, fh, C, R, { lit: 0.02 }); });
+    const tw = w * 0.2, tx = w * 0.42, th = gl * 0.64;
+    box(g, tx, gl - th, tw, th, C);
+    windowsGrid(g, tx + 4, gl - th + 6, tw - 8, th - fh * 1.6, fh, C, R, { lit: 0.1, cols: 6 });
+    g.fillStyle = C.ink; g.fillRect(tx + tw * 0.3, gl - fh * 1.4, tw * 0.4, fh * 1.4);
+    g.strokeStyle = C.accent; g.lineWidth = 2; g.strokeRect(tx + 1, gl - th + 1, tw - 2, th - 1);
+    return { x: tx + tw + 10, top: gl - th, label: `B2–9F · ${Math.round(th / fh)}F` };
+  },
+  remodel(g, w, h, gl, C, R, fh) {
+    farLayer(g, w, gl, C, R, 0, 0.3);
+    const bx = w * 0.28, bw = w * 0.44, bh = gl * 0.62, half = bw * 0.5;
+    box(g, bx, gl - bh, bw, bh, C);
+    // 기존 벽돌 쪽
+    g.strokeStyle = C.line; g.lineWidth = 1;
+    for (let y = gl - bh + 4; y < gl; y += Math.max(4, fh / 3)) { g.beginPath(); g.moveTo(bx + 2, y); g.lineTo(bx + half, y); g.stroke(); }
+    windowsGrid(g, bx + 8, gl - bh + 8, half - 16, bh - 16, fh * 1.4, C, R, { cols: 2, gapX: 0.5 });
+    // 새 유리 외피
+    windowsGrid(g, bx + half + 2, gl - bh + 3, half - 5, bh - 4, fh * 1.4, C, R, { cols: 4, gapX: 0.05, gapY: 0.08, lit: 0.08 });
+    // 비계
+    g.strokeStyle = C.accent; g.lineWidth = 1.2;
+    const sx = bx + bw + 6, sw = w * 0.07, step = fh * 1.4;
+    for (let y = gl; y > gl - bh - 4; y -= step) { g.beginPath(); g.moveTo(sx, y); g.lineTo(sx + sw, y); g.stroke(); }
+    g.beginPath(); g.moveTo(sx, gl); g.lineTo(sx, gl - bh - 4); g.moveTo(sx + sw, gl); g.lineTo(sx + sw, gl - bh - 4); g.stroke();
+    for (let y = gl; y > gl - bh; y -= step) { g.beginPath(); g.moveTo(sx, y); g.lineTo(sx + sw, y - step); g.stroke(); }
+    g.setLineDash([4, 4]); g.strokeStyle = C.muted; g.beginPath(); g.moveTo(bx + half, gl - bh - 10); g.lineTo(bx + half, gl); g.stroke(); g.setLineDash([]);
+    return { x: bx - 18, top: gl - bh, label: "1995 → 2026", left: true };
+  },
+  section(g, w, h, gl, C, R, fh) {
+    const floors = 8, sh = Math.min(gl * 0.86 / (floors + 1.5), fh * 2.6);
+    const bw = Math.min(w * 0.62, sh * 14), bx = (w - bw) / 2;
+    const top = gl - floors * sh;
+    g.fillStyle = C.body; g.fillRect(bx, top, bw, floors * sh);
+    g.fillRect(bx, gl, bw, sh); // B1
+    const lit = 2 + Math.floor(R() * 5);
+    for (let i = 0; i < floors; i++) {
+      const y = gl - (i + 1) * sh;
+      if (i === lit) { g.fillStyle = C.accent; g.globalAlpha = 0.22; g.fillRect(bx, y, bw, sh); g.globalAlpha = 1; }
+      g.fillStyle = C.ink; g.fillRect(bx - 6, y, bw + 12, 2);
+    }
+    g.strokeStyle = C.ink; g.lineWidth = 1.5;
+    [0, 0.33, 0.66, 1].forEach(p => { g.beginPath(); g.moveTo(bx + bw * p, top); g.lineTo(bx + bw * p, gl + sh); g.stroke(); });
+    // 코어
+    g.fillStyle = C.glass; g.fillRect(bx + bw * 0.44, top + 2, bw * 0.1, floors * sh + sh - 2);
+    const ey = gl - (lit + 1) * sh + 3;
+    g.fillStyle = C.accent; g.fillRect(bx + bw * 0.452, ey, bw * 0.076, sh - 6);
+    // 사람
+    for (let i = 0; i < floors; i++) {
+      const y = gl - i * sh - 3; const n = 1 + Math.floor(R() * 4);
+      for (let k = 0; k < n; k++) {
+        const px = bx + bw * (0.06 + R() * 0.34) + (R() > 0.5 ? bw * 0.5 : 0);
+        g.fillStyle = i === lit ? C.accent : C.muted;
+        g.fillRect(px, y - sh * 0.42, 3, sh * 0.42);
+        g.beginPath(); g.arc(px + 1.5, y - sh * 0.5, 2.6, 0, Math.PI * 2); g.fill();
+      }
+    }
+    g.font = `500 ${Math.max(9, sh * 0.34)}px "IBM Plex Mono", monospace`; g.textAlign = "right";
+    for (let i = 0; i < floors; i++) { g.fillStyle = i === lit ? C.accent : C.muted; g.fillText(`${i + 1}F`, bx - 12, gl - i * sh - sh * 0.35); }
+    g.fillStyle = C.muted; g.fillText("B1", bx - 12, gl + sh * 0.65); g.textAlign = "left";
+    return { x: bx + bw + 16, top, label: `${floors}F / B1` };
+  },
+  lobby(g, w, h, gl, C, R, fh) {
+    return ARTISTS.section(g, w, h, gl, C, R, fh);
+  },
+  retail(g, w, h, gl, C, R, fh) {
+    farLayer(g, w, gl, C, R, 0, 0.3);
+    let x = w * 0.03; let i = 0;
+    while (x < w * 0.97) {
+      const bw = w * (0.11 + R() * 0.07); const fl = 2 + Math.floor(R() * 3); const bh = fh * 2.1 * fl;
+      box(g, x, gl - bh, bw, bh, C);
+      windowsGrid(g, x + 4, gl - bh + 6, bw - 8, bh - fh * 2.4, fh * 2.1, C, R, { cols: 3, gapX: 0.3 });
+      const sf = fh * 1.9;
+      g.fillStyle = C.glass; g.fillRect(x + 6, gl - sf, bw - 12, sf);
+      g.fillStyle = i % 2 ? C.ink : C.accent;
+      g.beginPath(); g.moveTo(x + 2, gl - sf - 2); g.lineTo(x + bw - 2, gl - sf - 2); g.lineTo(x + bw - 8, gl - sf + fh * 0.6); g.lineTo(x + 8, gl - sf + fh * 0.6); g.closePath(); g.fill();
+      x += bw + w * 0.01; i++;
+    }
+    return null;
+  },
+  warehouse(g, w, h, gl, C, R, fh) {
+    farLayer(g, w, gl, C, R, 0, 0.12);
+    const bx = w * 0.12, bw = w * 0.7, bh = gl * 0.4;
+    box(g, bx, gl - bh, bw, bh, C);
+    g.strokeStyle = C.line; g.lineWidth = 1;
+    for (let xx = bx + 8; xx < bx + bw - 4; xx += Math.max(6, w / 90)) { g.beginPath(); g.moveTo(xx, gl - bh + 2); g.lineTo(xx, gl - 2); g.stroke(); }
+    g.strokeStyle = C.ink;
+    for (let k = 1; k < 4; k++) { const y = gl - bh * k / 4; g.beginPath(); g.moveTo(bx, y); g.lineTo(bx + bw, y); g.stroke(); }
+    // 저온 구역 표시
+    g.fillStyle = C.accent; g.globalAlpha = 0.18; g.fillRect(bx + bw * 0.65, gl - bh, bw * 0.35, bh); g.globalAlpha = 1;
+    // 램프
+    g.strokeStyle = C.accent; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(bx + bw, gl); g.lineTo(bx + bw + w * 0.12, gl - bh * 0.75); g.lineTo(bx + bw, gl - bh * 0.75); g.stroke();
+    // 도크와 트럭
+    for (let k = 0; k < 9; k++) {
+      const dx = bx + 10 + k * (bw - 20) / 9;
+      g.fillStyle = C.ink; g.fillRect(dx, gl - fh * 1.6, (bw - 20) / 9 - 6, fh * 1.6);
+      if (R() < 0.5) { g.fillStyle = C.glass; g.fillRect(dx - 2, gl - fh * 1.2, (bw - 20) / 9 - 2, fh * 1.2); }
+    }
+    return { x: bx - 16, top: gl - bh, label: "4F RAMP", left: true };
+  },
+  datacenter(g, w, h, gl, C, R, fh) {
+    farLayer(g, w, gl, C, R, 0, 0.25);
+    const bx = w * 0.18, bw = w * 0.52, bh = gl * 0.46;
+    box(g, bx, gl - bh, bw, bh, C);
+    g.fillStyle = C.glass;
+    const lv = Math.max(3, fh * 0.45);
+    for (let y = gl - bh + 10; y < gl - 10; y += lv * 2) {
+      for (let k = 0; k < 6; k++) { const cx = bx + 10 + k * (bw - 20) / 6; g.fillRect(cx, y, (bw - 20) / 6 - 8, lv); }
+    }
+    // 옥상 냉각기
+    for (let k = 0; k < 5; k++) {
+      const cx = bx + bw * (0.12 + k * 0.18), cy = gl - bh - fh * 0.9;
+      g.fillStyle = C.body; g.fillRect(cx - fh, cy - fh * 0.5, fh * 2, fh * 1.4);
+      g.strokeStyle = C.ink; g.strokeRect(cx - fh, cy - fh * 0.5, fh * 2, fh * 1.4);
+      g.beginPath(); g.arc(cx, cy + fh * 0.2, fh * 0.55, 0, Math.PI * 2); g.stroke();
+    }
+    // 송전탑
+    const tx = w * 0.83, th = gl * 0.7;
+    g.strokeStyle = C.accent; g.lineWidth = 1.4;
+    g.beginPath(); g.moveTo(tx - w * 0.04, gl); g.lineTo(tx, gl - th); g.lineTo(tx + w * 0.04, gl);
+    g.moveTo(tx - w * 0.05, gl - th * 0.8); g.lineTo(tx + w * 0.05, gl - th * 0.8);
+    g.moveTo(tx - w * 0.04, gl - th * 0.6); g.lineTo(tx + w * 0.04, gl - th * 0.6);
+    for (let k = 1; k < 6; k++) { const y1 = gl - th * k / 6, y2 = gl - th * (k - 1) / 6; const s1 = 0.04 * (1 - k / 6), s2 = 0.04 * (1 - (k - 1) / 6); g.moveTo(tx - w * s2, y2); g.lineTo(tx + w * s1, y1); }
+    g.stroke();
+    g.beginPath(); g.moveTo(tx - w * 0.05, gl - th * 0.8); g.quadraticCurveTo((tx + bx + bw) / 2, gl - th * 0.5, bx + bw, gl - bh - fh * 0.4); g.stroke();
+    return { x: bx - 16, top: gl - bh, label: "40MW", left: true };
+  },
+  campus(g, w, h, gl, C, R, fh) {
+    farLayer(g, w, gl, C, R, 0, 0.3);
+    const blocks = [[0.05, 0.17, 0.38], [0.25, 0.14, 0.55], [0.42, 0.19, 0.46], [0.65, 0.13, 0.62], [0.81, 0.15, 0.36]];
+    blocks.forEach(([px, pw, ph], i) => {
+      const bx = w * px, bw = w * pw, bh = gl * ph;
+      box(g, bx, gl - bh, bw, bh, C);
+      windowsGrid(g, bx + 3, gl - bh + 4, bw - 6, bh - 6, fh, C, R, { lit: i === 3 ? 0.14 : 0.03, gapY: 0.5, gapX: 0.04 });
+      if (i === 3) { g.strokeStyle = C.accent; g.lineWidth = 2; g.strokeRect(bx + 1, gl - bh + 1, bw - 2, bh - 1); }
+    });
+    for (let k = 0; k < 12; k++) {
+      const tx = w * (0.02 + R() * 0.96), r = fh * (0.6 + R() * 0.5);
+      g.fillStyle = C.muted; g.globalAlpha = 0.5; g.beginPath(); g.arc(tx, gl - r * 1.2, r, 0, Math.PI * 2); g.fill(); g.globalAlpha = 1;
+    }
+    return null;
+  },
+  chart(g, w, h, gl, C, R, fh) {
+    const vals = [0.32, 0.38, 0.35, 0.47, 0.52, 0.5, 0.61, 0.58, 0.7, 0.66];
+    const n = vals.length, gap = w * 0.02, bw = (w * 0.8 - gap * (n - 1)) / n, x0 = w * 0.1;
+    g.strokeStyle = C.line; g.lineWidth = 1;
+    for (let k = 1; k <= 4; k++) { const y = gl - gl * 0.8 * k / 4; g.beginPath(); g.moveTo(x0 - 10, y); g.lineTo(x0 + w * 0.8 + 10, y); g.stroke(); }
+    vals.forEach((v, i) => {
+      const bh = gl * 0.8 * v, bx = x0 + i * (bw + gap);
+      box(g, bx, gl - bh, bw, bh, C);
+      windowsGrid(g, bx + 3, gl - bh + 4, bw - 6, bh - 6, fh, C, R, { cols: 2, lit: i === n - 1 ? 0.3 : 0 });
+    });
+    g.strokeStyle = C.accent; g.lineWidth = 2; g.beginPath();
+    vals.forEach((v, i) => { const px = x0 + i * (bw + gap) + bw / 2, py = gl - gl * 0.8 * (0.55 + (i % 3) * 0.02 - i * 0.004); i ? g.lineTo(px, py) : g.moveTo(px, py); });
+    g.stroke();
+    return null;
+  },
+  bars(g, w, h, gl, C, R, fh) {
+    const vals = [5.8, 1.6, 1.1, 0.9], n = vals.length, gap = w * 0.05, bw = (w * 0.7 - gap * (n - 1)) / n, x0 = w * 0.15;
+    vals.forEach((v, i) => {
+      const bh = gl * 0.8 * v / 5.8, bx = x0 + i * (bw + gap);
+      box(g, bx, gl - bh, bw, bh, C, i === 0 ? C.body : C.body);
+      windowsGrid(g, bx + 4, gl - bh + 5, bw - 8, bh - 8, fh, C, R, { lit: i === 0 ? 0.2 : 0.03 });
+      if (i === 0) { g.strokeStyle = C.accent; g.lineWidth = 2; g.strokeRect(bx + 1, gl - bh + 1, bw - 2, bh - 1); }
+      g.fillStyle = C.ink; g.font = `500 ${Math.max(10, fh)}px "IBM Plex Mono", monospace`; g.textAlign = "center";
+      g.fillText(`${v}조`, bx + bw / 2, gl - bh - 8); g.textAlign = "left";
+    });
+    return null;
+  }
+};
+
+function drawArt(cv, C) {
+  const r = cv.getBoundingClientRect();
+  const w = Math.max(1, r.width), h = Math.max(1, r.height);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+  const g = cv.getContext("2d");
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const R = rng(+cv.dataset.seed || 7);
+  g.fillStyle = C.sky; g.fillRect(0, 0, w, h);
+  const step = Math.max(14, w / 36);
+  g.strokeStyle = C.grid; g.lineWidth = 1;
+  for (let x = step; x < w; x += step) { g.beginPath(); g.moveTo(Math.round(x) + 0.5, 0); g.lineTo(Math.round(x) + 0.5, h); g.stroke(); }
+  for (let y = step; y < h; y += step) { g.beginPath(); g.moveTo(0, Math.round(y) + 0.5); g.lineTo(w, Math.round(y) + 0.5); g.stroke(); }
+  const gl = Math.round(h * 0.84);
+  const fh = Math.max(5, h / 42);
+  const fs = Math.max(9, Math.min(12, w / 60));
+  const draw = ARTISTS[cv.dataset.kind] || ARTISTS.skyline;
+  const d = draw(g, w, h, gl, C, R, fh);
+  g.fillStyle = C.ground; g.fillRect(0, gl, w, h - gl);
+  g.strokeStyle = C.ink; g.lineWidth = 1.5; g.beginPath(); g.moveTo(0, gl + 0.5); g.lineTo(w, gl + 0.5); g.stroke();
+  g.fillStyle = C.muted; g.font = `500 ${fs}px "IBM Plex Mono", monospace`; g.textAlign = "left";
+  g.fillText("GL ±0", 10, gl + fs + 6);
+  g.textAlign = "right"; g.fillText("ELEVATION 1:500", w - 10, gl + fs + 6); g.textAlign = "left";
+  if (d && w > 260) dim(g, d.left ? d.x : Math.min(d.x, w - 24), d.top, gl, d.label, C, fs);
+}
+function drawAll() {
+  const C = palette();
+  document.querySelectorAll("canvas[data-kind]").forEach(cv => drawArt(cv, C));
+}
+
+/* ================= 초기화 ================= */
+function init() {
+  const floors = document.getElementById("floors");
+  floors.innerHTML = `<a class="floor-btn" href="#home" data-cat="__home"><span class="lamp">L</span><span class="txt">로비</span></a>` +
+    Object.entries(CATS).map(([k, c]) => `<a class="floor-btn" href="#${k}" data-cat="${k}"><span class="lamp">${c.f}</span><span class="txt">${esc(c.name)}</span></a>`).join("");
+  document.getElementById("board").innerHTML = Object.entries(CATS).slice().reverse()
+    .map(([k, c]) => `<li><a href="#${k}"><span class="mono">${c.f}</span><b>${esc(c.name)}</b><span>${esc(c.desc)}</span></a></li>`).join("");
+  document.getElementById("ticker").innerHTML = TICKER.map(([k, v, d]) => `<span class="tick">${esc(k)} <b>${esc(v)}</b><span class="chg">${esc(d)}</span></span>`).join("");
+
+  const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const now = new Date();
+  document.getElementById("today").textContent =
+    `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, "0")}.${String(now.getDate()).padStart(2, "0")} ${days[now.getDay()]}`;
+
+  document.getElementById("search-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const q = document.getElementById("q").value;
+    if (q.trim()) { renderSearch(q); window.scrollTo(0, 0); }
+  });
+
+  const nl = document.getElementById("nl-form");
+  nl.addEventListener("submit", e => {
+    e.preventDefault();
+    const input = document.getElementById("nl-email"), msg = document.getElementById("nl-msg");
+    msg.hidden = false;
+    if (!input.checkValidity() || !input.value) {
+      msg.textContent = "이메일 주소 형식을 확인해 주세요. 예: name@company.com";
+      return;
+    }
+    msg.textContent = `${input.value} 주소로 구독 신청을 받았습니다. 데모 사이트라 실제 메일은 발송되지 않습니다.`;
+    input.value = "";
+  });
+
+  window.addEventListener("hashchange", route);
+  let t;
+  window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(drawAll, 120); });
+  try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll); } catch (e) {}
+  new MutationObserver(drawAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawAll);
+
+  route();
+}
+
+init();
+})();
+</script>
+</body>
+</html>
