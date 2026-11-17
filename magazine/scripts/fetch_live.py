@@ -287,7 +287,13 @@ NEWS_QUERIES = ["오피스 빌딩 매각", "꼬마빌딩 매매", "물류센터 
                 "빌딩 리모델링", "호텔 매각", "상업용 부동산 PF", "데이터센터 부지 매입", "지식산업센터 공실"]
 
 # 상업용 부동산이 분명한 단어
-CRE = re.compile(r"빌딩|오피스(?!텔)|사옥|상가|상업용|물류센터|물류 센터|리츠|REIT|꼬마빌딩|지식산업센터|호텔 매각|호텔 인수|리테일 부동산|쇼핑몰|업무시설|근린생활|프라임 오피스|CBD|GBD|YBD")
+CRE = re.compile(r"빌딩|오피스(?!텔)|상가|상업용|물류센터|물류 센터|리츠|REIT|꼬마빌딩|지식산업센터|호텔 매각|호텔 인수|리테일 부동산|쇼핑몰|업무시설|근린생활|프라임 오피스|CBD|GBD|YBD")
+# 사옥은 거래·이전 기사일 때만 (기업 홍보성 '사옥' 기사 제외)
+SAOK = re.compile(r"사옥.*(매각|매입|인수|매물|이전|임차|입찰|팔|사들)|(매각|매입|인수|매물|이전|임차|입찰|팔|사들).*사옥")
+# 빌딩 오너에게 필요 없는 기사: 해외 기업 자동 번역 기사, 코인, 지방 의회·민원
+EXCLUDE_SOURCES = {"Investing.com 한국어", "Investing.com", "Simply Wall St", "데이터투자", "토큰포스트", "코인리더스",
+                   "Mezha.net", "블록미디어", "코인데스크코리아"}
+EXCLUDE_TITLE = re.compile(r"(시|구|도|군)의원|(시|도|군)의회|행정사무감사|도지사|주민들? 반대|비트코인|BTC|가상자산")
 # 데이터센터는 부동산 관점(부지·매각·개발 등)일 때만
 DC_RE = r"(부지 (확보|매입|매각)|매각|매입|인수|착공|준공|건립|부동산|펀드|리츠|임차)"
 DATACENTER = re.compile(r"데이터센터.*" + DC_RE + r"|" + DC_RE + r".*데이터센터")
@@ -296,7 +302,9 @@ HOUSING = re.compile(r"세입자|전세|월세|아파트|집값|주택|청약|�
 
 
 def is_cre(title: str) -> bool:
-    if CRE.search(title) or DATACENTER.search(title):
+    if EXCLUDE_TITLE.search(title):
+        return False
+    if CRE.search(title) or SAOK.search(title) or DATACENTER.search(title):
         return not (HOUSING.search(title) and not re.search(r"빌딩|오피스(?!텔)|상가|물류센터|리츠|지식산업센터|상업용", title))
     return False
 SECTIONS = [  # 먼저 맞는 섹션으로 분류
@@ -403,6 +411,9 @@ def fetch_news(now: dt.datetime, prev: list) -> list:
         key = re.sub(r"[^0-9A-Za-z가-힣]", "", x["title"])[:40]
         if not key or key in seen or (x.get("date") and x["date"] < cutoff):
             continue
+        if x.get("source") in EXCLUDE_SOURCES or EXCLUDE_TITLE.search(x["title"]) \
+                or not (is_cre(x["title"]) or "상업용 부동산" in (x.get("source") or "")):
+            continue  # 지난 데이터에 남아 있던 것도 지금 기준으로 다시 거른다
         g = (_bigrams(x["title"]), _figures(x["title"]))
         dup = next((i for i, h in enumerate(grams) if _similar(g, h)), None)
         if dup is not None:
