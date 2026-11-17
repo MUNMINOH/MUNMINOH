@@ -66,6 +66,20 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
 
+      # 새 페이지·바뀐 페이지를 IndexNow로 검색엔진(빙·네이버 등)에 알린다.
+      # 코드가 바뀐 배포와, 하루 한 번(00시대 UTC 예약 실행) 보낸다.
+      - name: 검색엔진에 알리기 (IndexNow)
+        continue-on-error: true
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$(date -u +%H)" != "00" ]; then echo "하루 한 번만 보냄"; exit 0; fi
+          key=$(grep -oP 'INDEXNOW_KEY = "\K[0-9a-f]+' magazine/scripts/build_site.py)
+          body=$(python3 -c "import json,sys; urls=open('_site/indexnow-urls.txt').read().split(); print(json.dumps({'host':'cadence.bldgrunner.com','key':sys.argv[1],'keyLocation':'https://cadence.bldgrunner.com/'+sys.argv[1]+'.txt','urlList':urls}))" "$key")
+          for ep in https://api.indexnow.org/indexnow https://searchadvisor.naver.com/indexnow; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$ep" -H "Content-Type: application/json; charset=utf-8" -d "$body" --max-time 30)
+            echo "$ep -> HTTP $code"
+          done
+
   # GitHub은 저장소에 60일 동안 커밋이 없으면 예약 실행을 멈춘다.
   # 마지막 커밋 후 45일이 지나면 이슈를 열어 주인에게 알린다 (GitHub 알림·메일).
   inactivity-notice:

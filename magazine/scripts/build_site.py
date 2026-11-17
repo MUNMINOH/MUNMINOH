@@ -21,6 +21,8 @@ ROOT = Path(__file__).resolve().parent.parent          # magazine/
 OUT = ROOT.parent / "_site"
 SITE = "https://cadence.bldgrunner.com"
 PYEONG = 3.3058
+# IndexNow 키 (빙·네이버 등에 새 페이지를 알릴 때 씀. 공개되는 값)
+INDEXNOW_KEY = "c572e823172e060b976bb235ecc05f45"
 # 검색엔진 소유 확인 코드 (구글 서치 콘솔 / 네이버 서치어드바이저에서 받은 content 값)
 SITE_VERIFICATION = {"google-site-verification": "", "naver-site-verification": ""}
 SOCIAL = [
@@ -297,6 +299,9 @@ def build() -> None:
                    for slug, path, *_ in ROUTES if slug not in ("sell", "buy"))
     urls += "".join(f"<url><loc>{SITE}/seoul/{v}/</loc><lastmod>{lastmod}</lastmod><changefreq>daily</changefreq></url>" for v in GU_SLUG.values())
     (OUT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n', encoding="utf-8")
+    (OUT / f"{INDEXNOW_KEY}.txt").write_text(INDEXNOW_KEY, encoding="utf-8")
+    (OUT / "indexnow-urls.txt").write_text("\n".join([SITE + p for _, p, *_ in ROUTES if p not in ("/sell/", "/buy/")]
+                                                     + [f"{SITE}/seoul/{v}/" for v in GU_SLUG.values()]), encoding="utf-8")
     (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
     print(f"빌드 완료: {OUT} (페이지 {len(ROUTES)}개 + 구별 {len(GU_SLUG)}개 + 404, sitemap.xml, robots.txt)")
 
