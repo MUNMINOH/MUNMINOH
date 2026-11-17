@@ -24,17 +24,26 @@ PYEONG = 3.3058
 # IndexNow 키 (빙·네이버 등에 새 페이지를 알릴 때 씀. 공개되는 값)
 INDEXNOW_KEY = "c572e823172e060b976bb235ecc05f45"
 # 검색엔진 소유 확인 코드 (구글 서치 콘솔 / 네이버 서치어드바이저에서 받은 content 값)
-SITE_VERIFICATION = {"google-site-verification": "", "naver-site-verification": ""}
+# 코드를 받으면 "" 안에 넣고 배포하면 모든 페이지 <head>에 들어갑니다. 비어 있으면 자리 표시 주석만 남습니다.
+SITE_VERIFICATION = {
+    "naver-site-verification": "",    # 네이버 서치어드바이저 > 사이트 등록 > HTML 태그의 content 값
+    "google-site-verification": "",   # 구글 서치 콘솔 > URL 접두어 > HTML 태그의 content 값
+}
+# Google Analytics 4 측정 ID (예: "G-ABC123XYZ9"). 비어 있으면 분석 코드를 넣지 않습니다.
+GA4_ID = ""
 SOCIAL = [
+    "https://blog.naver.com/morrison119",
     "https://www.youtube.com/@building_runner_official",
     "https://www.instagram.com/building_runner/",
-    "https://blog.naver.com/morrison119",
+    "https://www.threads.net/@building_runner",
+    "https://www.tiktok.com/@0xmorrison",
+    "https://cafe.daangn.com/geonmulju-doego",
 ]
 
 ROUTES = [
     # slug, 경로, 이름, 페이지 제목, 설명
-    ("home", "/", "홈", "서울 빌딩 시세·실거래가, 꼬마빌딩·상업용 부동산 정보 | CADENCE",
-     "서울 빌딩 실거래가와 권역·구·동별 평당가, 은행 대출 금리, 오피스 공실률, 상업용 부동산 뉴스를 3시간마다 모아 보여 주는 빌딩러너의 상업용 부동산 매거진."),
+    ("home", "/", "홈", "서울 빌딩 시세·실거래가 | CADENCE 매거진",
+     "서울 25개 구 빌딩 실거래가·평당가, 오피스 공실률, 대출 금리와 상업용 부동산 리포트를 3시간마다 정리하는 빌딩러너의 데이터 매거진."),
     ("price", "/price/", "시세", "서울 빌딩 시세: 권역·구·동별 평당가 | CADENCE",
      "국토교통부 실거래로 계산한 서울 빌딩 토지·연면적 평당가. CBD·GBD·YBD 권역, 25개 구, 동별, 준공 연도별·용도별 평당가와 월별 거래 건수."),
     ("deal", "/deal/", "실거래", "서울 빌딩 매매 실거래가 검색 | CADENCE",
@@ -87,7 +96,7 @@ def news_list(news, limit=20):
     if not news:
         return ""
     items = "".join(
-        f'<li><a href="{e(n["link"])}" rel="noopener" target="_blank"><small>{e(TOPIC.get(n.get("section"), ""))}</small> <b>{e(n["title"])}</b>'
+        f'<li><a href="{e(n["link"])}" rel="noopener noreferrer" target="_blank"><small>{e(TOPIC.get(n.get("section"), ""))}</small> <b>{e(n["title"])}</b>'
         f'<small>{e(n.get("source"))} · {e((n.get("date") or "")[:10])}</small></a></li>' for n in news[:limit])
     return f'<ol class="headlines">{items}</ol>'
 
@@ -125,7 +134,7 @@ def columns_list(cols, limit=None):
     if not cols:
         return ""
     items = "".join(
-        f'<li><a href="{e(c["link"])}" rel="noopener" target="_blank"><b>{e(c["title"])}</b>'
+        f'<li><a href="{e(c["link"])}" rel="noopener noreferrer" target="_blank"><b>{e(c["title"])}</b>'
         f'<small>빌딩러너 블로그 · {e((c.get("date") or "")[:10])}</small></a>'
         + (f'<p>{e(c.get("summary"))}</p>' if c.get("summary") else "") + "</li>" for c in cols)
     return f'<ol class="headlines">{items}</ol>'
@@ -139,7 +148,7 @@ def market_board(market):
     out = []
     for g in market.get("groups", []):
         items = "".join(f"<dt>{e(i['label'])}</dt><dd>{e(i['value'])}</dd>" for i in g["items"])
-        links = "".join(f'<li><a href="{e(l["url"])}" rel="noopener" target="_blank">{e(l["title"])}</a></li>' for l in g["links"])
+        links = "".join(f'<li><a href="{e(l["url"])}" rel="noopener noreferrer" target="_blank">{e(l["title"])}</a></li>' for l in g["links"])
         out.append(f'<article class="mb"><header><b>{e(g["source"])}</b><span>{e(g["kind"])}</span></header><dl>{items}</dl><ul class="mb-links">{links}</ul></article>')
     return f'<div class="board-grid">{"".join(out)}</div><p class="foot-note">{e(market.get("quarter"))} 기준 · {e(market.get("note"))}</p>'
 
@@ -209,9 +218,11 @@ def seo_head(slug, path, title, desc, data, noindex=False):
     if path != "/":
         crumbs.append({"@type": "ListItem", "position": 2, "name": title.split(" | ")[0], "item": url})
     graph = [
-        {"@type": "WebSite", "@id": SITE + "/#website", "url": SITE + "/", "name": "CADENCE", "alternateName": "케이던스",
-         "inLanguage": "ko-KR", "publisher": {"@id": SITE + "/#org"}},
-        {"@type": "Organization", "@id": SITE + "/#org", "name": "CADENCE by 빌딩러너", "url": SITE + "/",
+        {"@type": "WebSite", "@id": SITE + "/#website", "url": SITE + "/", "name": "CADENCE", "alternateName": "케이던스 매거진",
+         "inLanguage": "ko-KR", "publisher": {"@id": SITE + "/#org"},
+         "potentialAction": {"@type": "SearchAction", "target": SITE + "/?q={search_term_string}",
+                             "query-input": "required name=search_term_string"}},
+        {"@type": "NewsMediaOrganization", "@id": SITE + "/#org", "name": "CADENCE by 빌딩러너", "url": SITE + "/",
          "logo": SITE + "/assets/icon.svg", "sameAs": SOCIAL},
         {"@type": "WebPage", "@id": url + "#page", "url": url, "name": title, "description": desc, "inLanguage": "ko-KR",
          "isPartOf": {"@id": SITE + "/#website"}, "dateModified": data.get("updatedAt", "")},
@@ -242,7 +253,12 @@ def seo_head(slug, path, title, desc, data, noindex=False):
         f'<meta name="twitter:description" content="{e(desc)}">',
         f'<meta name="twitter:image" content="{img}">',
         f'<script type="application/ld+json">{ld}</script>',
-    ] + [f'<meta name="{k}" content="{e(v)}">' for k, v in SITE_VERIFICATION.items() if v])
+    ] + [f'<meta name="{k}" content="{e(v)}">' if v else f'<!-- {k}: 코드 발급 후 build_site.py SITE_VERIFICATION에 입력 -->'
+         for k, v in SITE_VERIFICATION.items()]
+      + ([f'<script async src="https://www.googletagmanager.com/gtag/js?id={e(GA4_ID)}"></script>',
+          "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}"
+          f"gtag('js',new Date());gtag('config','{e(GA4_ID)}');</script>"] if GA4_ID
+         else ["<!-- Google Analytics 4: 측정 ID 발급 후 build_site.py GA4_ID에 입력 -->"]))
 
 
 def build() -> None:
