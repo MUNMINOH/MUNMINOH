@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>STOREY 빌딩 매거진</title>
+<title>빌딩러너 매거진</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="빌딩과 상업용 부동산의 시장, 거래, 건축, 투자 이야기를 다루는 매거진">
+<meta name="description" content="빌딩러너: 빌딩과 상업용 부동산의 시장, 거래, 건축, 투자 이야기를 다루는 매거진">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Nanum+Myeongjo:wght@700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Black+Han+Sans&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Nanum+Myeongjo:wght@700;800&display=swap">
 <style>
 /* Layout: 건물 단면처럼 층(카테고리)이 쌓인 매거진. 엘리베이터 버튼 내비 + 도면 일러스트 + 스펙 시트 + 실시간 지표 */
 :root {
@@ -114,11 +114,18 @@ button, input { font: inherit; color: inherit; }
   display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
   padding-block: 28px 22px; flex-wrap: wrap;
 }
+.brand { display: flex; align-items: flex-end; gap: clamp(12px, 2vw, 20px); min-width: 0; }
+.mascot { width: clamp(64px, 11vw, 132px); height: auto; display: block; flex: none; }
+.brand-text { display: grid; gap: 10px; min-width: 0; }
 .wordmark {
-  font-family: var(--f-display); font-weight: 850; font-variation-settings: "wdth" 125;
-  font-size: clamp(3rem, 10vw, 7.5rem); line-height: 0.82; letter-spacing: -0.03em; display: block;
+  font-family: "Black Han Sans", var(--f-body); font-weight: 400;
+  font-size: clamp(3.25rem, 10vw, 7.25rem); line-height: 0.9; letter-spacing: -0.01em; display: block;
 }
 .wordmark span { color: var(--accent); }
+.wordmark-en {
+  font-family: var(--f-display); font-weight: 800; font-variation-settings: "wdth" 125;
+  font-size: clamp(0.75rem, 1.4vw, 1rem); letter-spacing: 0.32em; color: var(--muted);
+}
 .tagline { max-width: 23rem; display: grid; gap: 6px; padding-bottom: 4px; }
 .tagline strong { font-size: var(--t-lg); font-weight: 700; line-height: 1.4; }
 .tagline small { color: var(--muted); font-size: var(--t-sm); line-height: 1.55; }
@@ -394,9 +401,15 @@ footer .wrap { padding-block: 52px 40px; display: grid; gap: 32px; }
 
 <header class="masthead">
   <div class="wrap">
-    <a href="#home" class="wordmark" aria-label="STOREY 홈">STOREY<span>.</span></a>
+    <a href="#home" class="brand" aria-label="빌딩러너 홈">
+      <img class="mascot" id="mascot" alt="" hidden>
+      <span class="brand-text">
+        <span class="wordmark">빌딩러너<span>.</span></span>
+        <span class="wordmark-en">BUILDING RUNNER</span>
+      </span>
+    </a>
     <div class="tagline">
-      <strong>빌딩과 상업용 부동산, 한 층씩 깊게 읽습니다</strong>
+      <strong>빌딩 사이를 달리며, 상업용 부동산을 한 층씩 읽습니다</strong>
       <small>오피스 · 리테일 · 물류 · 데이터센터 시장과 거래, 건축과 투자 이야기</small>
     </div>
   </div>
@@ -440,7 +453,7 @@ footer .wrap { padding-block: 52px 40px; display: grid; gap: 32px; }
     <div class="directory">
       <div>
         <h2>층별 안내</h2>
-        <p class="foot-note">STOREY는 주제를 층으로 나눠 배치합니다. 원하는 층을 눌러 이동하세요.</p>
+        <p class="foot-note">빌딩러너는 주제를 층으로 나눠 배치합니다. 원하는 층을 눌러 이동하세요.</p>
       </div>
       <ul class="board" id="board"></ul>
     </div>
@@ -515,7 +528,7 @@ const ARTICLES = [
     ]
   },
   {
-    id: 4, cat: "invest", art: "section", seed: 41, author: "STOREY 편집부", date: "2026.11.09", min: 9,
+    id: 4, cat: "invest", art: "section", seed: 41, author: "빌딩러너 편집부", date: "2026.11.09", min: 9,
     title: "꼬마빌딩 매입 전에 반드시 확인할 7가지",
     dek: "50억~150억 원대 중소형 빌딩은 매물 정보가 적고, 매수자가 직접 확인해야 할 것이 많다. 계약서에 도장을 찍기 전 서류와 현장에서 볼 일곱 가지를 정리했다.",
     spec: [["대상", "매매가 50억~150억 원 중소형 빌딩"], ["확인 서류", "건축물대장 · 토지이용계획 · 등기부"], ["임대 자료", "렌트롤 · 임대차계약서 · 입금 내역"], ["실사 기간", "통상 2~4주"]],
@@ -611,7 +624,7 @@ const ARTICLES = [
     ]
   },
   {
-    id: 10, cat: "invest", art: "section", seed: 103, author: "STOREY 편집부", date: "2026.10.28", min: 8,
+    id: 10, cat: "invest", art: "section", seed: 103, author: "빌딩러너 편집부", date: "2026.10.28", min: 8,
     title: "법인으로 빌딩을 사면 세금이 정말 줄어들까",
     dek: "‘빌딩은 법인으로 사야 한다’는 말은 반만 맞다. 개인과 법인 매입의 세금 구조를 비교하고, 법인이 오히려 불리한 경우를 정리했다.",
     spec: [["비교", "개인 매입 vs 법인 매입"], ["개인 소득세 최고세율", "45% (지방세 별도)"], ["법인세", "과세표준 구간별 누진세율"], ["주의", "과밀억제권역 신설 법인 취득세 중과"]],
@@ -990,7 +1003,7 @@ function blockHtml(b, i) {
 
 const SIZES = [1, 1.125, 1.25];
 let sizeIdx = 1;
-try { const v = +localStorage.getItem("storey-size"); if (v >= 0 && v < SIZES.length) sizeIdx = v; } catch (e) {}
+try { const v = +localStorage.getItem("br-size"); if (v >= 0 && v < SIZES.length) sizeIdx = v; } catch (e) {}
 
 function renderArticle(id) {
   const a = byId[id];
@@ -1029,7 +1042,7 @@ function renderArticle(id) {
   const setSize = d => {
     sizeIdx = Math.max(0, Math.min(SIZES.length - 1, sizeIdx + d));
     prose.style.fontSize = SIZES[sizeIdx] + "rem";
-    try { localStorage.setItem("storey-size", String(sizeIdx)); } catch (e) {}
+    try { localStorage.setItem("br-size", String(sizeIdx)); } catch (e) {}
   };
   document.getElementById("size-down").addEventListener("click", () => setSize(-1));
   document.getElementById("size-up").addEventListener("click", () => setSize(1));
@@ -1376,6 +1389,9 @@ function loadLive() {
 
 /* ================= 초기화 ================= */
 function init() {
+  const mascot = document.getElementById("mascot");
+  mascot.onload = () => { mascot.alt = "빌딩러너 캐릭터"; mascot.hidden = false; };
+  mascot.src = "assets/character.png";
   document.getElementById("floors").innerHTML = `<a class="floor-btn" href="#home" data-cat="__home"><span class="lamp">L</span><span class="txt">로비</span></a>` +
     Object.entries(CATS).map(([k, c]) => `<a class="floor-btn" href="#${k}" data-cat="${k}"><span class="lamp">${c.f}</span><span class="txt">${esc(c.name)}</span></a>`).join("");
   document.getElementById("board").innerHTML = Object.entries(CATS).slice().reverse()

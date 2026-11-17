@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""STOREY 매거진 실시간 지표 수집기.
+"""빌딩러너 매거진 실시간 지표 수집기.
 
 공개 API에서 시장 지표를 받아 magazine/data/live.json 으로 저장합니다.
 표준 라이브러리만 사용하므로 별도 설치가 필요 없습니다.
@@ -25,7 +25,7 @@ from pathlib import Path
 
 KST = dt.timezone(dt.timedelta(hours=9))
 OUT = Path(__file__).resolve().parent.parent / "data" / "live.json"
-UA = "Mozilla/5.0 (compatible; storey-magazine-bot/1.0)"
+UA = "Mozilla/5.0 (compatible; buildingrunner-bot/1.0)"
 
 # ---------------------------------------------------------------- 공통
 def get(url: str, timeout: int = 20) -> bytes:
