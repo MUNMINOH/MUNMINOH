@@ -26,6 +26,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -37,11 +38,21 @@ jobs:
           python-version: "3.12"
 
       - name: 최신 지표 받기
+        id: fetch
+        timeout-minutes: 15
+        continue-on-error: true
         env:
           ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
           DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
         # 수집이 실패해도 저장소에 있는 마지막 데이터로 배포한다
-        run: python magazine/scripts/fetch_live.py || echo "::warning::지표 수집에 실패해 저장된 데이터로 배포합니다"
+        run: python magazine/scripts/fetch_live.py
+
+      # 수집이 실패하거나 시간 안에 끝나지 않으면 지금 공개된 데이터로 배포한다
+      - name: 지난 데이터로 대체
+        if: steps.fetch.outcome != 'success'
+        run: |
+          echo "::warning::지표 수집이 끝나지 않아 공개된 마지막 데이터로 배포합니다"
+          curl -sf --max-time 30 https://cadence.bldgrunner.com/data/live.json -o magazine/data/live.json || true
 
       - name: 페이지 만들기 (SEO)
         run: python magazine/scripts/build_site.py

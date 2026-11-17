@@ -32,9 +32,18 @@ UA = "Mozilla/5.0 (compatible; buildingrunner-bot/1.0)"
 PUBLISHED_URL = "https://cadence.bldgrunner.com/data/live.json"
 
 # ---------------------------------------------------------------- 공통
-def get(url: str, timeout: int = 20) -> bytes:
+START = time.time()
+BUDGET_DEALS = 6 * 60      # 실거래 예전 달 채우기는 시작 후 6분까지만
+BUDGET_TOTAL = 11 * 60     # 그 뒤 선택 작업(뉴스 검색 일부, 이미지)은 건너뜀
+
+
+def elapsed() -> float:
+    return time.time() - START
+
+
+def get(url: str, timeout: int = 15) -> bytes:
     last = None
-    for attempt in range(3):
+    for attempt in range(2):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": UA})
             with urllib.request.urlopen(req, timeout=timeout) as r:
@@ -233,6 +242,9 @@ def fetch_deals(key: str, today: dt.date, cache: dict) -> dict | None:
     refresh = want[:2]
     missing = [m for m in want[2:] if m not in months][:2]
     for m in refresh + missing:
+        if m in missing and elapsed() > BUDGET_DEALS:
+            log(f"실거래 {m}: 시간 제한으로 다음 실행에 채움")
+            continue
         rows = _fetch_month(key, m)
         if rows is not None:
             months[m] = rows
@@ -356,6 +368,9 @@ def fetch_news(now: dt.datetime, prev: list) -> list:
         except Exception as e:
             log(f"뉴스 {name} 실패: {e}")
     for q in NEWS_QUERIES:
+        if elapsed() > BUDGET_TOTAL:
+            log("뉴스 검색: 시간 제한으로 나머지 건너뜀")
+            break
         url = "https://news.google.com/rss/search?" + urllib.parse.urlencode({"q": q + " when:14d", "hl": "ko", "gl": "KR", "ceid": "KR:ko"})
         try:
             n = 0
@@ -428,7 +443,7 @@ def fetch_blog() -> list:
                             "summary": _plain(desc), "image": m.group(1) if m else "",
                             "tag": _text(it, "category")})
             for x in out:
-                if not x["image"]:
+                if not x["image"] and elapsed() < BUDGET_TOTAL:
                     x["image"] = _blog_og_image(x["link"])
             log(f"칼럼 블로그: {len(out)}건, 이미지 {sum(1 for x in out if x['image'])}건 ({url})")
             return out
