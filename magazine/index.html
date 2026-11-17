@@ -633,9 +633,25 @@ table.gustats td a:hover b { color: var(--accent); text-decoration: underline; t
   .ticker .live-dot span { display: none; }
   .fields { grid-template-columns: minmax(0, 1fr); }
   .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .zones { grid-template-columns: minmax(0, 1fr); }
-  .kpis, .board-grid { grid-template-columns: minmax(0, 1fr); }
-  .dlist li { grid-template-columns: 76px minmax(0, 1fr); }
+  .board-grid { grid-template-columns: minmax(0, 1fr); }
+  /* 휴대폰에서도 숫자 카드는 2열로: 한 화면에 더 많이 보이게 */
+  .kpi, .zone { padding: 14px 12px; }
+  .kpi strong { font-size: 1.625rem; }
+  .zone-val strong { font-size: 1.5rem; }
+  .zone-top { flex-wrap: wrap; gap: 0 6px; }
+  .kpi-l { font-size: var(--t-xs); }
+  .dlist li { grid-template-columns: 88px minmax(0, 1fr); gap: 12px; }
+  /* 실거래 표 → 카드 */
+  table.deals { min-width: 0; }
+  table.deals thead { display: none; }
+  table.deals, table.deals tbody { display: block; }
+  table.deals tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 10px; padding: 14px 0; border-top: 1px solid var(--line); }
+  table.deals tr:last-child { border-bottom: 1px solid var(--line); }
+  table.deals td { display: block; padding: 0; border: 0; text-align: left; font-size: 13px; white-space: normal; min-width: 0; overflow-wrap: anywhere; }
+  table.deals td[data-l]::before { content: attr(data-l); display: block; font-size: 11px; font-weight: 400; color: var(--muted); margin-bottom: 1px; }
+  table.deals td.lead { grid-column: 1 / -1; order: -1; font-size: var(--t-md); }
+  table.deals td.lead small { display: inline; margin-left: 6px; }
+  .d-amt { font-size: 1.0625rem; white-space: nowrap; }
   .d-pp { grid-column: 2; text-align: left; }
   .cta-btns { grid-template-columns: minmax(0, 1fr); }
   .util .wrap > span:first-child { display: none; }
@@ -1503,7 +1519,7 @@ function columnCard(c) {
     <a class="col-media" href="${esc(c.link)}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
       ${c.image ? `<div class="art thumb"><img src="${esc(c.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.thumb').classList.add('noimg');this.remove()"></div>` : artBox("section", hashSeed(c.title))}
     </a>
-    <div class="meta"><span class="tag"><span class="f">7F</span>칼럼</span><span>빌딩러너 블로그</span><span class="num">${newsDate(c.date).split(" ")[0]}</span></div>
+    <div class="meta"><span class="tag"><span class="f">${CATS.column.f}</span>칼럼</span><span>빌딩러너 블로그</span><span class="num">${newsDate(c.date).split(" ")[0]}</span></div>
     <h3><a href="${esc(c.link)}" target="_blank" rel="noopener">${esc(c.title)}</a></h3>
     ${c.summary ? `<p>${esc(c.summary)}</p>` : ""}
     <div class="col-links"><a href="${esc(c.link)}" target="_blank" rel="noopener">글 읽기 ↗</a></div>
@@ -2084,6 +2100,18 @@ function init() {
   loadLive();
 }
 
+/* 휴대폰에서 실거래 표를 카드로 보여 주기 위해 칸마다 머리글을 붙인다 */
+function labelDealTables() {
+  document.querySelectorAll("table.deals tbody tr:not([data-c])").forEach(tr => {
+    const hs = [...tr.closest("table").querySelectorAll("thead th")].map(th => th.textContent.trim());
+    tr.dataset.c = "1";
+    [...tr.children].forEach((td, i) => {
+      const h = hs[i] || "";
+      if (/^(위치|동)$/.test(h)) td.classList.add("lead"); else td.dataset.l = h;
+    });
+  });
+}
+new MutationObserver(labelDealTables).observe(document.getElementById("view"), { childList: true, subtree: true });
 init();
 })();
 </script>
