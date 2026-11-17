@@ -166,7 +166,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
   background: var(--surface); font-size: var(--t-sm);
 }
 .search input::placeholder { color: var(--muted); }
-.progress { position: absolute; left: 0; bottom: -1px; height: 3px; background: var(--accent); width: 0; }
 
 /* ---------- 실시간 지표 띠 ---------- */
 .ticker { border-bottom: 1px solid var(--line); background: var(--surface); }
@@ -275,7 +274,7 @@ td .spark { width: 110px; height: 30px; }
 .rank li a:hover b { color: var(--accent); }
 .rank li small { color: var(--muted); font-size: var(--t-xs); }
 
-/* ---------- 예시 차트 ---------- */
+/* ---------- 실거래 차트 ---------- */
 .data { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 48px; }
 .panel { min-width: 0; display: grid; gap: 12px; align-content: start; }
 .panel h3 { margin: 0; font-size: var(--t-md); font-weight: 600; }
@@ -444,6 +443,21 @@ a.sns:hover { border-color: var(--accent); color: var(--accent); }
 .footer-sns { display: grid; gap: 10px; margin-top: 20px; }
 .footer-sns strong { font-size: var(--t-sm); }
 
+
+/* ---------- 뉴스 ---------- */
+.card .ext { color: var(--muted); font-weight: 400; }
+.headlines { list-style: none; margin: 0; padding: 0; }
+.headlines li { border-top: 1px solid var(--line); }
+.headlines li:last-child { border-bottom: 1px solid var(--line); }
+.headlines a { display: grid; gap: 4px; padding: 13px 0; }
+.headlines b { font-weight: 600; font-size: var(--t-sm); line-height: 1.55; }
+.headlines small { color: var(--muted); font-size: var(--t-xs); }
+.headlines a:hover b { color: var(--accent); }
+.headlines.sec a { gap: 6px; justify-items: start; }
+.side-news { min-width: 0; }
+.cover-text .headlines { margin-top: 4px; }
+.chart .bar.top { fill: var(--accent); }
+
 /* ---------- 반응형 ---------- */
 @media (max-width: 1000px) {
   .latest { grid-template-columns: minmax(0, 1fr); }
@@ -488,7 +502,7 @@ a.sns:hover { border-color: var(--accent); color: var(--accent); }
 <div class="util">
   <div class="wrap">
     <span id="today" class="num">2026.11.17 (화)</span>
-    <span class="util-right"><span class="util-sns" id="util-sns"></span><span>No. 47 · 매주 목요일 발행</span></span>
+    <span class="util-right"><span class="util-sns" id="util-sns"></span><span>매일 갱신</span></span>
   </div>
 </div>
 
@@ -518,7 +532,6 @@ a.sns:hover { border-color: var(--accent); color: var(--accent); }
       <input id="q" type="search" placeholder="기사 검색" aria-label="기사 검색" autocomplete="off">
     </form>
   </div>
-  <div class="progress" id="progress"></div>
 </nav>
 
 <div class="ticker" id="ticker-bar" aria-label="실시간 시장 지표">
@@ -530,19 +543,7 @@ a.sns:hover { border-color: var(--accent); color: var(--accent); }
 
 <main id="view" class="wrap"></main>
 
-<section class="letter" aria-labelledby="nl-title">
-  <div class="wrap">
-    <div>
-      <h2 id="nl-title">CADENCE 위클리</h2>
-      <p>매주 목요일 아침, 한 주의 빌딩 거래와 금리·리츠 흐름, 에디터가 고른 기사 세 편을 정리해 보내 드립니다.</p>
-    </div>
-    <form id="nl-form" novalidate>
-      <input id="nl-email" type="email" placeholder="이메일 주소" aria-label="이메일 주소" required>
-      <button class="btn" type="submit">구독하기</button>
-      <p class="msg" id="nl-msg" role="status" hidden></p>
-    </form>
-  </div>
-</section>
+
 
 <footer>
   <div class="wrap">
@@ -555,8 +556,8 @@ a.sns:hover { border-color: var(--accent); color: var(--accent); }
       <ul class="board" id="board"></ul>
     </div>
     <div class="fine">
-      <span>실시간 지표 출처: 금리·환율 한국은행 경제통계시스템(ECOS), 상장 리츠 시세 Yahoo Finance(지연 시세), 서울 빌딩 실거래 국토교통부 실거래가 공개시스템. 하루 한 번 자동으로 갱신됩니다.</span>
-      <span>기사, 인물, 건물명, ‘예시’로 표시된 수치는 화면 구성을 보여 주기 위한 가상의 콘텐츠입니다. 투자 판단의 근거로 쓰지 마세요.</span>
+      <span>CADENCE는 빌딩러너가 운영하는 상업용 부동산 뉴스·데이터 페이지입니다. 기사는 각 언론사와 기관의 원문으로 연결되며, 기사의 저작권은 해당 언론사와 기관에 있습니다.</span>
+      <span>데이터 출처: 금리·환율 한국은행 경제통계시스템(ECOS), 상장 리츠 시세 Yahoo Finance(지연 시세), 서울 빌딩 실거래 국토교통부 상업업무용 부동산 매매 신고 자료. 투자 판단의 근거로 쓰기 전에 원자료를 확인하세요.</span>
     </div>
   </div>
 </footer>
@@ -565,224 +566,19 @@ a.sns:hover { border-color: var(--accent); color: var(--accent); }
 (() => {
 "use strict";
 
-/* ================= 편집 콘텐츠 ================= */
+/* ================= 섹션 =================
+   모든 기사는 언론사·기관의 원문 링크입니다. CADENCE는 제목, 출처, 날짜만 모읍니다. */
 const CATS = {
-  market:   { f: "1F", name: "마켓",        desc: "권역별 공실률과 임대료, 공급과 수요. 시장이 지금 어떤 속도로 움직이는지 읽습니다." },
-  deal:     { f: "2F", name: "클로징",      desc: "이번 주 손바뀜된 빌딩과 물류센터. 누가, 얼마에, 왜 샀는지 거래의 마지막까지 따라갑니다." },
-  building: { f: "3F", name: "빌딩",        desc: "리모델링, 신축, 용도 전환. 건물이 가치를 바꾸는 방식을 들여다봅니다." },
-  invest:   { f: "4F", name: "투자 노트",    desc: "꼬마빌딩부터 법인 매입까지. 빌딩 투자를 준비하는 사람을 위한 실무 노트." },
-  people:   { f: "5F", name: "페이스메이커", desc: "빌딩을 짓고, 채우고, 거래하는 사람들. 시장의 속도를 만드는 이들을 만납니다." },
-  data:     { f: "6F", name: "랩타임",      desc: "금리, 리츠, 실거래. 매일 갱신되는 숫자로 상업용 부동산을 봅니다." }
+  market:   { f: "1F", name: "마켓",        art: "skyline", desc: "공실률, 임대료, 수요와 공급. 상업용 부동산 시장 소식을 모읍니다." },
+  deal:     { f: "2F", name: "클로징",      art: "tower",   desc: "빌딩·물류센터·호텔 매각과 매입 소식, 그리고 국토교통부 실거래 신고 자료." },
+  building: { f: "3F", name: "빌딩",        art: "remodel", desc: "개발, 리모델링, 재건축, 준공. 건물이 바뀌는 소식을 모읍니다." },
+  policy:   { f: "4F", name: "정책·금융",    art: "section", desc: "세금, 대출, 금리, 규제 소식과 국토교통부 보도자료." },
+  players:  { f: "5F", name: "페이스메이커", art: "campus",  desc: "리츠, 자산운용사, 기관투자자. 시장의 속도를 만드는 플레이어들의 소식." },
+  data:     { f: "6F", name: "랩타임",      art: "chart",   desc: "금리, 상장 리츠, 서울 빌딩 실거래. 매일 갱신되는 숫자." }
 };
-
-const ARTICLES = [
-  {
-    id: 1, cat: "market", art: "skyline", seed: 11, author: "정하린 기자", date: "2026.11.13", min: 8,
-    title: "공실률 2%대의 역설, 서울 오피스는 왜 여전히 비싼가",
-    dek: "자연공실률을 밑도는 강남권 공실, 늘어나는 도심 신규 공급, 4%대 중반에 멈춘 캡레이트. 3분기 서울 오피스 시장을 세 가지 숫자로 읽었다.",
-    spec: [["서울 평균 공실률", "3.1%"], ["GBD 공실률", "2.3%"], ["CBD 공실률", "4.1%"], ["GBD 실질임대료(NOC)", "3.3㎡당 23.4만 원"], ["3분기 오피스 거래액", "5.8조 원"], ["오피스 평균 캡레이트", "4.6%"]],
-    body: [
-      "업계에서 오피스 시장의 ‘자연공실률’로 보는 수준은 5% 안팎이다. 임차인이 이사하고, 리모델링이 진행되고, 계약이 바뀌는 데 필요한 최소한의 빈 공간이다. 올해 3분기 강남권역(GBD)의 공실률은 이보다 한참 낮은 2%대에 머물렀다. 사무실을 찾는 기업 입장에서는 고를 수 있는 매물이 사실상 없다는 뜻이다.",
-      { h: "임대인 우위 시장은 계속된다" },
-      "공실이 귀해지자 임대 조건도 달라졌다. 몇 년 전만 해도 흔했던 렌트프리(무상임대) 기간은 눈에 띄게 줄었고, 일부 프라임 빌딩은 재계약 시점에 명목임대료를 한 번에 크게 올렸다. 실질임대료(NOC) 기준으로 보면 GBD 프라임 오피스는 3.3㎡당 23만 원을 넘어섰다.",
-      { q: "지금 강남에서 한 층에 500평 이상을 붙여 쓰려면 1년 전부터 움직여야 합니다. 그래도 원하는 빌딩에 들어간다는 보장은 없어요.", by: "한 임차대행사 관계자" },
-      "도심권역(CBD)은 분위기가 조금 다르다. 을지로·종로 일대 재개발로 대형 신축이 연이어 준공되면서 공실률이 4%대로 올라섰다. 다만 신축 빌딩이 주변 빌딩의 임차인을 흡수하는 ‘이전 수요’가 대부분이어서, 권역 전체의 수요가 꺾였다고 보기는 어렵다는 분석이 많다.",
-      { h: "가격은 금리가 아니라 희소성이 받친다" },
-      "가격 흐름도 눈여겨볼 만하다. 하반기 들어 기준금리가 다시 오르기 시작했지만 오피스 캡레이트는 4%대 중반에서 크게 움직이지 않았다. 조달금리와 수익률의 간격이 좁은데도 거래가 이어지는 이유로 시장은 대체 불가능성을 꼽는다. 도심 핵심 입지에 새로 지을 땅이 거의 없다는 사실이 가격의 하단을 받치고 있다.",
-      "변수는 2027년 이후의 공급이다. 도심과 여의도에 예정된 대형 프로젝트가 계획대로 준공되면, 지금의 임대인 우위 구도는 권역별로 다르게 흔들릴 수 있다. 숫자가 좋을 때일수록 권역과 빌딩 등급을 나눠 보는 습관이 필요하다."
-    ]
-  },
-  {
-    id: 2, cat: "deal", art: "tower", seed: 23, author: "오승민 기자", date: "2026.11.12", min: 6,
-    title: "테헤란로 이면 중소형 빌딩, 토지 평당 2억 원대 중반에 손바뀜",
-    dek: "역삼동의 지상 9층 업무시설이 312억 원에 팔렸다. 매수자는 사옥을 찾던 중견기업. 강남 중소형 빌딩 시장에서 법인 실사용 수요가 가격을 끌어올리고 있다.",
-    spec: [["위치", "서울 강남구 역삼동"], ["용도", "업무·근린생활시설"], ["규모", "지하 2층~지상 9층"], ["대지면적", "412㎡ (124.6평)"], ["연면적", "2,690㎡ (813.7평)"], ["준공", "2004년"], ["거래가", "312억 원"], ["토지 3.3㎡당", "2억 5,040만 원"], ["연면적 3.3㎡당", "3,834만 원"], ["매수자", "국내 중견기업 (사옥용)"]],
-    body: [
-      "서울 강남구 역삼동 테헤란로 이면에 있는 지하 2층~지상 9층 규모 업무시설이 312억 원에 거래됐다. 대지면적 124.6평을 기준으로 환산한 토지 3.3㎡당 가격은 약 2억 5,000만 원. 같은 블록에서 2년 전 이뤄진 거래보다 20%가량 높은 수준이다.",
-      { h: "투자자보다 실사용자가 비싸게 산다" },
-      "매수자는 강남 이전을 추진하던 국내 중견기업이다. 사옥을 찾는 법인은 임대수익률보다 입지와 상징성, 직원 출퇴근 여건을 먼저 본다. 같은 빌딩을 두고도 순수 투자자가 계산한 적정가와 실사용 법인이 감당할 수 있는 가격 사이에 차이가 생기는 이유다.",
-      "이번 거래도 마찬가지였다. 매각 자문을 맡은 한 중개법인 관계자는 “투자 목적의 매수 후보들은 연 3%대 초반의 임대수익률을 근거로 300억 원 아래를 제시했지만, 사옥 수요가 붙으면서 가격이 정리됐다”고 말했다.",
-      { q: "강남 300억 원 안팎 빌딩 시장은 지금 사옥 수요가 가격을 정합니다. 임차인이 빠져나가는 공실 리스크도 사옥 매수자에게는 오히려 장점이 되죠.", by: "중개법인 관계자" },
-      { h: "준공 20년 차, 매수 이후가 관건" },
-      "2004년 준공된 건물이라 설비 교체 비용은 매수자의 몫이다. 엘리베이터와 공조 설비, 외벽 단열 보강까지 감안하면 추가로 수십억 원이 들어갈 것으로 보인다. 연면적 기준 3.3㎡당 3,834만 원이라는 매입가에 개보수 비용을 더하면 실제 취득 원가는 4,000만 원대 중반까지 올라간다.",
-      "업계는 연말까지 비슷한 규모의 강남 사옥용 매물이 3~4건 더 시장에 나올 것으로 보고 있다. 금리 흐름이 안정되면 투자 수요까지 다시 붙을 수 있어, 테헤란로 이면 중소형 빌딩의 가격 하단은 당분간 단단할 전망이다."
-    ]
-  },
-  {
-    id: 3, cat: "building", art: "remodel", seed: 37, author: "이유진 기자", date: "2026.11.10", min: 7,
-    title: "준공 31년 빌딩의 두 번째 삶, 성수동 리모델링으로 임대료 40% 올렸다",
-    dek: "신축하면 오히려 면적이 줄어드는 건물이 있다. 1995년에 지은 성수동 6층 빌딩은 허물지 않고 고쳐 쓰는 길을 택했다.",
-    spec: [["위치", "서울 성동구 성수동2가"], ["준공 / 리모델링", "1995년 / 2026년"], ["규모", "지하 1층~지상 6층"], ["연면적", "1,980㎡ (599평)"], ["공사 기간", "11개월"], ["공사비", "3.3㎡당 약 620만 원"], ["임대료 (전)", "3.3㎡당 7.2만 원"], ["임대료 (후)", "3.3㎡당 10.1만 원"]],
-    body: [
-      "성수동2가의 6층짜리 빌딩은 지난여름 공사 가림막을 걷어냈다. 1995년 준공된 이 건물은 원래 1층 인쇄소와 위층 소규모 사무실이 들어선 평범한 근린생활시설이었다. 11개월 리모델링을 마친 지금은 1층에 브랜드 쇼룸, 위층에 디자인 스튜디오와 스타트업이 들어와 있다.",
-      { h: "허물면 손해인 건물" },
-      "소유주가 신축 대신 리모델링을 택한 이유는 용적률이다. 이 건물은 지어질 당시 기준으로 허가를 받아, 현재 적용되는 용적률보다 더 많은 면적을 확보하고 있었다. 허물고 새로 지으면 연면적이 15%가량 줄어든다는 계산이 나왔다. 기존 골조를 살리면 면적을 지키면서 공사 기간과 비용도 줄일 수 있었다.",
-      "공사는 구조 보강, 외피 교체, 수직 동선 개선에 집중했다. 기둥과 보에 탄소섬유 보강을 더했고, 낡은 타일 외벽은 걷어내고 큰 유리창과 금속 패널로 바꿨다. 엘리베이터는 한 대에서 두 대로 늘렸고, 1층은 필로티처럼 개방해 길에서 안이 들여다보이게 했다.",
-      { q: "임차인이 처음 보는 건 1층과 엘리베이터, 화장실입니다. 돈을 어디에 써야 하는지는 그 세 곳이 알려 줘요.", by: "설계를 맡은 건축사사무소 소장" },
-      { h: "숫자로 본 결과" },
-      "공사비는 3.3㎡당 약 620만 원. 같은 규모로 신축했을 때 예상 공사비의 절반 정도다. 리모델링 전 3.3㎡당 7만 2,000원이던 임대료는 재임대 후 10만 1,000원으로 40% 올랐다. 공실 기간을 포함해도 소유주는 공사비 회수에 7년 안팎이 걸릴 것으로 본다.",
-      "오래된 중소형 빌딩이 많은 성수·을지로·문래 일대에서는 비슷한 문의가 늘고 있다. 다만 구조 안전진단 결과에 따라 보강 비용이 크게 달라지는 만큼, 매입 단계에서부터 리모델링 가능성을 함께 검토하는 것이 좋다."
-    ]
-  },
-  {
-    id: 4, cat: "invest", art: "section", seed: 41, author: "CADENCE 편집부", date: "2026.11.09", min: 9,
-    title: "꼬마빌딩 매입 전에 반드시 확인할 7가지",
-    dek: "50억~150억 원대 중소형 빌딩은 매물 정보가 적고, 매수자가 직접 확인해야 할 것이 많다. 계약서에 도장을 찍기 전 서류와 현장에서 볼 일곱 가지를 정리했다.",
-    spec: [["대상", "매매가 50억~150억 원 중소형 빌딩"], ["확인 서류", "건축물대장 · 토지이용계획 · 등기부"], ["임대 자료", "렌트롤 · 임대차계약서 · 입금 내역"], ["실사 기간", "통상 2~4주"]],
-    body: [
-      "꼬마빌딩은 보통 연면적 3,000㎡ 이하, 매매가 수십억에서 150억 원 안팎의 중소형 빌딩을 가리킨다. 대형 오피스처럼 전문 실사 보고서가 붙어 나오는 경우가 드물어, 매수자가 직접 챙겨야 할 것이 많다. 아래 일곱 가지는 계약 전에 최소한으로 확인할 항목이다.",
-      { list: [
-        ["건축물대장의 ‘위반건축물’ 표시", "불법 증축이나 용도 무단 변경이 있으면 이행강제금이 매년 부과되고, 대출 한도에도 영향을 준다. 옥상 가건물과 테라스 확장이 흔한 사례다."],
-        ["용도지역과 남은 용적률", "토지이용계획확인원으로 용도지역을 확인하고, 현재 건물이 법정 용적률을 얼마나 쓰고 있는지 계산한다. 여유가 있으면 증축이나 신축으로 가치를 키울 수 있다."],
-        ["렌트롤과 실제 입금 내역", "매도인이 제시한 임대료 표가 실제 통장 입금과 일치하는지 확인한다. 매각 직전에 시세보다 높게 맞춰 둔 임대차 계약이 섞여 있는 경우가 있다."],
-        ["주차 대수와 법정 기준", "용도를 바꾸거나 증축하면 주차 기준이 다시 적용된다. 주차장이 부족하면 계획한 용도 변경이 막힐 수 있다."],
-        ["엘리베이터·소방 설비의 연식", "엘리베이터 교체와 소방 설비 보강은 수억 원 단위의 비용이다. 점검 기록과 교체 시기를 매매가 협상에 반영한다."],
-        ["도로 접면과 건축선 후퇴", "건물이 접한 도로 폭에 따라 신축 시 건축선이 뒤로 물러날 수 있다. 지금 면적을 나중에 그대로 다시 짓지 못할 수도 있다는 뜻이다."],
-        ["대출 가능 금액과 RTI", "개인 임대사업자는 임대업이자상환비율(RTI) 기준을 충족해야 원하는 만큼 대출을 받을 수 있다. 임대수익이 이자보다 충분히 커야 한다."]
-      ] },
-      { h: "실사는 2~4주를 잡는다" },
-      "위 항목은 서류 확인으로 끝나지 않는다. 현장에서 임차인을 직접 만나 계약 조건과 이전 계획을 들어 보고, 설비는 전문 업체 점검을 받는 것이 좋다. 실사 기간을 넉넉히 두지 않으면 협상에서 확인할 기회를 놓친다.",
-      { disclaimer: "이 글은 일반적인 정보 제공을 위한 예시 콘텐츠입니다. 실제 매입 결정 전에는 공인중개사, 감정평가사, 세무·법률 전문가의 검토를 받으세요." }
-    ]
-  },
-  {
-    id: 5, cat: "people", art: "lobby", seed: 53, author: "김태오 기자", date: "2026.11.06", min: 10,
-    title: "“빌딩의 가치는 결국 임차인이 만든다” 오피스 리싱 15년, 한서진 상무",
-    dek: "자산운용사에서 오피스 11개 동의 임대를 맡고 있는 한서진 상무(가상 인물)를 만나 공실 2% 시대의 임대 전략을 물었다.",
-    spec: [["이름", "한서진 (가상 인물)"], ["소속", "자산운용사 임대마케팅본부"], ["경력", "오피스 리싱 15년"], ["담당 자산", "오피스 11개 동"], ["관리 연면적", "약 42만㎡"]],
-    body: [
-      "한서진 상무의 하루는 임차인 미팅으로 시작해 임차인 미팅으로 끝난다. 15년 동안 서울 3대 권역의 오피스 임대를 맡아 온 그는 “요즘처럼 빈 사무실이 없는 시기에도 임차인을 만나는 시간은 줄지 않았다”고 말했다.",
-      { h: "공실이 거의 없는데 리싱 담당자는 무슨 일을 하나." },
-      "빈 층을 채우는 일보다 지금 있는 임차인이 떠나지 않게 하는 일이 더 많아졌습니다. 공실이 적다고 임차인이 영원히 머무는 게 아니에요. 계약 만기 2년 전부터 확장 계획, 인력 변화, 본사 이전 검토 여부를 계속 확인합니다.",
-      { h: "임대료를 올리기 좋은 시기 아닌가." },
-      "올릴 수는 있습니다. 그런데 한 번에 많이 올리면 다음 사이클에서 그대로 돌려받아요. 2010년대 중반에 공실률이 10%를 넘었을 때, 무리하게 올렸던 빌딩부터 임차인이 빠졌습니다. 저는 시장 임대료보다 조금 낮게 가더라도 우량 임차인과 장기 계약을 맺는 쪽을 택합니다.",
-      { q: "빌딩의 가치는 결국 그 안에 누가 있느냐로 정해집니다. 좋은 임차인이 좋은 임차인을 부르거든요.", by: "한서진 상무" },
-      { h: "임차인이 요즘 가장 많이 요구하는 것은." },
-      "회의실과 라운지 같은 공용 공간, 그리고 에너지 성능입니다. 글로벌 기업은 본사 지침에 따라 친환경 인증이 없는 빌딩에는 아예 입주하지 못하는 경우도 있어요. 설비 투자를 미룬 빌딩은 공실률이 낮은 지금도 협상력이 약합니다.",
-      { disclaimer: "이 인터뷰의 인물과 소속은 매거진 구성을 보여 주기 위해 만든 가상의 예시입니다." }
-    ]
-  },
-  {
-    id: 6, cat: "data", art: "chart", seed: 61, author: "데이터팀", date: "2026.11.05", min: 6,
-    title: "캡레이트 4.5%의 벽, 금리와 오피스 수익률 사이",
-    dek: "국고채 금리가 다시 오르는데도 오피스 캡레이트는 4%대 중반에서 버티고 있다. 대출 금리와 수익률이 거의 같은 ‘네거티브 레버리지’ 구간에서 매수자는 무엇을 보고 사는가.",
-    spec: [["오피스 캡레이트 (3Q, 예시)", "4.6%"], ["국고채 3년", "@ktb3"], ["회사채 3년 (AA-)", "@corp"], ["CD 91일", "@cd91"], ["캡레이트 − 국고채 3년", "@spread"]],
-    body: [
-      "캡레이트(Cap Rate)는 빌딩의 연간 순영업소득(NOI)을 매매가로 나눈 값이다. 100억 원짜리 빌딩이 1년에 4억 6,000만 원의 순수익을 낸다면 캡레이트는 4.6%다. 값이 낮을수록 같은 수익에 더 비싼 값을 치렀다는 뜻이다.",
-      { h: "좁아진 스프레드가 뜻하는 것" },
-      "3분기 서울 오피스 평균 캡레이트는 4.6% 수준이다. 국고채 3년물 금리가 3%대 후반까지 오르면서, 무위험 자산 대비 오피스가 주는 추가 수익인 스프레드는 1%p 안팎으로 좁아졌다. 과거 저금리 시기의 3%p 안팎과 비교하면 크게 줄었다. 스펙 시트의 금리는 한국은행 ECOS에서 매일 받아 오는 실제 값이다.",
-      "더 큰 문제는 대출 금리다. 오피스 담보대출 금리가 4%대 중후반에 형성되면서 캡레이트와 거의 같아졌다. 빌려서 살수록 자기자본 수익률이 떨어지는 구간이다. 그런데도 거래가 이어지는 건 매수자들이 현재 수익률보다 임대료 상승과 처분 시점의 가격을 더 크게 보고 있어서다.",
-      { q: "지금 오피스를 사는 사람들은 4.6%를 사는 게 아니라 5년 뒤의 임대료를 삽니다.", by: "한 리츠 운용역" },
-      "금리가 다시 내려가면 스프레드가 넓어지면서 매수 여력이 커진다. 반대로 공급이 몰리는 권역에서 임대료가 꺾이면, 지금의 가격은 빠르게 부담이 된다. 같은 4.6%라도 권역과 빌딩의 임대료 전망에 따라 전혀 다른 숫자가 되는 이유다."
-    ]
-  },
-  {
-    id: 7, cat: "market", art: "retail", seed: 71, author: "윤가은 기자", date: "2026.11.04", min: 7,
-    title: "성수·한남·연남, 리테일 상권 지도를 다시 그리다",
-    dek: "팝업스토어가 상권의 판도를 바꾸고 있다. 1층 임대료는 오르고 계약 기간은 짧아졌다. 서울 3대 신흥 상권의 1층 시장을 걸어서 확인했다.",
-    spec: [["성수 1층 임대료", "3.3㎡당 약 28만 원"], ["한남 1층 임대료", "3.3㎡당 약 31만 원"], ["연남 1층 임대료", "3.3㎡당 약 17만 원"], ["팝업 평균 계약", "2~4주"]],
-    body: [
-      "성수동 연무장길의 한 1층 점포는 올해에만 주인이 열한 번 바뀌었다. 정확히는 임차인이 아니라 팝업스토어가 바뀌었다. 2주에서 4주 단위로 브랜드가 들어왔다 나가고, 그 사이 공간 운영사가 임대료를 받는다.",
-      { h: "월세에서 일세로" },
-      "팝업 수요가 커지면서 1층 상가의 가격 체계가 달라졌다. 일반 임대차 기준 성수 1층 임대료는 3.3㎡당 28만 원 안팎이지만, 팝업 대관료를 일 단위로 환산하면 그 몇 배에 이른다. 소유주 입장에서는 장기 임차인보다 단기 대관이 더 큰 수익을 낼 수 있게 됐다.",
-      "한남동은 고급 브랜드의 플래그십이 중심이다. 대로변보다 이면 골목의 단독 건물을 통째로 빌리는 방식이 늘었고, 1층 임대료는 3.3㎡당 30만 원을 넘어섰다. 연남동은 상대적으로 낮은 임대료를 무기로 식음료 점포가 꾸준히 들어오고 있다.",
-      { q: "요즘 브랜드는 매장을 파는 곳이 아니라 보여 주는 곳으로 씁니다. 그래서 골목 하나 차이로 임대료가 두 배씩 벌어져요.", by: "리테일 전문 중개사" },
-      { h: "빌딩 투자자가 볼 것" },
-      "팝업 수익은 높지만 불안정하다. 대관이 끊기는 기간이 길어지면 연 수익이 오히려 일반 임대보다 낮아질 수 있다. 상권의 유행이 옮겨 가는 속도도 빠르다. 리테일 빌딩을 살 때는 현재 팝업 수익보다 장기 임차가 가능한 입지인지를 먼저 따져 볼 필요가 있다."
-    ]
-  },
-  {
-    id: 8, cat: "deal", art: "warehouse", seed: 83, author: "오승민 기자", date: "2026.11.03", min: 6,
-    title: "물류센터 거래 다시 늘었다, 수도권 남부로 몰리는 이유",
-    dek: "공급 과잉으로 2년 가까이 얼어붙었던 물류센터 시장이 움직이기 시작했다. 이천의 연면적 3만 평 저온 복합 센터가 1,950억 원에 팔렸다.",
-    spec: [["위치", "경기 이천시"], ["규모", "지하 1층~지상 4층 (램프식)"], ["연면적", "99,170㎡ (30,000평)"], ["저온 비중", "35%"], ["거래가", "1,950억 원"], ["연면적 3.3㎡당", "650만 원"], ["매수자", "해외 투자자 합작 펀드"]],
-    body: [
-      "경기 이천시의 지상 4층 램프식 물류센터가 1,950억 원에 거래됐다. 연면적 3만 평, 3.3㎡당 650만 원이다. 매수자는 해외 연기금과 국내 운용사가 함께 만든 합작 펀드다. 상온과 저온 창고가 섞인 복합 센터로, 저온 비중이 35%에 이른다.",
-      { h: "공급 절벽이 가격을 되돌렸다" },
-      "2022~2023년 수도권에 물류센터가 한꺼번에 준공되면서 공실이 쌓였고, 거래는 거의 끊겼다. 이후 공사비 상승과 금융 비용 부담으로 신규 착공이 급감했다. 새 공급이 줄자 기존 센터의 공실이 빠르게 소진됐고, 매수자들이 다시 시장에 들어왔다.",
-      "수도권 남부, 특히 이천·용인·안성 일대가 주목받는 이유는 고속도로망이다. 영동·중부·경부고속도로가 교차해 수도권 전역과 충청권을 반나절 안에 연결할 수 있다. 저온 물류는 배송 시간에 민감해 입지 프리미엄이 더 크다.",
-      { q: "저온 센터는 아무 데나 지을 수 없습니다. 전력과 인력, 도로가 모두 맞아야 하니 남부권에 수요가 몰릴 수밖에 없어요.", by: "물류 전문 운용사 관계자" },
-      "다만 서북부와 동부권은 여전히 공실이 남아 있어, 권역별 온도 차가 크다. 물류센터 투자는 이제 ‘물류’라는 섹터가 아니라 개별 입지와 임차인의 신용도를 보고 판단하는 시장이 됐다."
-    ]
-  },
-  {
-    id: 9, cat: "building", art: "datacenter", seed: 97, author: "이유진 기자", date: "2026.10.30", min: 8,
-    title: "데이터센터는 왜 도심 가까이 오려고 하나",
-    dek: "AI 연산 수요가 데이터센터의 입지를 바꾸고 있다. 땅값이 비싼 수도권으로 들어오려는 이유와, 그 앞을 가로막는 전력 문제를 짚었다.",
-    spec: [["예시 수전 용량", "40MW"], ["예시 연면적", "약 33,000㎡"], ["PUE 목표", "1.3 이하"], ["냉각 방식", "수랭식 + 외기냉방"]],
-    body: [
-      "데이터센터는 오랫동안 땅값이 싸고 전력이 넉넉한 지방이 유리하다고 여겨졌다. AI 서비스가 늘면서 셈법이 달라졌다. 사용자와 가까울수록 응답 속도가 빨라지고, 고객사 엔지니어가 직접 장비를 관리하기도 쉽다. 수도권 데이터센터의 임대 단가가 지방보다 높게 형성되는 이유다.",
-      { h: "부동산이 아니라 전력을 산다" },
-      "데이터센터 개발에서 가장 먼저 확보해야 하는 것은 땅이 아니라 전력이다. 40MW 규모 센터 하나가 쓰는 전력은 중소 도시 한 곳의 사용량과 맞먹는다. 수도권 변전소 용량에는 한계가 있어, 부지를 확보하고도 전력 공급 승인을 받지 못해 몇 년씩 사업이 멈추는 사례가 적지 않다.",
-      "그래서 시장에서는 이미 전력 인입이 확정된 부지가 웃돈을 받고 거래된다. 기존 공장이나 통신 시설처럼 대용량 수전 설비를 갖춘 부지를 데이터센터로 바꾸는 개발도 늘고 있다.",
-      { q: "데이터센터 부지 가격의 절반은 땅이 아니라 전력 인입 확정서에 붙어 있다고 보면 됩니다.", by: "데이터센터 개발사 관계자" },
-      { h: "건물은 거대한 냉장고" },
-      "AI용 서버는 발열이 크다. 공기로 식히는 방식만으로는 부족해 서버 랙 가까이 냉각수를 보내는 수랭식 설비가 확산되고 있다. 전력 효율 지표인 PUE를 1.3 이하로 맞추는 것이 최근 신축 센터의 기본 목표다. 건물의 층고와 바닥 하중, 설비 공간이 일반 오피스와 전혀 다르기 때문에 용도 전환도 쉽지 않다."
-    ]
-  },
-  {
-    id: 10, cat: "invest", art: "section", seed: 103, author: "CADENCE 편집부", date: "2026.10.28", min: 8,
-    title: "법인으로 빌딩을 사면 세금이 정말 줄어들까",
-    dek: "‘빌딩은 법인으로 사야 한다’는 말은 반만 맞다. 개인과 법인 매입의 세금 구조를 비교하고, 법인이 오히려 불리한 경우를 정리했다.",
-    spec: [["비교", "개인 매입 vs 법인 매입"], ["개인 소득세 최고세율", "45% (지방세 별도)"], ["법인세", "과세표준 구간별 누진세율"], ["주의", "과밀억제권역 신설 법인 취득세 중과"]],
-    body: [
-      "임대수익이 큰 빌딩을 개인 명의로 가지면 임대소득이 다른 소득과 합산돼 종합소득세가 부과된다. 소득이 많은 사람은 최고 45%(지방소득세 별도) 구간에 걸린다. 법인 명의라면 임대소득에 법인세가 붙고, 세율이 개인 최고세율보다 낮은 구간이 넓다. 법인 매입이 절세 수단으로 거론되는 이유다.",
-      { h: "법인에 남긴 돈은 아직 내 돈이 아니다" },
-      "문제는 법인이 번 돈을 개인이 꺼내 쓸 때다. 배당이나 급여로 가져가면 그때 다시 소득세가 붙는다. 수익을 법인에 쌓아 두고 재투자할 계획이라면 법인이 유리하지만, 생활비로 꺼내 써야 한다면 세금 차이는 생각보다 작아진다.",
-      { h: "취득 단계에서 중과되는 경우" },
-      "수도권 과밀억제권역 안에서 설립한 지 5년이 안 된 법인이 그 권역 안의 부동산을 취득하면 취득세가 중과된다. 서울 대부분이 여기에 해당한다. 이를 피하려고 권역 밖에 법인을 세우는 경우도 있지만, 실제 사업 실체가 없으면 문제가 될 수 있다.",
-      { q: "법인 매입은 절세 상품이 아니라 운영 방식의 선택입니다. 10년 뒤 이 돈을 어떻게 쓸지부터 정해야 해요.", by: "부동산 전문 세무사" },
-      "결론적으로 법인 매입은 임대수익을 오래 쌓아 재투자하거나, 자녀에게 지분을 나눠 승계를 준비하려는 경우에 의미가 크다. 단기간에 사고팔거나 수익을 바로 써야 한다면 개인 명의가 단순하고 유리할 수 있다.",
-      { disclaimer: "세율과 중과 요건은 법 개정에 따라 바뀝니다. 이 글은 일반적인 구조를 설명하는 예시 콘텐츠이며, 실제 매입 전에는 반드시 세무 전문가와 상담하세요." }
-    ]
-  },
-  {
-    id: 11, cat: "market", art: "campus", seed: 113, author: "정하린 기자", date: "2026.10.24", min: 7,
-    title: "판교와 마곡, ‘제4의 오피스 권역’ 자리를 두고 겨루다",
-    dek: "판교는 공실률 1%대로 강남보다 빡빡하고, 마곡은 연구소 수요를 기다리는 중이다. 서울 3대 권역 바깥에서 벌어지는 두 업무지구의 엇갈린 성적표.",
-    spec: [["판교 공실률", "1.6%"], ["마곡 공실률", "7.8%"], ["판교 주요 임차 업종", "IT · 게임 · 플랫폼"], ["마곡 주요 임차 업종", "R&D · 바이오 · 연구소"]],
-    body: [
-      "오피스 시장에서 흔히 말하는 서울 3대 권역은 도심(CBD), 강남(GBD), 여의도(YBD)다. 최근 몇 년 사이 여기에 판교를 더해 4대 권역으로 부르는 보고서가 늘었다. 공실률과 임대료만 보면 판교는 이미 3대 권역 못지않다.",
-      { h: "판교, 강남보다 빈자리가 없다" },
-      "3분기 판교 오피스 공실률은 1.6%다. IT·게임 기업이 몰려 있고, 대기업 계열사가 통째로 빌딩을 쓰는 경우가 많아 시장에 나오는 면적 자체가 적다. 강남에서 자리를 찾지 못한 기술 기업이 판교로 오고, 판교에서 자리를 찾지 못한 기업이 다시 강남으로 가는 순환이 생겼다.",
-      { h: "마곡, 연구소가 채울 시간" },
-      "마곡은 사정이 다르다. 대기업 연구소와 바이오 기업을 유치하며 성장했지만, 최근 몇 년간 지식산업센터와 오피스가 대거 공급되면서 공실률이 7%대로 올라섰다. 임대인들은 렌트프리 기간을 늘리고 인테리어 지원을 내걸며 임차인을 모으고 있다.",
-      { q: "마곡은 수요가 없는 게 아니라 공급이 먼저 도착한 겁니다. 공항 접근성과 연구 인프라는 다른 권역이 따라오기 어려워요.", by: "업무지구 전문 리서치 담당자" },
-      "두 권역의 차이는 결국 임차인의 업종 구성에서 나온다. 기술 기업의 인력 확장이 이어지는 한 판교의 강세는 계속될 가능성이 높고, 마곡은 바이오·제조 연구 수요가 얼마나 빨리 따라오느냐에 따라 회복 시점이 갈릴 것이다."
-    ]
-  },
-  {
-    id: 12, cat: "data", art: "bars", seed: 127, author: "데이터팀", date: "2026.10.21", min: 5,
-    title: "숫자로 보는 3분기 상업용 부동산 거래",
-    dek: "3분기 상업용 부동산 거래액은 9.4조 원. 오피스가 60%를 넘게 차지했고, 물류는 회복세로 돌아섰다. 섹터별 거래액을 한눈에 정리했다.",
-    spec: [["총 거래액", "9.4조 원"], ["오피스", "5.8조 원"], ["물류", "1.6조 원"], ["리테일", "0.9조 원"], ["호텔·기타", "1.1조 원"]],
-    body: [
-      "3분기 국내 상업용 부동산 거래액은 9.4조 원으로 집계됐다. 오피스가 5.8조 원으로 전체의 약 62%를 차지했고, 물류 1.6조 원, 호텔·기타 1.1조 원, 리테일 0.9조 원이 뒤를 이었다.",
-      { h: "오피스: 대형 거래 몇 건이 판을 만든다" },
-      "오피스 거래액의 절반 이상은 1,000억 원 이상 대형 거래 몇 건에서 나왔다. 도심 신축 빌딩과 리츠의 자산 편입이 큰 비중을 차지했다. 거래 건수 자체는 중소형 빌딩이 훨씬 많지만, 금액으로는 대형 거래의 영향력이 크다.",
-      { h: "물류: 얼었던 시장이 풀린다" },
-      "물류센터 거래액은 전 분기보다 크게 늘었다. 신규 공급이 줄면서 기존 센터의 공실이 해소된 영향이다. 저온 센터와 수도권 남부 입지에 매수 수요가 집중됐다.",
-      { h: "리테일과 호텔" },
-      "리테일은 대형 쇼핑몰보다 성수·한남 같은 가두 상권의 중소형 빌딩 위주로 거래가 이뤄졌다. 호텔은 외국인 관광객 회복에 힘입어 도심 비즈니스호텔을 중심으로 매수 문의가 이어졌다.",
-      { disclaimer: "이 기사의 수치는 화면 구성을 보여 주기 위한 예시입니다." }
-    ]
-  }
-];
-
-const SAMPLE_DEALS = [
-  { name: "역삼동 업무시설 A", zone: "GBD", use: "오피스", area: 813.7, price: 312, buyer: "국내 중견기업 (사옥)", when: "2026.11", link: 2 },
-  { name: "을지로2가 업무시설 B", zone: "CBD", use: "오피스", area: 21450, price: 8900, buyer: "국내 상장 리츠", when: "2026.11" },
-  { name: "성수동2가 근린생활시설 D", zone: "성수", use: "리테일", area: 599, price: 268, buyer: "개인", when: "2026.11" },
-  { name: "이천 물류센터 E", zone: "경기 남부", use: "물류", area: 30000, price: 1950, buyer: "해외 합작 펀드", when: "2026.10", link: 8 },
-  { name: "여의도동 업무시설 C", zone: "YBD", use: "오피스", area: 9880, price: 3420, buyer: "자산운용사 펀드", when: "2026.10" },
-  { name: "삼평동 업무시설 F", zone: "판교", use: "오피스", area: 6120, price: 2050, buyer: "국내 IT기업 (사옥)", when: "2026.10" }
-];
-const VACANCY = [["판교", 1.6], ["GBD", 2.3], ["YBD", 2.9], ["CBD", 4.1], ["마곡", 7.8]];
-const SEOUL_AVG = 3.1;
-const MIX = [["오피스", 5.8, "var(--accent)"], ["물류", 1.6, "var(--seg-2)"], ["호텔·기타", 1.1, "var(--seg-3)"], ["리테일", 0.9, "var(--seg-4)"]];
-const POPULAR = [4, 2, 10, 1, 6];
-const CAP_RATE_SAMPLE = 4.6;
+const ALIASES = { invest: "policy", people: "players" };   // 예전 주소
 const RATE_ORDER = ["base", "ktb3", "ktb10", "corp", "cd91", "usd"];
+const PYEONG = 3.3058;
 
 /* ================= 운영 설정 =================
    SOCIAL: 주소를 넣으면 버튼이 켜집니다.
@@ -808,45 +604,113 @@ function socialHtml(withLabel = true) {
     `<a class="sns" href="${esc(x.url)}" target="_blank" rel="noopener">${ICONS[x.id]}${esc(x.name)}</a>`).join("")}</div>`;
 }
 
-const byId = Object.fromEntries(ARTICLES.map(a => [a.id, a]));
 let LIVE = null;          // data/live.json
 let LIVE_STATE = "loading";
 
 /* ================= 유틸 ================= */
-const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const fmt = (n, d = 1) => Number(n).toLocaleString("ko-KR", { maximumFractionDigits: d });
 const md = s => s ? `${+s.slice(4, 6)}.${+s.slice(6, 8) || ""}`.replace(/\.$/, "월") : "";
 const ymd = s => s ? `${s.slice(0, 4)}.${s.slice(4, 6)}.${s.slice(6, 8)}` : "";
 const view = document.getElementById("view");
+const hashSeed = s => { let h = 7; for (const ch of String(s)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h % 100000 + 1; };
+const eok = manwon => fmt(manwon / 10000, 1);   // 만 원 → 억 원
+function newsDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return "";
+  const p = Object.fromEntries(new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+    .formatToParts(d).map(x => [x.type, x.value]));
+  return `${p.month}.${p.day} ${p.hour}:${p.minute}`;
+}
 
-function tag(a) {
-  const c = CATS[a.cat];
+function artBox(kind, seed, cls = "") {
+  return `<div class="art ${cls}"><canvas data-kind="${kind}" data-seed="${seed}" aria-hidden="true"></canvas></div>`;
+}
+function tagFor(sec) {
+  const c = CATS[sec] || CATS.market;
   return `<span class="tag"><span class="f">${c.f}</span>${esc(c.name)}</span>`;
-}
-function artBox(a, cls = "") {
-  return `<div class="art ${cls}"><canvas data-kind="${a.art}" data-seed="${a.seed}" aria-hidden="true"></canvas></div>`;
-}
-function card(a) {
-  return `<a class="card" href="#a${a.id}">
-    ${artBox(a)}
-    <div class="meta">${tag(a)}<span class="num">${a.date}</span><span>${a.min}분</span></div>
-    <h3>${esc(a.title)}</h3>
-    <p>${esc(a.dek)}</p>
-  </a>`;
-}
-function specSheet(a, title = "팩트 시트") {
-  return `<div class="spec">
-    <div class="spec-title"><span>${title}</span><span>${CATS[a.cat].f}</span></div>
-    <dl>${a.spec.map(([k, v]) => v.startsWith("@")
-      ? `<dt>${esc(k)}</dt><dd class="live" data-live="${v.slice(1)}">${liveSpec(v.slice(1))}</dd>`
-      : `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
-  </div>`;
 }
 function secHead(f, title, right = "") {
   return `<div class="sec-head"><h2>${f ? `<span class="fl">${f}</span>` : ""}${esc(title)}</h2>${right}</div>`;
 }
 const link = (href, text) => `<a href="${href}">${esc(text)} →</a>`;
+const news = () => (LIVE && Array.isArray(LIVE.news)) ? LIVE.news : [];
+const newsOf = sec => news().filter(n => n.section === sec);
 
+/* ================= 뉴스 카드 ================= */
+function newsCard(n) {
+  const c = CATS[n.section] || CATS.market;
+  return `<a class="card" href="${esc(n.link)}" target="_blank" rel="noopener">
+    ${artBox(c.art, hashSeed(n.title))}
+    <div class="meta">${tagFor(n.section)}<span>${esc(n.source)}</span><span class="num">${newsDate(n.date)}</span></div>
+    <h3>${esc(n.title)}<span class="ext" aria-label="새 창에서 원문 열기"> ↗</span></h3>
+  </a>`;
+}
+function newsList(list) {
+  return `<ol class="headlines">${list.map(n => `<li><a href="${esc(n.link)}" target="_blank" rel="noopener">
+    <b>${esc(n.title)}</b><small>${esc(n.source)} · ${newsDate(n.date)}</small></a></li>`).join("")}</ol>`;
+}
+function newsEmpty() {
+  return `<p class="loading">${LIVE_STATE === "loading" ? "뉴스를 불러오는 중입니다." : "아직 모인 뉴스가 없습니다. 다음 갱신 때 다시 확인해 주세요."}</p>`;
+}
+const newsNote = `<p class="foot-note">제목을 누르면 원문이 새 창으로 열립니다. 기사의 저작권은 각 언론사와 기관에 있습니다.</p>`;
+
+/* ================= 커버: 이번 달 최대 거래 (국토교통부 실거래) ================= */
+const useLabel = u => !u ? "건물" : /시설$/.test(u) ? u : u + "시설";
+function useArt(use) {
+  if (/판매|근린/.test(use)) return "retail";
+  if (/창고|물류/.test(use)) return "warehouse";
+  if (/숙박/.test(use)) return "tower";
+  if (/업무/.test(use)) return "tower";
+  return "skyline";
+}
+function coverBlock() {
+  const d = LIVE && LIVE.deals && LIVE.deals.top && LIVE.deals.top[0];
+  const top = news().slice(0, 5);
+  if (!d) {
+    if (!top.length) return `<section class="cover-empty">${newsEmpty()}</section>`;
+    const n = top[0];
+    return `<section class="cover" aria-label="주요 뉴스">
+      <a href="${esc(n.link)}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">${artBox((CATS[n.section] || CATS.market).art, hashSeed(n.title))}</a>
+      <div class="cover-text">
+        <div class="meta"><span class="eyebrow">주요 뉴스</span>${tagFor(n.section)}</div>
+        <h1><a href="${esc(n.link)}" target="_blank" rel="noopener">${esc(n.title)}</a></h1>
+        <div class="meta"><span>${esc(n.source)}</span><span class="num">${newsDate(n.date)}</span></div>
+        ${newsList(top.slice(1))}
+      </div>
+    </section>`;
+  }
+  const gfaPy = d.buildingArea / PYEONG, landPy = d.landArea ? d.landArea / PYEONG : 0;
+  const rows = [
+    ["위치", `서울 ${d.gu} ${d.dong}`],
+    ["용도", useLabel(d.use)],
+    ["용도지역", d.zone || "-"],
+    ["준공", d.built ? `${d.built}년` : "-"],
+    ["대지면적", landPy ? `${fmt(d.landArea, 1)}㎡ (${fmt(landPy, 1)}평)` : "-"],
+    ["연면적", `${fmt(d.buildingArea, 1)}㎡ (${fmt(gfaPy, 1)}평)`],
+    ["거래금액", `${eok(d.amount)}억 원`],
+    ["연면적 3.3㎡당", d.perPyeong ? `${fmt(d.perPyeong, 0)}만 원` : "-"],
+    ["토지 3.3㎡당", landPy ? `${fmt(d.amount / landPy, 0)}만 원` : "-"],
+    ["매수자 구분", d.buyer || "-"],
+    ["계약일", d.date]
+  ];
+  return `<section class="cover" aria-label="이번 달 최대 거래">
+    <a href="#deal" tabindex="-1" aria-hidden="true">${artBox(useArt(d.use), hashSeed(d.gu + d.dong + d.amount))}</a>
+    <div class="cover-text">
+      <div class="meta"><span class="eyebrow">이번 달 서울 최대 빌딩 거래</span>${tagFor("deal")}</div>
+      <h1><a href="#deal">서울 ${esc(d.gu)} ${esc(d.dong)} ${esc(useLabel(d.use))}, ${eok(d.amount)}억 원에 거래</a></h1>
+      <p class="dek">${esc(d.date)} 계약. 연면적 ${fmt(gfaPy, 0)}평 규모로, 연면적 3.3㎡당 ${d.perPyeong ? fmt(d.perPyeong, 0) + "만 원" : "-"}입니다.</p>
+      <div class="spec">
+        <div class="spec-title"><span>실거래 팩트 시트</span><span>2F</span></div>
+        <dl>${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
+      </div>
+      <p class="foot-note" style="margin:0">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 건물명과 지번은 공개되지 않습니다.</p>
+    </div>
+  </section>`;
+}
+
+/* ================= 금리·리츠 (기존 실시간 블록) ================= */
 /* 변화량 표시: 한국 시세 관례대로 상승 빨강 ▲, 하락 파랑 ▼ */
 function change(cur, prev, kind) {
   if (prev == null || cur == null) return `<span class="chg flat">–</span>`;
@@ -872,17 +736,6 @@ function spark(pts, w = 200, h = 40) {
     <circle class="end" cx="${x(v.length - 1).toFixed(1)}" cy="${y(v[v.length - 1]).toFixed(1)}" r="2.5"/>
   </svg>`;
 }
-function liveSpec(key) {
-  const r = LIVE && LIVE.rates;
-  if (!r) return LIVE_STATE === "loading" ? "불러오는 중" : "데이터 없음";
-  if (key === "spread") {
-    if (!r.ktb3) return "데이터 없음";
-    return `${(CAP_RATE_SAMPLE - r.ktb3.value).toFixed(2)}%p<small>예시 캡레이트 기준 · ${md(r.ktb3.date)}</small>`;
-  }
-  const s = r[key];
-  if (!s) return "데이터 없음";
-  return `${s.value.toFixed(s.unit === "원" ? 1 : 2)}${s.unit === "원" ? "원" : "%"}<small>ECOS · ${md(s.date)}</small>`;
-}
 function updatedLabel() {
   if (!LIVE || !LIVE.updatedAt) return "";
   const t = new Date(LIVE.updatedAt);
@@ -894,7 +747,7 @@ function updatedLabel() {
   } catch (e) { return LIVE.updatedAt; }
 }
 
-/* ================= 실시간 블록 ================= */
+
 function ratesBlock() {
   if (!LIVE || !LIVE.rates || !Object.keys(LIVE.rates).length)
     return `<p class="loading">${LIVE_STATE === "loading" ? "한국은행 ECOS에서 금리를 불러오는 중입니다." : "지금은 금리 데이터를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요."}</p>`;
@@ -930,44 +783,62 @@ function reitsBlock() {
   <p class="foot-note">출처: Yahoo Finance (지연 시세) · ${updatedLabel()} · 투자 권유가 아닙니다.</p>`;
 }
 
+/* ================= 서울 빌딩 실거래 (국토교통부) ================= */
 function dealsBlock() {
   const d = LIVE && LIVE.deals;
-  if (d && d.top && d.top.length) {
-    const months = d.months.map(m => `${m.slice(0, 4)}.${m.slice(4)}`).reverse().join("~");
-    return `<div class="table-scroll"><table class="deals">
-      <thead><tr><th>위치</th><th>용도</th><th class="r">연면적 (평)</th><th class="r">대지 (평)</th><th class="r">준공</th><th class="r">거래금액 (억 원)</th><th class="r">연면적 3.3㎡당 (만 원)</th><th>매수</th><th>계약일</th></tr></thead>
-      <tbody>${d.top.map(x => `<tr>
-        <td><b>서울 ${esc(x.gu)} ${esc(x.dong)}</b><small>${esc(x.zone || "")}</small></td>
-        <td>${esc(x.use || "-")}</td>
-        <td class="r">${fmt(x.buildingArea / 3.3058, 1)}</td>
-        <td class="r">${x.landArea ? fmt(x.landArea / 3.3058, 1) : "-"}</td>
-        <td class="r">${esc(x.built || "-")}</td>
-        <td class="r"><b>${fmt(x.amount / 10000, 1)}</b></td>
-        <td class="r hl">${x.perPyeong ? fmt(x.perPyeong, 0) : "-"}</td>
-        <td>${esc(x.buyer || "-")}</td>
-        <td class="num">${esc(x.date)}</td>
-      </tr>`).join("")}</tbody></table></div>
-    <p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 서울 25개 구 ${months} 신고분 중 건물 단위(일반) 거래 ${fmt(d.count, 0)}건, 금액 상위 12건 · ${updatedLabel()} · 지번은 공개 기준에 따라 표시하지 않습니다.</p>`;
-  }
+  if (!d || !d.top || !d.top.length)
+    return `<p class="loading">${LIVE_STATE === "loading" ? "국토교통부 실거래 자료를 불러오는 중입니다." : "지금은 실거래 자료를 불러오지 못했습니다."}</p>`;
+  const months = d.months.map(m => `${m.slice(0, 4)}.${m.slice(4)}`).reverse().join("~");
   return `<div class="table-scroll"><table class="deals">
-      <thead><tr><th>건물</th><th>권역</th><th>용도</th><th class="r">연면적 (평)</th><th class="r">거래가 (억 원)</th><th class="r">연면적 3.3㎡당 (만 원)</th><th>매수 주체</th><th>시기</th></tr></thead>
-      <tbody>${SAMPLE_DEALS.map(x => `<tr>
-        <td>${x.link ? `<a href="#a${x.link}"><b>${esc(x.name)}</b> ↗</a>` : esc(x.name)}</td>
-        <td><span class="zone">${esc(x.zone)}</span></td>
-        <td>${esc(x.use)}</td>
-        <td class="r">${fmt(x.area)}</td>
-        <td class="r">${fmt(x.price)}</td>
-        <td class="r hl">${fmt(Math.round(x.price * 10000 / x.area), 0)}</td>
-        <td>${esc(x.buyer)}</td>
-        <td class="num">${x.when}</td>
-      </tr>`).join("")}</tbody></table></div>
-    <p class="foot-note">예시 데이터입니다. 국토교통부 실거래가 서비스키를 연결하면 서울 25개 구의 실제 빌딩 거래로 바뀝니다. 3.3㎡당 가격 = 거래가 ÷ 연면적(평).</p>`;
+    <thead><tr><th>위치</th><th>용도</th><th class="r">연면적 (평)</th><th class="r">대지 (평)</th><th class="r">준공</th><th class="r">거래금액 (억 원)</th><th class="r">연면적 3.3㎡당 (만 원)</th><th>매수</th><th>계약일</th></tr></thead>
+    <tbody>${d.top.map(x => `<tr>
+      <td><b>서울 ${esc(x.gu)} ${esc(x.dong)}</b><small>${esc(x.zone || "")}</small></td>
+      <td>${esc(useLabel(x.use))}</td>
+      <td class="r">${fmt(x.buildingArea / PYEONG, 1)}</td>
+      <td class="r">${x.landArea ? fmt(x.landArea / PYEONG, 1) : "-"}</td>
+      <td class="r">${esc(x.built || "-")}</td>
+      <td class="r"><b>${eok(x.amount)}</b></td>
+      <td class="r hl">${x.perPyeong ? fmt(x.perPyeong, 0) : "-"}</td>
+      <td>${esc(x.buyer || "-")}</td>
+      <td class="num">${esc(x.date)}</td>
+    </tr>`).join("")}</tbody></table></div>
+  <p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 서울 25개 구 ${months} 신고분 중 건물 단위(일반) 거래 ${fmt(d.count, 0)}건, 금액 상위 12건 · ${updatedLabel()} · 신고 기한(계약 후 30일) 때문에 최근 거래는 계속 추가됩니다. 건물명과 지번은 공개되지 않습니다.</p>`;
 }
 
-function liveBadge(isLive) { return isLive ? `<span class="badge live">실시간</span>` : `<span class="badge">예시</span>`; }
+function dealCharts() {
+  const d = LIVE && LIVE.deals;
+  if (!d || !d.byGu) return "";
+  const gu = Object.entries(d.byGu).sort((a, b) => b[1].amount - a[1].amount).slice(0, 8);
+  const max = gu.length ? gu[0][1].amount : 1;
+  const W = 560, rowH = 34, left = 76, right = 120, H = gu.length * rowH + 8;
+  const x = v => left + (v / max) * (W - left - right);
+  let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="구별 빌딩 거래액">`;
+  gu.forEach(([k, v], i) => {
+    const y = i * rowH + 4;
+    svg += `<text class="lbl" x="${left - 10}" y="${y + 17}" text-anchor="end">${esc(k)}</text>`;
+    svg += `<rect class="bar${i === 0 ? " top" : ""}" x="${left}" y="${y}" width="${Math.max(2, x(v.amount) - left)}" height="22"/>`;
+    svg += `<text class="val" x="${x(v.amount) + 8}" y="${y + 17}">${eok(v.amount)}억 · ${v.count}건</text>`;
+  });
+  svg += `</svg>`;
+
+  const uses = Object.entries(d.byUse || {}).sort((a, b) => b[1].count - a[1].count);
+  const head = uses.slice(0, 4), rest = uses.slice(4);
+  if (rest.length) head.push(["기타", rest.reduce((t, [, v]) => ({ count: t.count + v.count, amount: t.amount + v.amount }), { count: 0, amount: 0 })]);
+  const colors = ["var(--accent)", "var(--seg-2)", "var(--seg-3)", "var(--seg-4)", "var(--bar)"];
+  const total = head.reduce((t, [, v]) => t + v.count, 0) || 1;
+  const mix = `<div class="stack" role="img" aria-label="용도별 거래 건수 비중">${head.map(([k, v], i) => `<div style="flex:${v.count};background:${colors[i]}" title="${esc(k)} ${v.count}건"></div>`).join("")}</div>
+    <ul class="legend">${head.map(([k, v], i) => `<li><i style="background:${colors[i]}"></i><span>${esc(k === "기타" ? k : useLabel(k))}</span><span class="num">${v.count}건</span><span class="pct">${Math.round(v.count / total * 100)}%</span></li>`).join("")}</ul>`;
+
+  return `<div class="data">
+    <div class="panel"><h3>구별 거래액 상위 8곳</h3>${svg}</div>
+    <div class="panel"><h3>용도별 거래 건수</h3>${mix}</div>
+  </div>
+  <p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 (서울, 건물 단위 거래 ${fmt(d.count, 0)}건) · ${updatedLabel()}</p>`;
+}
+
+function liveBadge() { return `<span class="badge live">실시간</span>`; }
 
 function renderLive() {
-  // 지표 띠
   const tk = document.getElementById("ticker");
   const r = LIVE && LIVE.rates;
   if (r && Object.keys(r).length) {
@@ -981,207 +852,97 @@ function renderLive() {
   } else if (LIVE_STATE === "failed") {
     document.getElementById("ticker-bar").hidden = true;
   }
-  const fill = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
-  fill("live-rates", ratesBlock());
-  fill("live-reits", reitsBlock());
-  fill("live-deals", dealsBlock());
-  const dh = document.getElementById("deals-badge");
-  if (dh) dh.innerHTML = liveBadge(!!(LIVE && LIVE.deals));
-  document.querySelectorAll("dd[data-live]").forEach(dd => { dd.innerHTML = liveSpec(dd.dataset.live); });
+  route(true);
 }
 
 /* ================= 화면 ================= */
 function renderHome() {
-  const cover = byId[1];
-  const latest = [2, 3, 7, 8, 9, 11].map(i => byId[i]);
-  const people = byId[5];
+  const all = news();
+  const latest = all.slice(0, 6);
+  const bySec = Object.keys(CATS).filter(k => k !== "data").map(k => [k, newsOf(k)[0]]).filter(([, n]) => n);
+  const molit = all.filter(n => n.source === "국토교통부").slice(0, 5);
 
   view.innerHTML = `
-  <section class="cover" aria-label="커버 스토리">
-    <a href="#a${cover.id}" aria-hidden="true" tabindex="-1">${artBox(cover)}</a>
-    <div class="cover-text">
-      <div class="meta"><span class="eyebrow">커버 스토리</span>${tag(cover)}</div>
-      <h1><a href="#a${cover.id}">${esc(cover.title)}</a></h1>
-      <p class="dek">${esc(cover.dek)}</p>
-      <div class="meta"><span>${esc(cover.author)}</span><span class="num">${cover.date}</span><span>${cover.min}분 읽기</span></div>
-      ${specSheet(cover, "2026년 3분기 서울 오피스 · 예시")}
-    </div>
-  </section>
+  ${coverBlock()}
 
   <section aria-label="오늘의 금리">
-    ${secHead("6F", "오늘의 금리와 환율", `<span class="src">${liveBadge(true)}</span>`)}
+    ${secHead("6F", "오늘의 금리와 환율", liveBadge())}
     <div id="live-rates">${ratesBlock()}</div>
   </section>
 
-  <section class="latest" aria-label="최신 기사">
+  <section class="latest" aria-label="최신 뉴스">
     <div>
-      ${secHead("", "최신 기사", link("#market", "마켓 전체 보기"))}
-      <div class="grid">${latest.map(card).join("")}</div>
+      ${secHead("", "최신 뉴스", link("#market", "마켓 뉴스 전체"))}
+      ${latest.length ? `<div class="grid">${latest.map(newsCard).join("")}</div>${newsNote}` : newsEmpty()}
     </div>
-    <aside class="rank">
-      ${secHead("", "많이 읽은 기사")}
-      <ol>${POPULAR.map(i => byId[i]).map(a => `<li><a href="#a${a.id}"><span><b>${esc(a.title)}</b><small>${esc(CATS[a.cat].name)} · ${a.min}분</small></span></a></li>`).join("")}</ol>
+    <aside class="side-news">
+      ${secHead("", "섹션별 최신")}
+      ${bySec.length ? `<ol class="headlines sec">${bySec.map(([k, n]) => `<li><a href="${esc(n.link)}" target="_blank" rel="noopener">
+        <span class="tag"><span class="f">${CATS[k].f}</span>${esc(CATS[k].name)}</span><b>${esc(n.title)}</b><small>${esc(n.source)} · ${newsDate(n.date)}</small></a></li>`).join("")}</ol>` : newsEmpty()}
     </aside>
   </section>
 
   ${ctaBlock()}
 
-  <section aria-label="빌딩 거래 기록">
-    <div class="sec-head"><h2><span class="fl">2F</span>서울 빌딩 거래<span id="deals-badge">${liveBadge(!!(LIVE && LIVE.deals))}</span></h2>${link("#deal", "클로징 기사 더 보기")}</div>
+  <section aria-label="서울 빌딩 거래">
+    ${secHead("2F", "서울 빌딩 거래", liveBadge())}
     <div id="live-deals">${dealsBlock()}</div>
   </section>
 
-  <section aria-label="상장 리츠 시세">
-    ${secHead("6F", "상장 리츠 시세", `<span class="src">${liveBadge(true)}</span>`)}
+  <section aria-label="거래 구성">
+    ${secHead("2F", "어디서, 어떤 건물이 거래됐나", link("#deal", "클로징 전체"))}
+    ${dealCharts() || `<p class="loading">실거래 자료를 불러오는 중입니다.</p>`}
+  </section>
+
+  <section aria-label="상장 리츠">
+    ${secHead("5F", "상장 리츠 시세", liveBadge())}
     <div id="live-reits">${reitsBlock()}</div>
   </section>
 
-  <section aria-label="시장 구조">
-    ${secHead("6F", "권역과 섹터", link("#data", "랩타임 기사 더 보기"))}
-    <div class="data">
-      <div class="panel">
-        <h3>권역별 오피스 공실률, 2026년 3분기${liveBadge(false)}</h3>
-        ${vacancyChart()}
-      </div>
-      <div class="panel">
-        <h3>3분기 섹터별 거래액 9.4조 원${liveBadge(false)}</h3>
-        ${mixChart()}
-        <a class="back" href="#a12">섹터별 거래 분석 읽기 →</a>
-      </div>
-    </div>
-  </section>
-
-  <section aria-label="피플">
-    ${secHead("5F", "페이스메이커", link("#people", "인터뷰 더 보기"))}
-    <a class="feature" href="#a${people.id}">
-      ${artBox(people)}
-      <div class="feature-text">
-        <span class="eyebrow">인터뷰</span>
-        <blockquote>“빌딩의 가치는 결국 그 안에 누가 있느냐로 정해집니다.”</blockquote>
-        <p class="dek">${esc(people.dek)}</p>
-        <span class="more">인터뷰 읽기 →</span>
-      </div>
-    </a>
-  </section>
-
-  <section aria-label="투자 가이드">
-    ${secHead("4F", "투자 노트", link("#invest", "투자 노트 전체 보기"))}
-    <div class="grid two">${[4, 10].map(i => card(byId[i])).join("")}</div>
-  </section>`;
-}
-
-function vacancyChart() {
-  const W = 560, rowH = 42, top = 22, left = 60, right = 60;
-  const H = top + VACANCY.length * rowH + 26;
-  const max = 10, x = v => left + (v / max) * (W - left - right);
-  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="권역별 공실률 막대 그래프">`;
-  [0, 2, 4, 6, 8, 10].forEach(t => {
-    s += `<line class="gridl" x1="${x(t)}" x2="${x(t)}" y1="${top}" y2="${H - 24}"/>`;
-    s += `<text x="${x(t)}" y="${H - 6}" text-anchor="middle">${t}%</text>`;
-  });
-  s += `<line class="ref" x1="${x(SEOUL_AVG)}" x2="${x(SEOUL_AVG)}" y1="${top - 6}" y2="${H - 24}"/>`;
-  s += `<text class="reft" x="${x(SEOUL_AVG) + 6}" y="${top - 8}">서울 평균 ${SEOUL_AVG}%</text>`;
-  VACANCY.forEach(([k, v], i) => {
-    const y = top + i * rowH + 8;
-    s += `<text class="lbl" x="${left - 12}" y="${y + 18}" text-anchor="end">${k}</text>`;
-    s += `<rect class="bar" x="${x(0)}" y="${y}" width="${x(v) - x(0)}" height="26"/>`;
-    s += `<text class="val" x="${x(v) + 8}" y="${y + 18}">${v.toFixed(1)}%</text>`;
-  });
-  return s + `</svg>`;
-}
-function mixChart() {
-  const total = MIX.reduce((t, m) => t + m[1], 0);
-  return `<div class="stack" role="img" aria-label="섹터별 거래액 비중">${MIX.map(([k, v, c]) => `<div style="flex:${v};background:${c}" title="${k} ${v}조 원"></div>`).join("")}</div>
-  <ul class="legend">${MIX.map(([k, v, c]) => `<li><i style="background:${c}"></i><span>${k}</span><span class="num">${v.toFixed(1)}조 원</span><span class="pct">${Math.round(v / total * 100)}%</span></li>`).join("")}</ul>`;
+  ${molit.length ? `<section aria-label="국토교통부 보도자료">
+    ${secHead("4F", "국토교통부 보도자료", link("#policy", "정책·금융 전체"))}
+    ${newsList(molit)}
+  </section>` : ""}`;
 }
 
 function renderCat(slug) {
   const c = CATS[slug];
-  const list = ARTICLES.filter(a => a.cat === slug);
-  const others = ARTICLES.filter(a => a.cat !== slug).slice(0, 3);
-  const extra = slug === "data"
-    ? `<section>${secHead("", "오늘의 금리와 환율", `<span class="src">${liveBadge(true)}</span>`)}<div id="live-rates">${ratesBlock()}</div></section>
-       <section>${secHead("", "상장 리츠 시세", `<span class="src">${liveBadge(true)}</span>`)}<div id="live-reits">${reitsBlock()}</div></section>`
-    : slug === "deal"
-    ? `<section><div class="sec-head"><h2>서울 빌딩 거래<span id="deals-badge">${liveBadge(!!(LIVE && LIVE.deals))}</span></h2></div><div id="live-deals">${dealsBlock()}</div></section>${ctaBlock()}`
-    : "";
+  const list = slug === "data" ? [] : newsOf(slug);
+  const extra = {
+    deal: `<section>${secHead("", "서울 빌딩 거래", liveBadge())}<div id="live-deals">${dealsBlock()}</div></section>
+           <section>${secHead("", "어디서, 어떤 건물이 거래됐나")}${dealCharts()}</section>${ctaBlock()}`,
+    players: `<section>${secHead("", "상장 리츠 시세", liveBadge())}<div id="live-reits">${reitsBlock()}</div></section>`,
+    data: `<section>${secHead("", "오늘의 금리와 환율", liveBadge())}<div id="live-rates">${ratesBlock()}</div></section>
+           <section>${secHead("", "상장 리츠 시세", liveBadge())}<div id="live-reits">${reitsBlock()}</div></section>
+           <section>${secHead("", "서울 빌딩 거래", liveBadge())}<div id="live-deals">${dealsBlock()}</div></section>
+           <section>${secHead("", "어디서, 어떤 건물이 거래됐나")}${dealCharts()}</section>`
+  }[slug] || "";
   view.innerHTML = `
   <section class="cat-head">
     <div class="big">${c.f}</div>
     <div><h1>${esc(c.name)}</h1><p>${esc(c.desc)}</p></div>
   </section>
-  <section><div class="grid">${list.map(card).join("")}</div></section>
-  ${extra}
-  <section>${secHead("", "다른 섹션 보기")}<div class="grid">${others.map(card).join("")}</div></section>`;
+  ${slug === "data" ? "" : `<section>${list.length ? `<div class="grid">${list.map(newsCard).join("")}</div>${newsNote}` : newsEmpty()}</section>`}
+  ${extra}`;
 }
 
-function blockHtml(b, i) {
-  if (typeof b === "string") return `<p>${esc(b)}</p>`;
-  if (b.h) return `<h2 id="sec-${i}">${esc(b.h)}</h2>`;
-  if (b.q) return `<blockquote><p>“${esc(b.q)}”</p><cite>${esc(b.by)}</cite></blockquote>`;
-  if (b.list) return `<ol>${b.list.map(([t, d]) => `<li><span><b>${esc(t)}</b>${esc(d)}</span></li>`).join("")}</ol>`;
-  if (b.disclaimer) return `<p class="disclaimer">${esc(b.disclaimer)}</p>`;
-  return "";
-}
-
-const SIZES = [1, 1.125, 1.25];
-let sizeIdx = 1;
-try { const v = +localStorage.getItem("cadence-size"); if (v >= 0 && v < SIZES.length) sizeIdx = v; } catch (e) {}
-
-function renderArticle(id) {
-  const a = byId[id];
-  if (!a) { renderNotFound(); return; }
-  const c = CATS[a.cat];
-  const related = ARTICLES.filter(x => x.id !== a.id && x.cat === a.cat)
-    .concat(ARTICLES.filter(x => x.id !== a.id && x.cat !== a.cat)).slice(0, 3);
-  const heads = a.body.map((b, i) => b && b.h ? [i, b.h] : null).filter(Boolean);
+function renderSearch(q) {
+  const term = q.trim().toLowerCase();
+  const hits = news().filter(n => (n.title + " " + n.source).toLowerCase().includes(term));
+  setActive(null);
   view.innerHTML = `
-  <article class="article">
-    <header class="a-head">
-      <a class="back" href="#${a.cat}">← ${c.f} ${esc(c.name)}</a>
-      ${tag(a)}
-      <h1>${esc(a.title)}</h1>
-      <p class="dek">${esc(a.dek)}</p>
-      <div class="byline"><b>${esc(a.author)}</b><span class="num">${a.date}</span><span>${a.min}분 읽기</span>
-        <span class="tools">
-          <button class="pill" id="size-down" type="button" aria-label="글자 작게">가−</button>
-          <button class="pill" id="size-up" type="button" aria-label="글자 크게">가+</button>
-          <button class="pill" id="copy-link" type="button">링크 복사</button>
-        </span></div>
-    </header>
-    ${artBox(a, "a-art")}
-    <div class="a-body">
-      <div class="prose" id="prose" style="font-size:${SIZES[sizeIdx]}rem">${a.body.map(blockHtml).join("")}</div>
-      <aside class="aside">
-        ${heads.length > 1 ? `<nav class="toc" aria-label="목차"><strong>이 기사의 순서</strong>${heads.map(([i, h]) => `<button type="button" data-to="sec-${i}">${esc(h)}</button>`).join("")}</nav>` : ""}
-        ${specSheet(a)}
-        <p class="foot-note">파란색 값은 매일 갱신되는 실제 지표이고, 나머지는 기사 구성을 위한 예시입니다.</p>
-      </aside>
-    </div>
-  </article>
-  <section>${secHead("", "이어서 읽기")}<div class="grid">${related.map(card).join("")}</div></section>`;
-
-  const prose = document.getElementById("prose");
-  const setSize = d => {
-    sizeIdx = Math.max(0, Math.min(SIZES.length - 1, sizeIdx + d));
-    prose.style.fontSize = SIZES[sizeIdx] + "rem";
-    try { localStorage.setItem("cadence-size", String(sizeIdx)); } catch (e) {}
-  };
-  document.getElementById("size-down").addEventListener("click", () => setSize(-1));
-  document.getElementById("size-up").addEventListener("click", () => setSize(1));
-  view.querySelectorAll(".toc button").forEach(b => b.addEventListener("click", () => {
-    const el = document.getElementById(b.dataset.to);
-    if (el) el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-  }));
-  const btn = document.getElementById("copy-link");
-  btn.addEventListener("click", () => {
-    const url = location.href;
-    const done = t => { btn.textContent = t; setTimeout(() => (btn.textContent = "링크 복사"), 2200); };
-    try { navigator.clipboard.writeText(url).then(() => done("복사했습니다"), () => done("복사 안 됨")); }
-    catch (e) { done("복사 안 됨"); }
-  });
+  <section class="cat-head">
+    <div class="big">?</div>
+    <div><h1>‘${esc(q)}’ 검색 결과</h1><p>최근 3주 동안 모은 뉴스에서 ${hits.length}건을 찾았습니다.</p></div>
+  </section>
+  <section>${hits.length ? `<div class="grid">${hits.map(newsCard).join("")}</div>${newsNote}` :
+    `<p class="empty">일치하는 뉴스가 없습니다. ‘오피스’, ‘물류센터’, ‘리츠’처럼 짧은 단어로 다시 검색해 보세요.</p>`}</section>`;
+  drawAll();
 }
 
+function renderNotFound() {
+  view.innerHTML = `<section class="cat-head"><div class="big">B2</div><div><h1>찾는 페이지가 없습니다</h1><p>주소가 바뀌었거나 없어진 페이지입니다. <a href="#home" style="color:var(--accent)">홈으로 돌아가기</a></p></div></section>`;
+}
 
 function ctaBlock() {
   return `<section class="cta" aria-label="매도·매수 의뢰">
@@ -1335,25 +1096,6 @@ function renderInquiry(type) {
   });
 }
 
-function renderSearch(q) {
-  const term = q.trim().toLowerCase();
-  const hits = ARTICLES.filter(a => [a.title, a.dek, CATS[a.cat].name, ...a.body.map(b => typeof b === "string" ? b : (b.h || b.q || ""))]
-    .join(" ").toLowerCase().includes(term));
-  setActive(null);
-  view.innerHTML = `
-  <section class="cat-head">
-    <div class="big">?</div>
-    <div><h1>‘${esc(q)}’ 검색 결과</h1><p>기사 ${hits.length}건을 찾았습니다.</p></div>
-  </section>
-  <section>${hits.length ? `<div class="grid">${hits.map(card).join("")}</div>` :
-    `<p class="empty">일치하는 기사가 없습니다. ‘공실률’, ‘물류’, ‘리모델링’처럼 짧은 단어로 다시 검색해 보세요.</p>`}</section>`;
-  drawAll();
-}
-
-function renderNotFound() {
-  view.innerHTML = `<section class="cat-head"><div class="big">B2</div><div><h1>찾는 페이지가 없습니다</h1><p>주소가 바뀌었거나 삭제된 기사입니다. <a href="#home" style="color:var(--accent)">홈으로 돌아가기</a></p></div></section>`;
-}
-
 /* ================= 라우팅 ================= */
 function setActive(slug) {
   document.querySelectorAll(".floor-btn").forEach(b => {
@@ -1362,26 +1104,23 @@ function setActive(slug) {
   const cur = document.querySelector(".floor-btn[aria-current]");
   if (cur) cur.scrollIntoView({ block: "nearest", inline: "nearest" });
 }
-let isArticle = false;
-function route() {
-  const h = location.hash.replace(/^#/, "");
+let lastHash = null;
+// keep = true: 데이터가 도착해 같은 화면을 다시 그릴 때 (스크롤 위치 유지, 의뢰서 작성 중이면 건드리지 않음)
+function route(keep) {
+  let h = location.hash.replace(/^#/, "");
+  h = ALIASES[h] || h;
+  if (/^a\d+$/.test(h)) h = "home";   // 예전 기사 주소
+  const isInquiry = h === "inquiry" || h === "sell" || h === "buy";
+  if (keep === true && isInquiry && h === lastHash) return;
   let active = null;
-  isArticle = false;
   if (!h || h === "home") { renderHome(); active = "__home"; }
   else if (CATS[h]) { renderCat(h); active = h; }
-  else if (h === "inquiry" || h === "sell" || h === "buy") { renderInquiry(h === "buy" ? "매수" : "매도"); active = "inquiry"; }
-  else if (/^a\d+$/.test(h)) { const a = byId[+h.slice(1)]; renderArticle(+h.slice(1)); active = a ? a.cat : null; isArticle = !!a; }
+  else if (isInquiry) { renderInquiry(h === "buy" ? "매수" : "매도"); active = "inquiry"; }
   else renderNotFound();
   setActive(active);
-  window.scrollTo(0, 0);
-  onScroll();
+  if (keep !== true || h !== lastHash) window.scrollTo(0, 0);
+  lastHash = h;
   drawAll();
-}
-const progress = document.getElementById("progress");
-function onScroll() {
-  if (!isArticle) { progress.style.width = "0"; return; }
-  const max = document.documentElement.scrollHeight - innerHeight;
-  progress.style.width = max > 0 ? Math.min(100, scrollY / max * 100) + "%" : "0";
 }
 
 /* ================= 입면도 일러스트 (canvas) ================= */
@@ -1691,17 +1430,7 @@ function init() {
     if (q.trim()) { renderSearch(q); window.scrollTo(0, 0); }
   });
 
-  document.getElementById("nl-form").addEventListener("submit", e => {
-    e.preventDefault();
-    const input = document.getElementById("nl-email"), msg = document.getElementById("nl-msg");
-    msg.hidden = false;
-    if (!input.value || !input.checkValidity()) { msg.textContent = "이메일 주소 형식을 확인해 주세요. 예: name@company.com"; return; }
-    msg.textContent = `${input.value} 주소로 구독 신청을 받았습니다. 데모 사이트라 실제 메일은 발송되지 않습니다.`;
-    input.value = "";
-  });
-
   window.addEventListener("hashchange", route);
-  window.addEventListener("scroll", onScroll, { passive: true });
   let t;
   window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(drawAll, 120); });
   try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll); } catch (e) {}
