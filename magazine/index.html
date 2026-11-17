@@ -380,7 +380,7 @@ footer .wrap { padding-block: 52px 40px; display: grid; gap: 32px; }
 .cta-btn.primary:hover { filter: brightness(1.08); }
 
 .inq { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 56px; align-items: start; }
-.form { display: grid; gap: 32px; min-width: 0; }
+.form { display: grid; gap: 22px; min-width: 0; max-width: 40rem; }
 .form fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 14px; min-width: 0; }
 .form legend { font-weight: 700; font-size: var(--t-lg); padding: 0; margin-bottom: 12px; }
 .seg { position: relative; display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line-strong); border-radius: 999px; padding: 4px; gap: 4px; justify-self: start; }
@@ -393,11 +393,13 @@ footer .wrap { padding-block: 52px 40px; display: grid; gap: 32px; }
 .field.full { grid-column: 1 / -1; }
 .field > label { font-size: var(--t-sm); font-weight: 600; }
 .field > label i { color: var(--up); font-style: normal; margin-left: 2px; }
+.field > label small { color: var(--muted); font-weight: 400; font-size: var(--t-xs); }
+.fields[hidden] { display: none !important; }
 .field input, .field select, .field textarea {
   width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface);
   font-size: var(--t-md); line-height: 1.4; min-width: 0;
 }
-.field textarea { min-height: 120px; resize: vertical; line-height: 1.6; }
+.field textarea { min-height: 96px; resize: vertical; line-height: 1.6; }
 .field input:focus, .field select:focus, .field textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 .field [aria-invalid="true"] { border-color: var(--up); }
 .field small { color: var(--muted); font-size: var(--t-xs); }
@@ -409,7 +411,8 @@ footer .wrap { padding-block: 52px 40px; display: grid; gap: 32px; }
 .consent { border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; font-size: var(--t-sm); color: var(--ink-2); background: var(--surface); }
 .consent label { display: flex; gap: 10px; align-items: flex-start; font-weight: 600; color: var(--ink); cursor: pointer; }
 .consent input { width: 18px; height: 18px; margin: 3px 0 0; flex: none; accent-color: var(--accent); }
-.consent dl { margin: 12px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; }
+.consent summary { margin-top: 8px; color: var(--muted); font-size: var(--t-xs); cursor: pointer; }
+.consent dl { margin: 10px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; }
 .consent dt { color: var(--muted); }
 .consent dd { margin: 0; }
 .submit-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
@@ -1194,87 +1197,62 @@ function ctaBlock() {
   </section>`;
 }
 
-const USES = ["오피스", "근린생활시설 (꼬마빌딩)", "상가·리테일", "물류·창고", "숙박·호텔", "토지·개발 부지", "기타"];
-const opts = (list, first = "선택") => `<option value="">${first}</option>` + list.map(v => `<option>${esc(v)}</option>`).join("");
 const fld = (id, label, input, o = {}) =>
-  `<div class="field${o.full ? " full" : ""}"><label for="${id}">${label}${o.req ? '<i aria-hidden="true">*</i><span class="hp">필수</span>' : ""}</label>${input}${o.help ? `<small>${o.help}</small>` : ""}</div>`;
-const unit = (id, u, ph = "") => `<div class="unit"><input id="${id}" name="${id}" inputmode="decimal" placeholder="${ph}" autocomplete="off"><span>${u}</span></div>`;
+  `<div class="field${o.full ? " full" : ""}"><label for="${id}">${label}${o.req ? '<i aria-hidden="true">*</i><span class="hp">필수</span>' : ' <small>(선택)</small>'}</label>${input}${o.help ? `<small>${o.help}</small>` : ""}</div>`;
+const unit = (id, u, ph = "", mode = "decimal") => `<div class="unit"><input id="${id}" name="${id}" inputmode="${mode}" placeholder="${ph}" autocomplete="off"><span>${u}</span></div>`;
+const MEMO_PH = {
+  "매도": "예: 지상 6층 근생 건물, 현재 만실이에요. 연내 매각을 생각하고 있어요.",
+  "매수": "예: 사옥 용도로 엘리베이터 있는 건물을 찾고 있어요. 대출을 일부 활용할 예정이에요."
+};
 
 function renderInquiry(type) {
   view.innerHTML = `
   <section class="cat-head">
     <div class="big">RF</div>
-    <div><h1>빌딩 매도·매수 의뢰</h1><p>팔고 싶은 빌딩, 찾고 있는 빌딩을 알려 주세요. 빌딩러너가 조건을 검토한 뒤 남겨 주신 연락처로 연락드립니다.</p></div>
+    <div><h1>빌딩 매도·매수 의뢰</h1><p>필요한 것만 짧게 남겨 주세요. 자세한 내용은 빌딩러너가 연락드려 상담하면서 여쭤보겠습니다.</p></div>
   </section>
   <section class="inq">
     <form class="form" id="inq-form" novalidate>
-      <fieldset>
-        <legend>의뢰 종류</legend>
-        <div class="seg" role="radiogroup" aria-label="의뢰 종류">
-          <input type="radio" name="kind" id="kind-sell" value="매도"${type === "매도" ? " checked" : ""}><label for="kind-sell">팔고 싶어요 · 매도</label>
-          <input type="radio" name="kind" id="kind-buy" value="매수"${type === "매수" ? " checked" : ""}><label for="kind-buy">사고 싶어요 · 매수</label>
-        </div>
-      </fieldset>
+      <div class="seg" role="radiogroup" aria-label="의뢰 종류">
+        <input type="radio" name="kind" id="kind-sell" value="매도"${type === "매도" ? " checked" : ""}><label for="kind-sell">팔고 싶어요 · 매도</label>
+        <input type="radio" name="kind" id="kind-buy" value="매수"${type === "매수" ? " checked" : ""}><label for="kind-buy">사고 싶어요 · 매수</label>
+      </div>
 
-      <fieldset>
-        <legend>연락처</legend>
-        <div class="fields">
-          ${fld("f-name", "이름 또는 회사명", `<input id="f-name" name="f-name" autocomplete="name" required>`, { req: 1 })}
-          ${fld("f-phone", "휴대폰 번호", `<input id="f-phone" name="f-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="010-0000-0000" required>`, { req: 1 })}
-          ${fld("f-email", "이메일", `<input id="f-email" name="f-email" type="email" autocomplete="email" placeholder="선택">`)}
-          ${fld("f-time", "연락 받기 편한 시간", `<select id="f-time" name="f-time">${opts(["언제든 괜찮아요", "오전 (9~12시)", "오후 (12~18시)", "저녁 (18시 이후)", "문자로 먼저 주세요"], "선택")}</select>`)}
-        </div>
-      </fieldset>
+      <div class="fields">
+        ${fld("f-name", "이름", `<input id="f-name" name="f-name" autocomplete="name" placeholder="회사명도 괜찮아요">`, { req: 1 })}
+        ${fld("f-phone", "연락처", `<input id="f-phone" name="f-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="010-0000-0000">`, { req: 1 })}
+      </div>
 
-      <fieldset data-for="매도">
-        <legend>팔고 싶은 건물</legend>
-        <div class="fields">
-          ${fld("s-addr", "건물 위치", `<input id="s-addr" name="s-addr" placeholder="예: 서울 강남구 역삼동">`, { req: 1, full: 1, help: "번지는 상담할 때 알려 주셔도 됩니다." })}
-          ${fld("s-use", "용도", `<select id="s-use" name="s-use">${opts(USES)}</select>`)}
-          ${fld("s-built", "준공 연도", `<input id="s-built" name="s-built" inputmode="numeric" placeholder="예: 2004">`)}
-          ${fld("s-land", "대지면적", unit("s-land", "평", "예: 120"))}
-          ${fld("s-gfa", "연면적", unit("s-gfa", "평", "예: 800"))}
-          ${fld("s-price", "희망 매도가", unit("s-price", "억 원", "예: 300"))}
-          ${fld("s-rent", "월 임대료 합계", unit("s-rent", "만 원", "예: 8,500"))}
-          ${fld("s-occ", "임대 상태", `<select id="s-occ" name="s-occ">${opts(["만실", "일부 공실", "전체 공실", "사옥으로 사용 중"])}</select>`)}
-          ${fld("s-when", "희망 매도 시기", `<select id="s-when" name="s-when">${opts(["3개월 안", "6개월 안", "1년 안", "시세만 먼저 알고 싶어요"])}</select>`)}
-        </div>
-      </fieldset>
+      <div class="fields" data-for="매도">
+        ${fld("s-addr", "건물 위치", `<input id="s-addr" name="s-addr" placeholder="예: 서울 강남구 역삼동">`, { req: 1, help: "구·동까지만 적어도 됩니다." })}
+        ${fld("s-price", "희망 매도가", unit("s-price", "억 원", "예: 120", "text"))}
+      </div>
 
-      <fieldset data-for="매수">
-        <legend>찾고 있는 건물</legend>
-        <div class="fields">
-          ${fld("b-area", "희망 지역", `<input id="b-area" name="b-area" placeholder="예: 강남·서초, 성수, 마포 (여러 곳 가능)">`, { req: 1, full: 1 })}
-          ${fld("b-min", "예산", `<div class="range2">${unit("b-min", "억 원", "최소")}<span aria-hidden="true">~</span>${unit("b-max", "억 원", "최대")}</div>`, { req: 1, full: 1, help: "대출을 포함한 총 매입 예산입니다. 한쪽만 적어도 됩니다." })}
-          ${fld("b-use", "용도", `<select id="b-use" name="b-use">${opts(USES)}</select>`)}
-          ${fld("b-who", "매수 주체", `<select id="b-who" name="b-who">${opts(["개인", "법인", "법인 설립 검토 중"])}</select>`)}
-          ${fld("b-goal", "매입 목적", `<select id="b-goal" name="b-goal">${opts(["임대 수익", "사옥", "리모델링·개발", "아직 정하지 않았어요"])}</select>`)}
-          ${fld("b-loan", "대출 활용", `<select id="b-loan" name="b-loan">${opts(["활용할 예정", "활용하지 않음", "상담 후 결정"])}</select>`)}
-          ${fld("b-when", "희망 매입 시기", `<select id="b-when" name="b-when">${opts(["3개월 안", "6개월 안", "1년 안", "좋은 매물이 나오면"])}</select>`)}
-        </div>
-      </fieldset>
+      <div class="fields" data-for="매수">
+        ${fld("b-area", "희망 지역", `<input id="b-area" name="b-area" placeholder="예: 강남·서초, 성수">`, { req: 1 })}
+        ${fld("b-budget", "예산", unit("b-budget", "억 원", "예: 50~80", "text"), { req: 1, help: "대출 포함 총액. 대략이어도 됩니다." })}
+      </div>
 
-      <fieldset>
-        <legend>더 알려 주실 내용</legend>
-        <div class="fields">
-          ${fld("f-memo", "요청 사항", `<textarea id="f-memo" name="f-memo" placeholder="예: 1층 근생 임차인은 유지하고 싶어요 / 엘리베이터 있는 건물만 봐 주세요"></textarea>`, { full: 1 })}
-        </div>
-        <div class="hp" aria-hidden="true"><label for="f-hp">비워 두세요</label><input id="f-hp" name="_honey" tabindex="-1" autocomplete="off"></div>
-      </fieldset>
+      <div class="fields">
+        ${fld("f-memo", "문의 내용", `<textarea id="f-memo" name="f-memo" rows="3"></textarea>`, { full: 1 })}
+      </div>
+      <div class="hp" aria-hidden="true"><label for="f-hp">비워 두세요</label><input id="f-hp" name="_honey" tabindex="-1" autocomplete="off"></div>
 
       <div class="consent">
         <label for="f-agree"><input type="checkbox" id="f-agree" name="f-agree"> [필수] 개인정보 수집·이용에 동의합니다</label>
-        <dl>
-          <dt>수집 항목</dt><dd>이름(회사명), 휴대폰 번호, 이메일, 의뢰 내용</dd>
-          <dt>이용 목적</dt><dd>매도·매수 의뢰 상담과 회신</dd>
-          <dt>보유 기간</dt><dd>상담 종료 후 1년. 요청하시면 바로 삭제합니다.</dd>
-        </dl>
-        <p class="foot-note" style="margin-top:8px">동의하지 않으실 수 있지만, 이 경우 의뢰를 접수할 수 없습니다.</p>
+        <details>
+          <summary>내용 보기</summary>
+          <dl>
+            <dt>수집 항목</dt><dd>이름, 연락처, 의뢰 내용</dd>
+            <dt>이용 목적</dt><dd>매도·매수 의뢰 상담과 회신</dd>
+            <dt>보유 기간</dt><dd>상담 종료 후 1년. 요청하시면 바로 삭제합니다.</dd>
+          </dl>
+          <p class="foot-note" style="margin-top:8px">동의하지 않으실 수 있지만, 이 경우 의뢰를 접수할 수 없습니다.</p>
+        </details>
       </div>
 
       <div class="submit-row">
         <button class="btn" type="submit" id="inq-submit">의뢰 보내기</button>
-        <span class="foot-note" style="margin:0">남겨 주신 정보는 상담 목적으로만 사용합니다.</span>
       </div>
       <div class="form-msg" id="inq-msg" role="status" hidden></div>
     </form>
@@ -1283,10 +1261,9 @@ function renderInquiry(type) {
       <div class="spec">
         <div class="spec-title"><span>진행 순서</span><span>RF</span></div>
         <ol class="steps">
-          <li data-n="1"><span><b>의뢰서 접수</b><span>위치와 조건을 남겨 주세요</span></span></li>
-          <li data-n="2"><span><b>빌딩러너 연락</b><span>남겨 주신 번호로 연락드립니다</span></span></li>
-          <li data-n="3"><span><b>시세·조건 검토</b><span>주변 실거래와 임대 현황을 함께 봅니다</span></span></li>
-          <li data-n="4"><span><b>매칭과 현장 확인</b><span>조건이 맞는 상대와 건물을 연결합니다</span></span></li>
+          <li data-n="1"><span><b>의뢰 남기기</b><span>1분이면 충분합니다</span></span></li>
+          <li data-n="2"><span><b>빌딩러너 연락</b><span>조건을 자세히 여쭤봅니다</span></span></li>
+          <li data-n="3"><span><b>검토와 매칭</b><span>시세를 보고 맞는 상대를 찾습니다</span></span></li>
         </ol>
       </div>
       <div class="side-box">
@@ -1300,7 +1277,10 @@ function renderInquiry(type) {
   const form = document.getElementById("inq-form");
   const msg = document.getElementById("inq-msg");
   const kind = () => form.querySelector('input[name="kind"]:checked').value;
-  const sync = () => form.querySelectorAll("fieldset[data-for]").forEach(fs => { fs.hidden = fs.dataset.for !== kind(); });
+  const sync = () => {
+    form.querySelectorAll("[data-for]").forEach(el => { el.hidden = el.dataset.for !== kind(); });
+    document.getElementById("f-memo").placeholder = MEMO_PH[kind()];
+  };
   form.querySelectorAll('input[name="kind"]').forEach(r => r.addEventListener("change", sync));
   sync();
 
@@ -1313,12 +1293,11 @@ function renderInquiry(type) {
     const k = kind();
     const problems = [];
     const need = (id, ok, text) => { if (!ok) { problems.push([id, text]); } };
-    need("f-name", val("f-name"), "이름 또는 회사명을 적어 주세요.");
-    need("f-phone", val("f-phone").replace(/\D/g, "").length >= 9, "연락 가능한 휴대폰 번호를 적어 주세요. 예: 010-1234-5678");
-    if (val("f-email")) need("f-email", document.getElementById("f-email").checkValidity(), "이메일 형식을 확인해 주세요.");
-    if (k === "매도") need("s-addr", val("s-addr"), "건물 위치를 적어 주세요. 구와 동까지만 적어도 됩니다.");
-    else { need("b-area", val("b-area"), "희망 지역을 적어 주세요."); need("b-min", val("b-min") || val("b-max"), "예산을 최소나 최대 중 하나라도 적어 주세요."); }
-    need("f-agree", document.getElementById("f-agree").checked, "개인정보 수집·이용에 동의해 주셔야 접수할 수 있습니다.");
+    need("f-name", val("f-name"), "이름을 적어 주세요.");
+    need("f-phone", val("f-phone").replace(/\D/g, "").length >= 9, "연락처를 적어 주세요. 예: 010-1234-5678");
+    if (k === "매도") need("s-addr", val("s-addr"), "건물 위치를 적어 주세요.");
+    else { need("b-area", val("b-area"), "희망 지역을 적어 주세요."); need("b-budget", val("b-budget"), "예산을 대략이라도 적어 주세요."); }
+    need("f-agree", document.getElementById("f-agree").checked, "개인정보 수집·이용에 동의해 주세요.");
     if (problems.length) {
       problems.forEach(([id]) => document.getElementById(id).setAttribute("aria-invalid", "true"));
       say(problems.map(p => p[1]).join(" "), true);
@@ -1327,16 +1306,10 @@ function renderInquiry(type) {
     }
     if (val("f-hp")) return; // 스팸 봇
 
-    const data = { "의뢰 종류": k, "이름": val("f-name"), "휴대폰": val("f-phone"), "이메일": val("f-email"), "연락 시간": val("f-time") };
-    const add = (label, id, suffix = "") => { const v = val(id); if (v) data[label] = v + suffix; };
-    if (k === "매도") {
-      add("건물 위치", "s-addr"); add("용도", "s-use"); add("준공 연도", "s-built"); add("대지면적", "s-land", "평"); add("연면적", "s-gfa", "평");
-      add("희망 매도가", "s-price", "억 원"); add("월 임대료", "s-rent", "만 원"); add("임대 상태", "s-occ"); add("희망 시기", "s-when");
-    } else {
-      add("희망 지역", "b-area"); data["예산"] = `${val("b-min") || "?"} ~ ${val("b-max") || "?"} 억 원`;
-      add("용도", "b-use"); add("매수 주체", "b-who"); add("매입 목적", "b-goal"); add("대출 활용", "b-loan"); add("희망 시기", "b-when");
-    }
-    add("요청 사항", "f-memo");
+    const data = { "의뢰 종류": k, "이름": val("f-name"), "연락처": val("f-phone") };
+    if (k === "매도") { data["건물 위치"] = val("s-addr"); if (val("s-price")) data["희망 매도가"] = val("s-price") + "억 원"; }
+    else { data["희망 지역"] = val("b-area"); data["예산"] = val("b-budget") + "억 원"; }
+    if (val("f-memo")) data["문의 내용"] = val("f-memo");
     data._subject = `[CADENCE] ${k} 의뢰 · ${data["이름"]}`;
     data._template = "table";
     data._captcha = "false";
@@ -1352,7 +1325,7 @@ function renderInquiry(type) {
       .then(res => {
         if (res && (res.success === false || res.success === "false")) throw new Error(res.message || "fail");
         form.reset(); sync();
-        say(`${k} 의뢰를 접수했습니다. 확인하는 대로 ${data["휴대폰"]} 번호로 연락드리겠습니다.`);
+        say(`${k} 의뢰를 접수했습니다. 확인하는 대로 ${data["연락처"]}로 연락드리겠습니다.`);
       })
       .catch(() => say("의뢰를 보내지 못했습니다. 인터넷 연결을 확인하고 다시 눌러 주세요. 계속 안 되면 빌딩러너 SNS 메시지로 문의해 주세요.", true))
       .finally(() => { btn.disabled = false; btn.textContent = "의뢰 보내기"; });
