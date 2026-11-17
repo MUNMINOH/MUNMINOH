@@ -21,6 +21,8 @@ ROOT = Path(__file__).resolve().parent.parent          # magazine/
 OUT = ROOT.parent / "_site"
 SITE = "https://cadence.bldgrunner.com"
 PYEONG = 3.3058
+# 검색엔진 소유 확인 코드 (구글 서치 콘솔 / 네이버 서치어드바이저에서 받은 content 값)
+SITE_VERIFICATION = {"google-site-verification": "", "naver-site-verification": ""}
 SOCIAL = [
     "https://www.youtube.com/@building_runner_official",
     "https://www.instagram.com/building_runner/",
@@ -29,30 +31,34 @@ SOCIAL = [
 
 ROUTES = [
     # slug, 경로, 이름, 페이지 제목, 설명
-    ("home", "/", "홈", "CADENCE 케이던스 | 서울 빌딩 실거래·평당가·상업용 부동산 뉴스",
-     "서울 빌딩 실거래와 권역·구·동별 평당가, 금리와 은행 대출 금리, 상장 리츠, 상업용 부동산 뉴스를 3시간마다 모아 보여 주는 빌딩러너의 상업용 부동산 리뷰."),
-    ("market", "/market/", "마켓", "상업용 부동산 시장 뉴스: 오피스 공실률·임대료 | CADENCE",
-     "오피스 공실률, 임대료, 수요와 공급 등 상업용 부동산 시장 뉴스를 언론사 원문 링크와 함께 모았습니다."),
-    ("deal", "/deal/", "클로징", "서울 빌딩 매매 실거래 검색 | CADENCE",
-     "국토교통부 신고 자료로 서울 빌딩 매매 실거래를 구·용도·금액대·기간별로 검색하고, 빌딩·물류센터·호텔 매각 뉴스를 봅니다."),
-    ("building", "/building/", "빌딩", "빌딩 개발·리모델링·재건축 뉴스 | CADENCE",
-     "빌딩 개발, 리모델링, 재건축, 준공 소식을 언론사 원문 링크와 함께 모았습니다."),
-    ("policy", "/guide/", "건물주 가이드", "건물주 가이드: 취득세·중개보수·상가임대차보호법·RTI 계산기 | CADENCE",
+    ("home", "/", "홈", "서울 빌딩 시세·실거래가, 꼬마빌딩·상업용 부동산 정보 | CADENCE",
+     "서울 빌딩 실거래가와 권역·구·동별 평당가, 은행 대출 금리, 오피스 공실률, 상업용 부동산 뉴스를 3시간마다 모아 보여 주는 빌딩러너의 상업용 부동산 매거진."),
+    ("price", "/price/", "시세", "서울 빌딩 시세: 권역·구·동별 평당가 | CADENCE",
+     "국토교통부 실거래로 계산한 서울 빌딩 토지·연면적 평당가. CBD·GBD·YBD 권역, 25개 구, 동별, 준공 연도별·용도별 평당가와 월별 거래 건수."),
+    ("deal", "/deal/", "실거래", "서울 빌딩 매매 실거래가 검색 | CADENCE",
+     "국토교통부 신고 자료로 서울 빌딩·꼬마빌딩 매매 실거래가를 구·용도·금액대·기간별로 검색하고 이번 달 큰 거래와 매매 뉴스를 봅니다."),
+    ("report", "/report/", "시장 리포트", "상업용 부동산 시장 리포트: 오피스 공실률·거래액·금리 | CADENCE",
+     "한국부동산원·알스퀘어·JLL·CBRE의 분기 오피스 공실률과 거래액, 금리와 은행 대출 금리, 상장 리츠 시세를 한곳에 모았습니다."),
+    ("policy", "/guide/", "건물주 가이드", "건물주 가이드: 빌딩 취득세·중개보수·상가임대차보호법·RTI 계산기 | CADENCE",
      "빌딩 취득세 4.6%, 중개보수 0.9% 이내, 건물분 부가세, 상가임대차보호법 환산보증금, 임대업 대출 RTI 기준을 근거 법령과 함께 정리하고 계산기로 확인합니다."),
-    ("players", "/players/", "페이스메이커", "리츠·자산운용사 뉴스와 상장 리츠 시세 | CADENCE",
-     "리츠, 자산운용사, 기관투자자 소식과 상장 리츠 시세를 모았습니다."),
-    ("data", "/data/", "랩타임", "서울 권역·구·동별 빌딩 평당가와 금리 | CADENCE",
-     "국토교통부 실거래로 계산한 서울 권역·구·동별 빌딩 토지·연면적 평당가, 연식·용도별 평당가, 금리와 은행 대출 금리, 상장 리츠 시세."),
-    ("column", "/column/", "칼럼", "빌딩러너 칼럼 | CADENCE",
+    ("news", "/news/", "뉴스", "상업용 부동산 뉴스: 오피스·빌딩 매매·리츠·정책 | CADENCE",
+     "오피스·상가·빌딩 매매·리츠·정책 등 상업용 부동산 뉴스를 언론사 원문 링크로 모았습니다. 3시간마다 갱신합니다."),
+    ("column", "/column/", "칼럼", "빌딩러너 칼럼: 상권과 빌딩 가치 분석 | CADENCE",
      "빌딩러너가 상권과 빌딩 가치를 숫자로 풀어 쓴 칼럼을 모았습니다."),
     ("inquiry", "/inquiry/", "매도·매수 의뢰", "빌딩 매도·매수 의뢰 | CADENCE",
      "팔고 싶은 빌딩, 찾고 있는 빌딩을 남겨 주세요. 빌딩러너가 조건을 검토해 연락드립니다."),
     ("sell", "/sell/", "매도 의뢰", "빌딩 매도 의뢰 | CADENCE",
-     "팔고 싶은 빌딩의 위치와 조건을 남겨 주세요. 빌딩러너가 검토해 연락드립니다."),
+     "팔고 싶은 빌딩의 지번과 조건을 남겨 주세요. 빌딩러너가 검토해 연락드립니다."),
     ("buy", "/buy/", "매수 의뢰", "빌딩 매수 의뢰 | CADENCE",
      "찾고 있는 빌딩의 지역과 예산을 남겨 주세요. 빌딩러너가 검토해 연락드립니다."),
 ]
-SECTION_NAMES = {"market": "마켓", "deal": "클로징", "building": "빌딩", "policy": "건물주 가이드", "players": "페이스메이커"}
+# 예전 주소 → 새 주소
+REDIRECTS = {"/market/": "/news/", "/building/": "/news/", "/players/": "/news/", "/data/": "/price/"}
+GU_SLUG = {"강남구": "gangnam", "서초구": "seocho", "송파구": "songpa", "강동구": "gangdong", "종로구": "jongno", "중구": "jung",
+           "용산구": "yongsan", "성동구": "seongdong", "광진구": "gwangjin", "동대문구": "dongdaemun", "중랑구": "jungnang", "성북구": "seongbuk",
+           "강북구": "gangbuk", "도봉구": "dobong", "노원구": "nowon", "은평구": "eunpyeong", "서대문구": "seodaemun", "마포구": "mapo",
+           "양천구": "yangcheon", "강서구": "gangseo", "구로구": "guro", "금천구": "geumcheon", "영등포구": "yeongdeungpo", "동작구": "dongjak", "관악구": "gwanak"}
+TOPIC = {"market": "시장·임대", "deal": "매매·투자", "building": "개발·리모델링", "policy": "정책·세금·금융", "players": "리츠·운용사"}
 
 e = lambda s: html.escape(str(s or ""), quote=True)
 
@@ -79,7 +85,7 @@ def news_list(news, limit=20):
     if not news:
         return ""
     items = "".join(
-        f'<li><a href="{e(n["link"])}" rel="noopener" target="_blank"><b>{e(n["title"])}</b>'
+        f'<li><a href="{e(n["link"])}" rel="noopener" target="_blank"><small>{e(TOPIC.get(n.get("section"), ""))}</small> <b>{e(n["title"])}</b>'
         f'<small>{e(n.get("source"))} · {e((n.get("date") or "")[:10])}</small></a></li>' for n in news[:limit])
     return f'<ol class="headlines">{items}</ol>'
 
@@ -123,28 +129,63 @@ def columns_list(cols, limit=None):
     return f'<ol class="headlines">{items}</ol>'
 
 
-def prerender(slug, name, desc, data, guide):
+def gu_links():
+    return "<nav class=\"gu-chips\">" + "".join(f'<a href="/seoul/{v}/">{e(k)} 빌딩 시세</a>' for k, v in GU_SLUG.items()) + "</nav>"
+
+
+def market_board(market):
+    out = []
+    for g in market.get("groups", []):
+        items = "".join(f"<dt>{e(i['label'])}</dt><dd>{e(i['value'])}</dd>" for i in g["items"])
+        links = "".join(f'<li><a href="{e(l["url"])}" rel="noopener" target="_blank">{e(l["title"])}</a></li>' for l in g["links"])
+        out.append(f'<article class="mb"><header><b>{e(g["source"])}</b><span>{e(g["kind"])}</span></header><dl>{items}</dl><ul class="mb-links">{links}</ul></article>')
+    return f'<div class="board-grid">{"".join(out)}</div><p class="foot-note">{e(market.get("quarter"))} 기준 · {e(market.get("note"))}</p>'
+
+
+def prerender(slug, name, desc, data, guide, market, gu=None):
     news = data.get("news", [])
     rows = ((data.get("deals") or {}).get("history") or {}).get("rows", [])
     cols = data.get("columns", [])
+    if gu:
+        rs = [r for r in rows if r["gu"] == gu]
+        by = {}
+        for r in rs:
+            by.setdefault(r["dong"], []).append(r)
+        dong = sorted(((d, med([land_py(r) for r in v]), len(v)) for d, v in by.items() if len(v) >= 2), key=lambda x: -x[1])
+        dong_rows = "".join(f"<tr><td>{e(d)}</td><td>{l:,.0f}만 원</td><td>{n}</td></tr>" for d, l, n in dong)
+        return (f'<section class="cat-head"><div><p class="crumb"><a href="/price/">서울 빌딩 시세</a> › {e(gu)}</p><h1>{e(gu)} 빌딩 시세·실거래가</h1>'
+                f'<p>{e(desc)}</p></div></section>'
+                + (f'<section><h2>{e(gu)} 빌딩 평당가 요약</h2><ul><li>토지 3.3㎡당 중위값: {med([land_py(r) for r in rs]):,.0f}만 원</li>'
+                   f'<li>연면적 3.3㎡당 중위값: {med([gfa_py(r) for r in rs]):,.0f}만 원</li><li>중위 거래금액: {eok(med([r["amount"] for r in rs]))}억 원</li>'
+                   f'<li>거래 건수: {len(rs)}건</li></ul></section>' if rs else "")
+                + (f'<section><h2>{e(gu)} 동별 평당가</h2><div class="table-scroll"><table class="gustats"><thead><tr><th>동</th><th>토지 3.3㎡당</th><th>거래 건수</th></tr></thead><tbody>{dong_rows}</tbody></table></div></section>' if dong_rows else "")
+                + (f'<section><h2>{e(gu)} 최근 실거래</h2>{deals_table(rs, 20)}</section>' if rs else "")
+                + f'<section><h2>다른 구 시세</h2>{gu_links()}</section>')
     if slug == "home":
         top = ((data.get("deals") or {}).get("top") or [None])[0]
-        lead = ""
-        if top:
-            lead = (f'<section class="cover-text"><p class="eyebrow">이번 달 서울 최대 빌딩 거래</p>'
-                    f'<h1>서울 {e(top["gu"])} {e(top["dong"])} {e(top.get("use"))}, {eok(top["amount"])}억 원에 거래</h1>'
-                    f'<p class="dek">{e(top["date"])} 계약 · 출처: 국토교통부 상업업무용 부동산 매매 신고 자료</p></section>')
-        else:
-            lead = '<h1>CADENCE 케이던스 · 서울 빌딩·상업용 부동산 리뷰</h1>'
+        land = med([land_py(r) for r in rows]) if rows else 0
+        lead = ('<section class="hero"><div class="hero-head"><h1>서울 빌딩 시세와 실거래, 오늘의 숫자</h1>'
+                f'<p>{e(desc)}</p></div><ul>'
+                + (f"<li>서울 빌딩 토지 3.3㎡당 중위값 {land / 10000:,.2f}억 원 (국토교통부 실거래 {len(rows)}건)</li>" if land else "")
+                + (f'<li>이번 달 최대 거래: 서울 {e(top["gu"])} {e(top["dong"])} {e(top.get("use"))} {eok(top["amount"])}억 원 ({e(top["date"])})</li>' if top else "")
+                + "</ul></section>")
         return (lead
-                + (f'<section><h2>빌딩러너 칼럼</h2>{columns_list(cols, 5)}</section>' if cols else "")
                 + (f'<section><h2>최신 상업용 부동산 뉴스</h2>{news_list(news, 12)}</section>' if news else "")
-                + (f'<section><h2>서울 구별 빌딩 평당가</h2>{gu_table(rows, 10)}</section>' if rows else ""))
-    if slug in ("market", "building", "players"):
-        return head(name, desc) + news_list([n for n in news if n.get("section") == slug], 40)
+                + (f'<section><h2>서울 구별 빌딩 평당가</h2>{gu_table(rows)}</section>' if rows else "")
+                + f'<section><h2>구별 빌딩 시세 바로 보기</h2>{gu_links()}</section>'
+                + (f'<section><h2>빌딩러너 칼럼</h2>{columns_list(cols, 5)}</section>' if cols else "")
+                + f'<section><h2>기관별 시장 지표</h2>{market_board(market)}</section>')
+    if slug == "price":
+        return head(name, desc) + (f'<section><h2>구별 빌딩 평당가</h2>{gu_table(rows)}</section>' if rows else "") + f'<section><h2>구별 상세</h2>{gu_links()}</section>'
     if slug == "deal":
-        return (head(name, desc) + (deals_table(rows) if rows else "")
-                + news_list([n for n in news if n.get("section") == "deal"], 30))
+        return (head(name, desc) + (deals_table(rows, 30) if rows else "")
+                + news_list([n for n in news if n.get("section") == "deal"], 20))
+    if slug == "report":
+        rates = data.get("rates", {})
+        rate_items = "".join(f'<li>{e(r["name"])}: {r["value"]}{e(r.get("unit"))} ({e(r.get("date"))})</li>' for r in rates.values())
+        return (head(name, desc) + f'<section><h2>기관별 시장 지표</h2>{market_board(market)}</section>'
+                + (f'<section><h2>금리·환율·은행 대출 금리</h2><ul>{rate_items}</ul><p class="foot-note">출처: 한국은행 경제통계시스템(ECOS)</p></section>' if rates else "")
+                + news_list([n for n in news if n.get("section") in ("market", "players")], 20))
     if slug == "policy":
         facts = "".join(
             f'<article class="fact"><h3>{e(f["q"])}</h3><p class="fact-a">{e(f["a"])}</p><p>{e(f["d"])}</p>'
@@ -152,11 +193,8 @@ def prerender(slug, name, desc, data, guide):
         return (head(name, desc) + f'<section><h2>건물주가 가장 많이 묻는 기준</h2><div class="facts">{facts}</div>'
                 f'<p class="foot-note">{e(guide.get("checked"))} 기준으로 법령과 공개 자료를 확인해 정리했습니다.</p></section>'
                 + news_list([n for n in news if n.get("section") == "policy"], 20))
-    if slug == "data":
-        rates = data.get("rates", {})
-        rate_items = "".join(f'<li>{e(r["name"])}: {r["value"]}{e(r.get("unit"))} ({e(r.get("date"))})</li>' for r in rates.values())
-        return (head(name, desc) + (f'<section><h2>구별 빌딩 평당가</h2>{gu_table(rows)}</section>' if rows else "")
-                + (f'<section><h2>금리·환율·은행 대출 금리</h2><ul>{rate_items}</ul><p class="foot-note">출처: 한국은행 경제통계시스템(ECOS)</p></section>' if rates else ""))
+    if slug == "news":
+        return head(name, desc) + news_list(news, 60)
     if slug == "column":
         return head(name, desc) + columns_list(cols)
     return head(name, desc)
@@ -202,7 +240,7 @@ def seo_head(slug, path, title, desc, data, noindex=False):
         f'<meta name="twitter:description" content="{e(desc)}">',
         f'<meta name="twitter:image" content="{img}">',
         f'<script type="application/ld+json">{ld}</script>',
-    ])
+    ] + [f'<meta name="{k}" content="{e(v)}">' for k, v in SITE_VERIFICATION.items() if v])
 
 
 def build() -> None:
@@ -210,18 +248,39 @@ def build() -> None:
     data_path = ROOT / "data" / "live.json"
     data = json.loads(data_path.read_text(encoding="utf-8")) if data_path.exists() else {}
     guide = json.loads((ROOT / "content" / "guide.json").read_text(encoding="utf-8"))
-    guide_js = "<script>window.GUIDE_DATA = " + json.dumps(guide, ensure_ascii=False).replace("</", "<\\/") + ";</script>"
+    market = json.loads((ROOT / "content" / "market.json").read_text(encoding="utf-8"))
+    guide_js = ("<script>window.GUIDE_DATA = " + json.dumps(guide, ensure_ascii=False).replace("</", "<\\/") + ";\n"
+                "window.MARKET_DATA = " + json.dumps(market, ensure_ascii=False).replace("</", "<\\/") + ";</script>")
 
     a, b = template.index("<!--SEO:start-->"), template.index("<!--SEO:end-->") + len("<!--SEO:end-->")
     if OUT.exists():
         shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
 
-    def page(slug, path, name, title, desc, noindex=False):
+    def page(slug, path, name, title, desc, noindex=False, gu=None):
         out = template[:a] + seo_head(slug, path, title, desc, data, noindex) + template[b:]
         out = out.replace("<!--DATA-->", guide_js, 1)
-        body = prerender(slug, name, desc, data, guide) if not noindex else head("찾는 페이지가 없습니다", "주소가 바뀌었거나 없어진 페이지입니다.")
+        body = prerender(slug, name, desc, data, guide, market, gu) if not noindex else head("찾는 페이지가 없습니다", "주소가 바뀌었거나 없어진 페이지입니다.")
         return out.replace("<!--PRERENDER-->", body, 1)
+
+    rows = ((data.get("deals") or {}).get("history") or {}).get("rows", [])
+    months = ((data.get("deals") or {}).get("history") or {}).get("months", [])
+    period = f"{months[0][:4]}.{months[0][4:]}~{months[-1][:4]}.{months[-1][4:]}" if months else ""
+    for gu, gslug in GU_SLUG.items():
+        n = sum(1 for r in rows if r["gu"] == gu)
+        path = f"/seoul/{gslug}/"
+        title = f"{gu} 빌딩 시세·실거래가 (토지·연면적 평당가) | CADENCE"
+        desc = (f"서울 {gu} 빌딩·꼬마빌딩 매매 실거래가와 동별 토지·연면적 평당가. 국토교통부 신고 자료"
+                + (f" {period} {n}건" if n else "") + " 기준, 3시간마다 갱신합니다.")
+        target = OUT / "seoul" / gslug / "index.html"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(page("gu", path, gu, title, desc, gu=gu), encoding="utf-8")
+    for old, new in REDIRECTS.items():
+        t = OUT / old.strip("/") / "index.html"
+        t.parent.mkdir(parents=True, exist_ok=True)
+        t.write_text(f'<!doctype html><meta charset="utf-8"><title>이동합니다</title><link rel="canonical" href="{SITE}{new}">'
+                     f'<meta name="robots" content="noindex"><meta http-equiv="refresh" content="0; url={new}">'
+                     f'<a href="{new}">새 주소로 이동</a>', encoding="utf-8")
 
     for slug, path, name, title, desc in ROUTES:
         target = OUT / path.strip("/") / "index.html" if path != "/" else OUT / "index.html"
@@ -234,11 +293,12 @@ def build() -> None:
             shutil.copytree(ROOT / d, OUT / d, dirs_exist_ok=True)
 
     lastmod = (data.get("updatedAt") or dt.datetime.now(dt.timezone.utc).isoformat())[:10]
-    urls = "".join(f"<url><loc>{SITE}{path}</loc><lastmod>{lastmod}</lastmod><changefreq>{'hourly' if slug in ('home', 'deal', 'data', 'market') else 'daily'}</changefreq></url>"
+    urls = "".join(f"<url><loc>{SITE}{path}</loc><lastmod>{lastmod}</lastmod><changefreq>{'hourly' if slug in ('home', 'deal', 'price', 'news') else 'daily'}</changefreq></url>"
                    for slug, path, *_ in ROUTES if slug not in ("sell", "buy"))
+    urls += "".join(f"<url><loc>{SITE}/seoul/{v}/</loc><lastmod>{lastmod}</lastmod><changefreq>daily</changefreq></url>" for v in GU_SLUG.values())
     (OUT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n', encoding="utf-8")
     (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
-    print(f"빌드 완료: {OUT} (페이지 {len(ROUTES)}개 + 404, sitemap.xml, robots.txt)")
+    print(f"빌드 완료: {OUT} (페이지 {len(ROUTES)}개 + 구별 {len(GU_SLUG)}개 + 404, sitemap.xml, robots.txt)")
 
 
 if __name__ == "__main__":

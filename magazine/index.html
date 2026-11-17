@@ -528,6 +528,69 @@ table.mini th, table.mini td { padding: 8px 6px; }
 .filters.one { grid-template-columns: minmax(0, 320px); margin-bottom: 14px; }
 table.seg { min-width: 0; }
 
+
+/* ---------- 개편: 홈 첫 화면 ---------- */
+.hero { display: grid; gap: 22px; }
+.hero-head h1 { margin: 0 0 8px; font-family: var(--f-head); font-weight: 800; font-size: var(--t-3xl); line-height: 1.25; letter-spacing: -0.01em; text-wrap: balance; }
+.hero-head p { margin: 0; color: var(--ink-2); max-width: 46rem; }
+.hero-head .num { color: var(--muted); font-size: var(--t-xs); white-space: nowrap; }
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line-strong); }
+.kpi { background: var(--surface); padding: 18px 20px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.kpi-l { font-size: var(--t-sm); font-weight: 600; color: var(--ink-2); }
+.kpi strong { font-family: var(--f-display); font-weight: 700; font-size: 2.125rem; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.kpi strong em { font-style: normal; font-family: var(--f-body); font-size: var(--t-sm); font-weight: 600; color: var(--muted); margin-left: 3px; }
+.kpi-s { font-size: var(--t-xs); color: var(--muted); line-height: 1.5; }
+.kpi-src { font-size: 11px; color: var(--muted); letter-spacing: 0.02em; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: start; }
+.two > div { min-width: 0; }
+.sub-h { margin: 26px 0 12px; font-size: var(--t-md); font-weight: 700; }
+/* 뉴스 목록 */
+.nlist { list-style: none; margin: 0; padding: 0; }
+.nlist li { border-top: 1px solid var(--line); }
+.nlist li:last-child { border-bottom: 1px solid var(--line); }
+.nlist a { display: grid; gap: 4px; padding: 13px 0; }
+.nlist b { font-weight: 600; font-size: var(--t-md); line-height: 1.5; }
+.nlist a:hover b { color: var(--accent); }
+.nlist small { color: var(--muted); font-size: var(--t-xs); }
+.nl-topic { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.02em; }
+/* 큰 거래 목록 */
+.dlist { list-style: none; margin: 0; padding: 0; }
+.dlist li { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.dlist li:last-child { border-bottom: 1px solid var(--line); }
+.d-amt { font-family: var(--f-display); font-weight: 700; font-size: 1.25rem; font-variant-numeric: tabular-nums; text-align: right; }
+.d-amt em { font-style: normal; font-family: var(--f-body); font-size: var(--t-xs); color: var(--muted); margin-left: 2px; }
+.d-main { display: grid; gap: 2px; min-width: 0; }
+.d-main b { font-weight: 600; }
+.d-main a:hover b { color: var(--accent); }
+.d-main small { color: var(--muted); font-size: var(--t-xs); }
+.d-pp { text-align: right; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; font-size: var(--t-sm); }
+.d-pp small { display: block; color: var(--muted); font-weight: 400; font-size: 11px; }
+/* 구 바로가기 */
+.gu-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.gu-chips a { display: inline-flex; gap: 6px; align-items: baseline; padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: var(--t-sm); font-weight: 600; }
+.gu-chips a:hover { border-color: var(--accent); color: var(--accent); }
+.gu-chips small { color: var(--muted); font-weight: 400; font-size: 11px; }
+table.gustats td a:hover b { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.crumb { margin: 0 0 6px; font-size: var(--t-xs); color: var(--muted); }
+.crumb a:hover { color: var(--accent); }
+.cat-head .gu-big { font-size: clamp(3rem, 8vw, 5.5rem); font-family: var(--f-head); }
+/* 기관별 시장 지표 */
+.board-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line-strong); }
+.mb { background: var(--surface); padding: 18px 20px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.mb header { display: grid; gap: 2px; }
+.mb header b { font-size: var(--t-md); }
+.mb header span { font-size: var(--t-xs); color: var(--muted); }
+.mb dl { margin: 0; display: grid; gap: 8px; }
+.mb dt { font-size: var(--t-xs); color: var(--muted); }
+.mb dd { margin: 0; font-weight: 700; font-size: var(--t-lg); font-variant-numeric: tabular-nums; }
+.mb-links { list-style: none; margin: 0; padding: 10px 0 0; border-top: 1px solid var(--line); display: grid; gap: 6px; font-size: var(--t-xs); }
+.mb-links a { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
+.pill small { margin-left: 5px; color: inherit; opacity: 0.6; font-weight: 400; }
+.footer-gu { display: grid; gap: 10px; }
+.footer-gu strong { font-size: var(--t-sm); }
+.footer-gu nav { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: var(--t-xs); color: var(--muted); }
+.footer-gu nav a:hover { color: var(--accent); }
+
 /* ---------- 반응형 ---------- */
 @media (max-width: 1000px) {
   .latest { grid-template-columns: minmax(0, 1fr); }
@@ -538,6 +601,8 @@ table.seg { min-width: 0; }
   .toc { display: none; }
   .inq { grid-template-columns: minmax(0, 1fr); gap: 40px; }
   .calcs { grid-template-columns: minmax(0, 1fr); }
+  .two { grid-template-columns: minmax(0, 1fr); gap: 56px; }
+  .board-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .zones { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .inq-side { position: static; }
@@ -553,6 +618,7 @@ table.seg { min-width: 0; }
   .tools { margin-left: 0; }
   .cta { grid-template-columns: minmax(0, 1fr); padding: 26px 22px; }
   .facts, .guide-links { grid-template-columns: minmax(0, 1fr); }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ex-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 520px) {
@@ -568,6 +634,9 @@ table.seg { min-width: 0; }
   .fields { grid-template-columns: minmax(0, 1fr); }
   .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .zones { grid-template-columns: minmax(0, 1fr); }
+  .kpis, .board-grid { grid-template-columns: minmax(0, 1fr); }
+  .dlist li { grid-template-columns: 76px minmax(0, 1fr); }
+  .d-pp { grid-column: 2; text-align: left; }
   .cta-btns { grid-template-columns: minmax(0, 1fr); }
   .util .wrap > span:first-child { display: none; }
 }
@@ -596,8 +665,8 @@ table.seg { min-width: 0; }
       </span>
     </a>
     <div class="tagline">
-      <strong>시장의 리듬을 읽는 상업용 부동산 리뷰</strong>
-      <small>오피스 · 리테일 · 물류 · 데이터센터의 거래와 금리, 그리고 그 흐름을 만드는 사람들</small>
+      <strong>서울 빌딩 시세·실거래와 상업용 부동산 리뷰</strong>
+      <small>국토교통부 실거래 · 한국은행 금리 · 한국부동산원 통계 · 상업용 부동산 뉴스, 3시간마다 갱신</small>
     </div>
   </div>
 </header>
@@ -632,6 +701,7 @@ table.seg { min-width: 0; }
       </div>
       <ul class="board" id="board"></ul>
     </div>
+    <div class="footer-gu"><strong>서울 구별 빌딩 시세</strong><nav id="footer-gu" aria-label="구별 빌딩 시세"></nav></div>
     <div class="fine">
       <span>CADENCE는 빌딩러너가 운영하는 상업용 부동산 뉴스·데이터 페이지입니다. 기사는 각 언론사와 기관의 원문으로 연결되며, 기사의 저작권은 해당 언론사와 기관에 있습니다.</span>
       <span>데이터 출처: 금리·환율 한국은행 경제통계시스템(ECOS), 상장 리츠 시세 Yahoo Finance(지연 시세), 서울 빌딩 실거래 국토교통부 상업업무용 부동산 매매 신고 자료. 투자 판단의 근거로 쓰기 전에 원자료를 확인하세요.</span>
@@ -647,15 +717,14 @@ table.seg { min-width: 0; }
 /* ================= 섹션 =================
    모든 기사는 언론사·기관의 원문 링크입니다. CADENCE는 제목, 출처, 날짜만 모읍니다. */
 const CATS = {
-  market:   { f: "1F", name: "마켓",        art: "skyline", desc: "공실률, 임대료, 수요와 공급. 상업용 부동산 시장 소식을 모읍니다." },
-  deal:     { f: "2F", name: "클로징",      art: "tower",   desc: "빌딩·물류센터·호텔 매각과 매입 소식, 그리고 국토교통부 실거래 신고 자료." },
-  building: { f: "3F", name: "빌딩",        art: "remodel", desc: "개발, 리모델링, 재건축, 준공. 건물이 바뀌는 소식을 모읍니다." },
-  policy:   { f: "4F", name: "건물주 가이드", art: "section", desc: "빌딩을 사고, 보유하고, 임대할 때 꼭 확인할 세금·대출·임대차 기준과 계산기. 근거 법령을 함께 적었습니다." },
-  players:  { f: "5F", name: "페이스메이커", art: "campus",  desc: "리츠, 자산운용사, 기관투자자. 시장의 속도를 만드는 플레이어들의 소식." },
-  data:     { f: "6F", name: "랩타임",      art: "chart",   desc: "서울 권역·구·동별 빌딩 평당가, 금리와 은행 대출 금리, 상장 리츠. 3시간마다 갱신되는 숫자." },
-  column:   { f: "7F", name: "칼럼",        art: "section", desc: "빌딩러너가 네이버 블로그에 쓴 글을 모았습니다." }
+  price:  { f: "1F", name: "시세",        art: "chart",   h1: "서울 빌딩 시세 · 권역·구·동별 평당가", desc: "국토교통부 실거래로 계산한 서울 빌딩 토지·연면적 평당가. 권역·구·동, 연식·용도별로 보고 월별 거래와 금액대 분포까지 확인합니다." },
+  deal:   { f: "2F", name: "실거래",      art: "tower",   h1: "서울 빌딩 매매 실거래", desc: "서울 빌딩 매매 신고를 구·용도·금액대·기간별로 검색하고, 이번 달 큰 거래와 매매 뉴스를 봅니다." },
+  report: { f: "3F", name: "시장 리포트",  art: "skyline", h1: "상업용 부동산 시장 리포트", desc: "한국부동산원·알스퀘어·JLL·CBRE의 분기 지표, 금리와 은행 대출 금리, 상장 리츠 시세를 한곳에 모았습니다." },
+  policy: { f: "4F", name: "건물주 가이드", art: "section", h1: "건물주 가이드 · 세금·대출·임대차 기준과 계산기", desc: "빌딩을 사고, 보유하고, 임대할 때 꼭 확인할 세금·대출·임대차 기준과 계산기. 근거 법령을 함께 적었습니다." },
+  news:   { f: "5F", name: "뉴스",        art: "skyline", h1: "상업용 부동산 뉴스", desc: "오피스·상가·빌딩 매매·리츠·정책 뉴스를 언론사 원문 링크로 모았습니다. 3시간마다 갱신합니다." },
+  column: { f: "6F", name: "칼럼",        art: "section", h1: "빌딩러너 칼럼", desc: "빌딩러너가 네이버 블로그에 쓴 글을 모았습니다." }
 };
-const ALIASES = { invest: "policy", people: "players", guide: "policy", columns: "column" };   // 예전 주소
+const ALIASES = { invest: "policy", guide: "policy", columns: "column", data: "price", market: "news", building: "news", players: "news", people: "news" };   // 예전 주소
 const RATE_ORDER = ["base", "ktb3", "ktb10", "corp", "cd91", "usd", "loan_corp", "loan_sme"];
 const DAILY_RATES = ["base", "ktb3", "ktb10", "corp", "cd91", "usd"];
 const PYEONG = 3.3058;
@@ -709,10 +778,6 @@ function newsDate(iso) {
 function artBox(kind, seed, cls = "") {
   return `<div class="art ${cls}"><canvas data-kind="${kind}" data-seed="${seed}" aria-hidden="true"></canvas></div>`;
 }
-function tagFor(sec) {
-  const c = CATS[sec] || CATS.market;
-  return `<span class="tag"><span class="f">${c.f}</span>${esc(c.name)}</span>`;
-}
 function secHead(f, title, right = "") {
   return `<div class="sec-head"><h2>${f ? `<span class="fl">${f}</span>` : ""}${esc(title)}</h2>${right}</div>`;
 }
@@ -720,77 +785,11 @@ const link = (href, text) => `<a href="${href}">${esc(text)} →</a>`;
 const news = () => (LIVE && Array.isArray(LIVE.news)) ? LIVE.news : [];
 const newsOf = sec => news().filter(n => n.section === sec);
 
-/* ================= 뉴스 카드 ================= */
-function newsCard(n) {
-  const c = CATS[n.section] || CATS.market;
-  return `<a class="card" href="${esc(n.link)}" target="_blank" rel="noopener">
-    ${artBox(c.art, hashSeed(n.title))}
-    <div class="meta">${tagFor(n.section)}<span>${esc(n.source)}</span><span class="num">${newsDate(n.date)}</span></div>
-    <h3>${esc(n.title)}<span class="ext" aria-label="새 창에서 원문 열기"> ↗</span></h3>
-  </a>`;
-}
-function newsList(list) {
-  return `<ol class="headlines">${list.map(n => `<li><a href="${esc(n.link)}" target="_blank" rel="noopener">
-    <b>${esc(n.title)}</b><small>${esc(n.source)} · ${newsDate(n.date)}</small></a></li>`).join("")}</ol>`;
-}
+const useLabel = u => !u ? "건물" : /시설$/.test(u) ? u : u + "시설";
 function newsEmpty() {
   return `<p class="loading">${LIVE_STATE === "loading" ? "뉴스를 불러오는 중입니다." : "아직 모인 뉴스가 없습니다. 다음 갱신 때 다시 확인해 주세요."}</p>`;
 }
 const newsNote = `<p class="foot-note">제목을 누르면 원문이 새 창으로 열립니다. 기사의 저작권은 각 언론사와 기관에 있습니다.</p>`;
-
-/* ================= 커버: 이번 달 최대 거래 (국토교통부 실거래) ================= */
-const useLabel = u => !u ? "건물" : /시설$/.test(u) ? u : u + "시설";
-function useArt(use) {
-  if (/판매|근린/.test(use)) return "retail";
-  if (/창고|물류/.test(use)) return "warehouse";
-  if (/숙박/.test(use)) return "tower";
-  if (/업무/.test(use)) return "tower";
-  return "skyline";
-}
-function coverBlock() {
-  const d = LIVE && LIVE.deals && LIVE.deals.top && LIVE.deals.top[0];
-  const top = news().slice(0, 5);
-  if (!d) {
-    if (!top.length) return `<section class="cover-empty">${newsEmpty()}</section>`;
-    const n = top[0];
-    return `<section class="cover" aria-label="주요 뉴스">
-      <a href="${esc(n.link)}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">${artBox((CATS[n.section] || CATS.market).art, hashSeed(n.title))}</a>
-      <div class="cover-text">
-        <div class="meta"><span class="eyebrow">주요 뉴스</span>${tagFor(n.section)}</div>
-        <h1><a href="${esc(n.link)}" target="_blank" rel="noopener">${esc(n.title)}</a></h1>
-        <div class="meta"><span>${esc(n.source)}</span><span class="num">${newsDate(n.date)}</span></div>
-        ${newsList(top.slice(1))}
-      </div>
-    </section>`;
-  }
-  const gfaPy = d.buildingArea / PYEONG, landPy = d.landArea ? d.landArea / PYEONG : 0;
-  const rows = [
-    ["위치", `서울 ${d.gu} ${d.dong}`],
-    ["용도", useLabel(d.use)],
-    ["용도지역", d.zone || "-"],
-    ["준공", d.built ? `${d.built}년` : "-"],
-    ["대지면적", landPy ? `${fmt(d.landArea, 1)}㎡ (${fmt(landPy, 1)}평)` : "-"],
-    ["연면적", `${fmt(d.buildingArea, 1)}㎡ (${fmt(gfaPy, 1)}평)`],
-    ["거래금액", `${eok(d.amount)}억 원`],
-    ["연면적 3.3㎡당", d.perPyeong ? `${fmt(d.perPyeong, 0)}만 원` : "-"],
-    ["토지 3.3㎡당", landPy ? `${fmt(d.amount / landPy, 0)}만 원` : "-"],
-    ["매수자 구분", d.buyer || "-"],
-    ["계약일", d.date]
-  ];
-  return `<section class="cover" aria-label="이번 달 최대 거래">
-    <a href="/deal/" tabindex="-1" aria-hidden="true">${artBox(useArt(d.use), hashSeed(d.gu + d.dong + d.amount))}</a>
-    <div class="cover-text">
-      <div class="meta"><span class="eyebrow">이번 달 서울 최대 빌딩 거래</span>${tagFor("deal")}</div>
-      <h1><a href="/deal/">서울 ${esc(d.gu)} ${esc(d.dong)} ${esc(useLabel(d.use))}, ${eok(d.amount)}억 원에 거래</a></h1>
-      <p class="dek">${esc(d.date)} 계약. 연면적 ${fmt(gfaPy, 0)}평 규모로, 연면적 3.3㎡당 ${d.perPyeong ? fmt(d.perPyeong, 0) + "만 원" : "-"}입니다.</p>
-      <div class="spec">
-        <div class="spec-title"><span>실거래 팩트 시트</span><span>2F</span></div>
-        <dl>${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
-      </div>
-      <p class="foot-note" style="margin:0">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 건물명과 지번은 공개되지 않습니다.</p>
-    </div>
-  </section>`;
-}
 
 /* ================= 금리·리츠 (기존 실시간 블록) ================= */
 /* 변화량 표시: 한국 시세 관례대로 상승 빨강 ▲, 하락 파랑 ▼ */
@@ -938,96 +937,6 @@ function renderLive() {
 }
 
 /* ================= 화면 ================= */
-function renderHome() {
-  const all = news();
-  const latest = all.slice(0, 6);
-  const bySec = Object.keys(CATS).filter(k => k !== "data" && k !== "column").map(k => [k, newsOf(k)[0]]).filter(([, n]) => n);
-  const molit = all.filter(n => n.source === "국토교통부").slice(0, 5);
-
-  view.innerHTML = `
-  ${coverBlock()}
-
-  <section aria-label="빌딩러너 칼럼">
-    ${secHead("7F", "빌딩러너 칼럼", link("/column/", "칼럼 전체 보기"))}
-    ${columnGrid(3)}
-  </section>
-
-  <section aria-label="오늘의 금리">
-    ${secHead("6F", "오늘의 금리와 환율", liveBadge())}
-    <div id="live-rates">${ratesBlock()}</div>
-  </section>
-
-  <section class="latest" aria-label="최신 뉴스">
-    <div>
-      ${secHead("", "최신 뉴스", link("/market/", "마켓 뉴스 전체"))}
-      ${latest.length ? `<div class="grid">${latest.map(newsCard).join("")}</div>${newsNote}` : newsEmpty()}
-    </div>
-    <aside class="side-news">
-      ${secHead("", "섹션별 최신")}
-      ${bySec.length ? `<ol class="headlines sec">${bySec.map(([k, n]) => `<li><a href="${esc(n.link)}" target="_blank" rel="noopener">
-        <span class="tag"><span class="f">${CATS[k].f}</span>${esc(CATS[k].name)}</span><b>${esc(n.title)}</b><small>${esc(n.source)} · ${newsDate(n.date)}</small></a></li>`).join("")}</ol>` : newsEmpty()}
-    </aside>
-  </section>
-
-  ${ctaBlock()}
-
-  <section aria-label="서울 빌딩 거래">
-    ${secHead("2F", "서울 빌딩 거래", liveBadge())}
-    <div id="live-deals">${dealsBlock()}</div>
-  </section>
-
-  <section aria-label="권역별 평당가">
-    ${secHead("6F", "서울 권역별 빌딩 평당가", link("/data/", "구·동별 평당가 전체 보기"))}
-    ${zoneCards()}
-  </section>
-
-  <section aria-label="건물주 가이드">
-    ${secHead("4F", "건물주 가이드", link("/guide/", "기준 정리와 계산기 전체"))}
-    <div class="guide-links">
-      <a href="/guide/"><b>매입 비용 계산기</b><span>취득세 4.6%, 중개보수, 건물분 부가세까지 현금이 얼마나 더 드는지</span></a>
-      <a href="/guide/"><b>수익률·대출(RTI) 계산기</b><span>지금 월세로 수익률은 몇 %인지, 임대업 대출 기준 1.5배를 넘는지</span></a>
-      <a href="/guide/"><b>상가 임대차 보호 범위</b><span>환산보증금 기준과 5% 증액 상한, 10년 갱신요구권 적용 여부</span></a>
-    </div>
-  </section>
-
-  <section aria-label="상장 리츠">
-    ${secHead("5F", "상장 리츠 시세", liveBadge())}
-    <div id="live-reits">${reitsBlock()}</div>
-  </section>
-
-  ${molit.length ? `<section aria-label="국토교통부 보도자료">
-    ${secHead("4F", "국토교통부 보도자료", link("/guide/", "정책·금융 전체"))}
-    ${newsList(molit)}
-  </section>` : ""}`;
-}
-
-function renderCat(slug) {
-  const c = CATS[slug];
-  const list = slug === "data" ? [] : newsOf(slug);
-  const extra = {
-    deal: `<section>${secHead("", "서울 빌딩 실거래 검색", liveBadge())}${dealExplorer()}</section>
-           <section>${secHead("", "이번 달 큰 거래")}<div id="live-deals">${dealsBlock()}</div></section>
-           <section>${secHead("", "어디서, 어떤 건물이 거래됐나")}${dealCharts()}</section>${ctaBlock()}`,
-    players: `<section>${secHead("", "상장 리츠 시세", liveBadge())}<div id="live-reits">${reitsBlock()}</div></section>`,
-    data: `<section>${secHead("", "권역별 빌딩 평당가", liveBadge())}${zoneCards()}</section>
-           <section>${secHead("", "구별 빌딩 평당가")}${guStats()}</section>
-           <section>${secHead("", "동별 빌딩 평당가")}${dongBlock()}</section>
-           <section>${secHead("", "연식·용도별 평당가")}${segBlocks()}</section>
-           <section>${secHead("", "금리·환율·은행 대출 금리", liveBadge())}<div id="live-rates">${ratesBlock()}</div></section>
-           <section>${secHead("", "상장 리츠 시세", liveBadge())}<div id="live-reits">${reitsBlock()}</div></section>
-           <section>${secHead("", "월별 빌딩 거래")}${monthTrend()}</section>
-           <section>${secHead("", "금액대별 거래 분포")}${priceBuckets()}</section>
-           <section>${secHead("", "서울 빌딩 실거래 검색")}${dealExplorer()}</section>`
-  }[slug] || "";
-  view.innerHTML = `
-  <section class="cat-head">
-    <div class="big">${c.f}</div>
-    <div><h1>${esc(c.name)}</h1><p>${esc(c.desc)}</p></div>
-  </section>
-  ${slug === "data" ? "" : `<section>${list.length ? `<div class="grid">${list.map(newsCard).join("")}</div>${newsNote}` : newsEmpty()}</section>`}
-  ${extra}`;
-}
-
 function renderSearch(q) {
   const term = q.trim().toLowerCase();
   const hits = news().filter(n => (n.title + " " + n.source).toLowerCase().includes(term));
@@ -1038,8 +947,8 @@ function renderSearch(q) {
     <div class="big">?</div>
     <div><h1>‘${esc(q)}’ 검색 결과</h1><p>빌딩러너 칼럼 ${colHits.length}건, 최근 3주 뉴스 ${hits.length}건을 찾았습니다.</p></div>
   </section>
-  ${colHits.length ? `<section>${secHead("7F", "빌딩러너 칼럼")}<div class="grid">${colHits.map(columnCard).join("")}</div></section>` : ""}
-  <section>${hits.length ? `<div class="grid">${hits.map(newsCard).join("")}</div>${newsNote}` :
+  ${colHits.length ? `<section>${secHead("6F", "빌딩러너 칼럼")}<div class="grid">${colHits.map(columnCard).join("")}</div></section>` : ""}
+  <section>${hits.length ? newsRows(hits) :
     `<p class="empty">일치하는 뉴스가 없습니다. ‘오피스’, ‘물류센터’, ‘리츠’처럼 짧은 단어로 다시 검색해 보세요.</p>`}</section>`;
   drawAll();
 }
@@ -1312,7 +1221,7 @@ function guStats(limit) {
   if (limit) list = list.slice(0, limit);
   return `<div class="table-scroll"><table class="gustats">
     <thead><tr><th>구</th><th class="r">토지 3.3㎡당 (만 원)</th><th class="r">6개월 변화</th><th class="r">연면적 3.3㎡당 (만 원)</th><th class="r">중위 거래금액 (억 원)</th><th class="r">거래 건수</th></tr></thead>
-    <tbody>${list.map(x => `<tr><td><b>${esc(x.gu)}</b></td><td class="r hl">${x.land ? fmt(x.land, 0) : "-"}</td><td class="r">${chgChip(x.chg)}</td><td class="r">${x.gfa ? fmt(x.gfa, 0) : "-"}</td><td class="r">${eok(x.amt)}</td><td class="r">${x.n}</td></tr>`).join("")}</tbody>
+    <tbody>${list.map(x => `<tr><td><a href="${guPath(x.gu)}"><b>${esc(x.gu)}</b></a></td><td class="r hl">${x.land ? fmt(x.land, 0) : "-"}</td><td class="r">${chgChip(x.chg)}</td><td class="r">${x.gfa ? fmt(x.gfa, 0) : "-"}</td><td class="r">${eok(x.amt)}</td><td class="r">${x.n}</td></tr>`).join("")}</tbody>
   </table></div>
   <p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 서울 건물 단위 거래 · ${periodLabel()} · 토지 평당가가 높은 순 · 모두 중위값 · ${chgNote()} 거래가 적은 구는 한두 건에 크게 움직입니다.</p>`;
 }
@@ -1342,8 +1251,7 @@ function renderDong() {
 }
 function bindDong() {
   const sel = document.getElementById("dong-gu");
-  if (!sel) return;
-  sel.addEventListener("change", () => { DONG.gu = sel.value; renderDong(); });
+  if (sel) sel.addEventListener("change", () => { DONG.gu = sel.value; renderDong(); });
   renderDong();
 }
 
@@ -1561,7 +1469,7 @@ function bindCalcs() {
 
 function guideNews() {
   const list = newsOf("policy");
-  return list.length ? `<div class="grid">${list.map(newsCard).join("")}</div>${newsNote}` : newsEmpty();
+  return newsRows(list);
 }
 // 데이터가 늦게 도착해도 계산기 입력은 그대로 두고 데이터 칸만 다시 채운다
 function refreshGuide() {
@@ -1580,7 +1488,7 @@ function renderGuide() {
   </section>
   <section>${secHead("", "건물주가 가장 많이 묻는 기준")}${factCards()}</section>
   <section>${secHead("", "계산기")}${calcBlock()}</section>
-  <section>${secHead("", "서울 구별 빌딩 시세", link("/data/", "랩타임에서 더 보기"))}<div id="guide-gu">${guStats(10)}</div></section>
+  <section>${secHead("", "서울 구별 빌딩 시세", link("/price/", "랩타임에서 더 보기"))}<div id="guide-gu">${guStats(10)}</div></section>
   <section>${secHead("", "세금·대출·규제 뉴스")}<div id="guide-news">${guideNews()}</div></section>`;
   bindCalcs();
 }
@@ -1624,6 +1532,184 @@ function renderColumns() {
   ${ctaBlock()}`;
 }
 
+/* ================= 개편 화면 ================= */
+const GU_SLUG = { "강남구": "gangnam", "서초구": "seocho", "송파구": "songpa", "강동구": "gangdong", "종로구": "jongno", "중구": "jung",
+  "용산구": "yongsan", "성동구": "seongdong", "광진구": "gwangjin", "동대문구": "dongdaemun", "중랑구": "jungnang", "성북구": "seongbuk",
+  "강북구": "gangbuk", "도봉구": "dobong", "노원구": "nowon", "은평구": "eunpyeong", "서대문구": "seodaemun", "마포구": "mapo",
+  "양천구": "yangcheon", "강서구": "gangseo", "구로구": "guro", "금천구": "geumcheon", "영등포구": "yeongdeungpo", "동작구": "dongjak", "관악구": "gwanak" };
+const SLUG_GU = Object.fromEntries(Object.entries(GU_SLUG).map(([k, v]) => [v, k]));
+const guPath = gu => `/seoul/${GU_SLUG[gu] || ""}/`;
+const MARKET = window.MARKET_DATA || { quarter: "", groups: [] };   // content/market.json (빌드 때 넣음)
+const TOPICS = [["all", "전체"], ["market", "시장·임대"], ["deal", "매매·투자"], ["building", "개발·리모델링"], ["policy", "정책·세금·금융"], ["players", "리츠·운용사"]];
+const TOPIC_NAME = Object.fromEntries(TOPICS);
+
+/* 뉴스: 촘촘한 목록 */
+function newsRows(list) {
+  return list.length ? `<ol class="nlist">${list.map(n => `<li><a href="${esc(n.link)}" target="_blank" rel="noopener">
+      <span class="nl-topic">${esc(TOPIC_NAME[n.section] || "시장·임대")}</span>
+      <b>${esc(n.title)}</b>
+      <small>${esc(n.source)} · ${newsDate(n.date)}</small></a></li>`).join("")}</ol>${newsNote}` : newsEmpty();
+}
+
+/* 홈 첫 화면: 오늘의 숫자 */
+function kpi(label, value, sub, src) {
+  return `<div class="kpi"><span class="kpi-l">${esc(label)}</span><strong>${value}</strong><span class="kpi-s">${sub}</span><span class="kpi-src">${esc(src)}</span></div>`;
+}
+function heroKpis() {
+  const rows = histRows(), r = (LIVE && LIVE.rates) || {}, top = LIVE && LIVE.deals && LIVE.deals.top && LIVE.deals.top[0];
+  const cut = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10).replace(/-/g, ".");
+  const recent = rows.filter(x => x.date >= cut).length;
+  const vac = MARKET.groups[0] && MARKET.groups[0].items[0];
+  const items = [];
+  if (rows.length) items.push(kpi("서울 빌딩 토지 3.3㎡당", `${fmt(median(rows.map(landPy)) / 10000, 2)}<em>억 원</em>`, `중위값 · 최근 ${histMonths().length}개월 ${fmt(rows.length, 0)}건`, "국토교통부 실거래"));
+  if (rows.length) items.push(kpi("최근 30일 계약 신고", `${fmt(recent, 0)}<em>건</em>`, "서울 건물 단위 매매 · 신고 기한 30일", "국토교통부 실거래"));
+  if (top) items.push(kpi("이번 달 최대 거래", `${eok(top.amount)}<em>억 원</em>`, `${esc(top.gu)} ${esc(top.dong)} ${esc(useLabel(top.use))} · ${esc(top.date)}`, "국토교통부 실거래"));
+  if (r.loan_sme) items.push(kpi("은행 중소기업대출 금리", `${r.loan_sme.value.toFixed(2)}<em>%</em>`, `${ymd(r.loan_sme.date)} 신규 취급 · ${change(r.loan_sme.value, r.loan_sme.prev, "bp")}`, "한국은행"));
+  if (r.ktb3) items.push(kpi("국고채 3년", `${r.ktb3.value.toFixed(2)}<em>%</em>`, `${ymd(r.ktb3.date)} · ${change(r.ktb3.value, r.ktb3.prev, "bp")}`, "한국은행"));
+  if (vac) items.push(kpi(`서울 ${vac.label.replace("서울 ", "")}`, `${esc(vac.value)}`, `${esc(MARKET.quarter)}`, MARKET.groups[0].source));
+  return items.length ? `<div class="kpis">${items.join("")}</div>` : `<p class="loading">오늘의 숫자를 불러오는 중입니다.</p>`;
+}
+function bigDealsCompact(limit = 8) {
+  const top = (LIVE && LIVE.deals && LIVE.deals.top) || [];
+  if (!top.length) return noHist();
+  return `<ol class="dlist">${top.slice(0, limit).map(x => `<li>
+      <span class="d-amt">${eok(x.amount)}<em>억</em></span>
+      <span class="d-main"><a href="${guPath(x.gu)}"><b>${esc(x.gu)} ${esc(x.dong)}</b></a><small>${esc(useLabel(x.use))} · 연면적 ${fmt(x.buildingArea / PYEONG, 0)}평 · ${esc(x.date)}</small></span>
+      <span class="d-pp">${landPy(x) ? fmt(landPy(x), 0) + "만" : "-"}<small>토지 3.3㎡당</small></span>
+    </li>`).join("")}</ol>
+    <p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 최근 2개월 신고분 중 금액 상위 · 건물명·지번 비공개</p>`;
+}
+function guChips() {
+  const rows = histRows();
+  const counts = {};
+  rows.forEach(r => counts[r.gu] = (counts[r.gu] || 0) + 1);
+  return `<nav class="gu-chips" aria-label="구별 빌딩 시세">${Object.keys(GU_SLUG).map(g => `<a href="${guPath(g)}">${esc(g)}${counts[g] ? `<small>${counts[g]}</small>` : ""}</a>`).join("")}</nav>`;
+}
+function marketBoard(compact) {
+  if (!MARKET.groups.length) return "";
+  return `<div class="board-grid">${MARKET.groups.map(g => `<article class="mb">
+      <header><b>${esc(g.source)}</b><span>${esc(g.kind)}</span></header>
+      <dl>${(compact ? g.items.slice(0, 2) : g.items).map(i => `<dt>${esc(i.label)}</dt><dd>${esc(i.value)}</dd>`).join("")}</dl>
+      ${compact ? "" : `<ul class="mb-links">${g.links.map(l => `<li><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.title)} ↗</a></li>`).join("")}</ul>`}
+    </article>`).join("")}</div>
+    <p class="foot-note">${esc(MARKET.quarter)} 기준 · ${esc(MARKET.checked)} 확인 · ${esc(MARKET.note)}</p>`;
+}
+function toolLinks() {
+  return `<div class="guide-links">
+      <a href="/guide/#calc-buy"><b>매입 비용 계산기</b><span>취득세 4.6%, 중개보수, 건물분 부가세까지 현금이 얼마나 더 드는지</span></a>
+      <a href="/guide/#calc-yield"><b>수익률·대출(RTI) 계산기</b><span>지금 월세로 수익률은 몇 %인지, 임대업 대출 기준 1.5배를 넘는지</span></a>
+      <a href="/guide/#calc-lease"><b>상가 임대차 보호 범위</b><span>환산보증금 기준과 5% 증액 상한, 10년 갱신요구권 적용 여부</span></a>
+    </div>`;
+}
+
+function renderHome() {
+  const all = news();
+  view.innerHTML = `
+  <section class="hero" aria-label="오늘의 숫자">
+    <div class="hero-head">
+      <h1>서울 빌딩 시세와 실거래, 오늘의 숫자</h1>
+      <p>국토교통부 실거래, 한국은행 금리, 한국부동산원 통계를 3시간마다 모아 건물주와 예비 건물주가 바로 쓸 수 있게 정리합니다. <span class="num">${updatedLabel()}</span></p>
+    </div>
+    ${heroKpis()}
+  </section>
+
+  <section class="two" aria-label="큰 거래와 뉴스">
+    <div>${secHead("2F", "이번 달 큰 거래", link("/deal/", "실거래 검색"))}${bigDealsCompact()}</div>
+    <div>${secHead("5F", "최신 뉴스", link("/news/", "뉴스 전체"))}${newsRows(all.slice(0, 9))}</div>
+  </section>
+
+  <section aria-label="권역별 평당가">
+    ${secHead("1F", "서울 권역별 빌딩 평당가", link("/price/", "구·동별 시세 전체"))}
+    ${zoneCards()}
+    <h3 class="sub-h">구별 빌딩 시세 바로 보기</h3>
+    ${guChips()}
+  </section>
+
+  <section aria-label="빌딩러너 칼럼">
+    ${secHead("6F", "빌딩러너 칼럼", link("/column/", "칼럼 전체"))}
+    ${columnGrid(3)}
+  </section>
+
+  <section aria-label="시장 리포트">
+    ${secHead("3F", `기관별 시장 지표 · ${esc(MARKET.quarter)}`, link("/report/", "시장 리포트 전체"))}
+    ${marketBoard(true)}
+  </section>
+
+  <section aria-label="건물주 가이드">
+    ${secHead("4F", "건물주 계산기", link("/guide/", "기준 정리와 계산기"))}
+    ${toolLinks()}
+  </section>
+
+  ${ctaBlock()}`;
+}
+
+function pageHead(c) {
+  return `<section class="cat-head"><div class="big">${c.f}</div><div><h1>${esc(c.h1 || c.name)}</h1><p>${esc(c.desc)}</p></div></section>`;
+}
+
+function renderPrice() {
+  view.innerHTML = `${pageHead(CATS.price)}
+  <section>${secHead("", "권역별 빌딩 평당가", liveBadge())}${zoneCards()}</section>
+  <section>${secHead("", "구별 빌딩 평당가")}${guStats()}<h3 class="sub-h">구별 상세 페이지</h3>${guChips()}</section>
+  <section>${secHead("", "동별 빌딩 평당가")}${dongBlock()}</section>
+  <section>${secHead("", "연식·용도별 평당가")}${segBlocks()}</section>
+  <section>${secHead("", "월별 거래 건수")}${monthTrend()}</section>
+  <section>${secHead("", "금액대별 거래 분포")}${priceBuckets()}</section>
+  ${ctaBlock()}`;
+}
+
+function renderDeals() {
+  view.innerHTML = `${pageHead(CATS.deal)}
+  <section>${secHead("", "서울 빌딩 실거래 검색", liveBadge())}${dealExplorer()}</section>
+  <section>${secHead("", "이번 달 큰 거래")}<div id="live-deals">${dealsBlock()}</div></section>
+  <section>${secHead("", "어디서, 어떤 건물이 거래됐나")}${dealCharts()}</section>
+  <section>${secHead("", "매매·투자 뉴스", link("/news/", "뉴스 전체"))}${newsRows(newsOf("deal").slice(0, 15))}</section>
+  ${ctaBlock()}`;
+}
+
+function renderReport() {
+  view.innerHTML = `${pageHead(CATS.report)}
+  <section>${secHead("", `기관별 시장 지표 · ${esc(MARKET.quarter)}`)}${marketBoard(false)}</section>
+  <section>${secHead("", "금리·환율·은행 대출 금리", liveBadge())}<div id="live-rates">${ratesBlock()}</div></section>
+  <section>${secHead("", "상장 리츠 시세", liveBadge())}<div id="live-reits">${reitsBlock()}</div></section>
+  <section>${secHead("", "시장·임대 뉴스")}${newsRows(newsOf("market").slice(0, 12))}</section>
+  <section>${secHead("", "리츠·운용사 뉴스")}${newsRows(newsOf("players").slice(0, 10))}</section>`;
+}
+
+const NEWS_TAB = { t: "all" };
+function renderNews() {
+  const tabs = TOPICS.map(([k, n]) => `<button type="button" class="pill${NEWS_TAB.t === k ? " on" : ""}" data-topic="${k}" aria-pressed="${NEWS_TAB.t === k}">${n}<small>${k === "all" ? news().length : newsOf(k).length}</small></button>`).join("");
+  view.innerHTML = `${pageHead(CATS.news)}
+  <section><div class="col-tabs">${tabs}</div><div id="news-out">${newsRows(NEWS_TAB.t === "all" ? news() : newsOf(NEWS_TAB.t))}</div></section>`;
+  view.querySelectorAll("[data-topic]").forEach(b => b.addEventListener("click", () => { NEWS_TAB.t = b.dataset.topic; renderNews(); }));
+}
+
+function renderGu(gu) {
+  const rows = histRows().filter(r => r.gu === gu);
+  const st = statsOf(rows), chg = halfChange(rows);
+  const recent = rows.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 20);
+  view.innerHTML = `
+  <section class="cat-head"><div class="big gu-big">${esc(gu.replace(/구$/, ""))}</div><div>
+    <p class="crumb"><a href="/price/">서울 빌딩 시세</a> › ${esc(gu)}</p>
+    <h1>${esc(gu)} 빌딩 시세·실거래가</h1>
+    <p>국토교통부 상업업무용 부동산 매매 신고 자료로 계산한 ${esc(gu)}의 빌딩 토지·연면적 평당가와 최근 실거래입니다. ${periodLabel() ? "기간 " + esc(periodLabel()) + "." : ""}</p></div></section>
+  ${rows.length ? `<section><div class="kpis">
+      ${kpi("토지 3.3㎡당", `${fmt(st.land, 0)}<em>만 원</em>`, "중위값", "국토교통부 실거래")}
+      ${kpi("연면적 3.3㎡당", `${fmt(st.gfa, 0)}<em>만 원</em>`, "중위값", "국토교통부 실거래")}
+      ${kpi("중위 거래금액", `${eok(st.amt)}<em>억 원</em>`, "건물 단위 매매", "국토교통부 실거래")}
+      ${kpi("거래 건수", `${fmt(st.n, 0)}<em>건</em>`, periodLabel(), "국토교통부 실거래")}
+      ${kpi("6개월 변화", chg == null ? "-" : chgChip(chg), "중위 토지 평당가, 최근 6개월 vs 이전 6개월", "국토교통부 실거래")}
+    </div></section>
+    <section>${secHead("", `${esc(gu)} 동별 평당가`)}<div id="dong-out"></div></section>
+    <section>${secHead("", `${esc(gu)} 최근 실거래 ${recent.length}건`, link("/deal/", "서울 전체 실거래 검색"))}
+      <div class="table-scroll"><table class="deals"><thead><tr><th>계약일</th><th>동</th><th>용도</th><th class="r">대지 (평)</th><th class="r">연면적 (평)</th><th class="r">준공</th><th class="r">거래금액 (억 원)</th><th class="r">토지 3.3㎡당 (만 원)</th></tr></thead>
+      <tbody>${recent.map(r => `<tr><td class="num">${esc(r.date)}</td><td><b>${esc(r.dong)}</b><small>${esc(r.zone || "")}</small></td><td>${esc(useLabel(r.use))}</td><td class="r">${r.landArea ? fmt(r.landArea / PYEONG, 1) : "-"}</td><td class="r">${r.buildingArea ? fmt(r.buildingArea / PYEONG, 1) : "-"}</td><td class="r">${esc(r.built || "-")}</td><td class="r"><b>${eok(r.amount)}</b></td><td class="r hl">${landPy(r) ? fmt(landPy(r), 0) : "-"}</td></tr>`).join("")}</tbody></table></div>
+      <p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 건물명과 지번은 공개되지 않습니다.</p></section>` : `<section>${noHist()}</section>`}
+  <section>${secHead("", "다른 구 시세")}${guChips()}</section>
+  ${ctaBlock()}`;
+  DONG.gu = gu;
+}
+
 /* ================= 라우팅 ================= */
 function setActive(slug) {
   document.querySelectorAll(".floor-btn").forEach(b => {
@@ -1632,7 +1718,7 @@ function setActive(slug) {
   const cur = document.querySelector(".floor-btn[aria-current]");
   if (cur) cur.scrollIntoView({ block: "nearest", inline: "nearest" });
 }
-const PATHS = { home: "/", market: "/market/", deal: "/deal/", building: "/building/", policy: "/guide/", players: "/players/", data: "/data/", column: "/column/", inquiry: "/inquiry/", sell: "/sell/", buy: "/buy/" };
+const PATHS = { home: "/", price: "/price/", deal: "/deal/", report: "/report/", policy: "/guide/", news: "/news/", column: "/column/", inquiry: "/inquiry/", sell: "/sell/", buy: "/buy/" };
 const pathOf = k => PATHS[k] || "/";
 function currentSlug() {
   const seg = location.pathname.replace(/^\/+|\/+$/g, "").split("/")[0].replace(/\.html$/, "");
@@ -1654,12 +1740,17 @@ function route(keep) {
   const h = currentSlug();
   const isInquiry = h === "inquiry" || h === "sell" || h === "buy";
   const hasInputs = isInquiry || h === "policy";
+  const seg2 = location.pathname.replace(/^\/+|\/+$/g, "").split("/")[1] || "";
   if (keep === true && hasInputs && h === lastHash && document.querySelector("#view form, #view .calc")) { refreshGuide(); return; }
   let active = null;
   if (!h || h === "home") { renderHome(); active = "__home"; }
+  else if (h === "price") { DONG.gu = ""; renderPrice(); active = h; }
+  else if (h === "seoul" && SLUG_GU[seg2]) { renderGu(SLUG_GU[seg2]); active = "price"; }
+  else if (h === "deal") { renderDeals(); active = h; }
+  else if (h === "report") { renderReport(); active = h; }
   else if (h === "policy") { renderGuide(); active = h; }
+  else if (h === "news") { renderNews(); active = h; }
   else if (h === "column") { renderColumns(); active = h; }
-  else if (CATS[h]) { renderCat(h); active = h; }
   else if (isInquiry) { renderInquiry(h === "buy" ? "매수" : "매도"); active = "inquiry"; }
   else renderNotFound();
   setActive(active);
@@ -1668,6 +1759,9 @@ function route(keep) {
   bindExplorer();
   bindDong();
   drawAll();
+  // /guide/#calc-buy 같은 화면 안 위치로 이동
+  const anchor = keep !== true && location.hash.length > 1 && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (anchor) anchor.scrollIntoView();
 }
 
 /* ================= 입면도 일러스트 (canvas) ================= */
@@ -1963,6 +2057,7 @@ function init() {
     Object.entries(CATS).slice().reverse()
     .map(([k, c]) => `<li><a href="${pathOf(k)}"><span class="mono">${c.f}</span><b>${esc(c.name)}</b><span>${esc(c.desc)}</span></a></li>`).join("");
   document.getElementById("footer-sns").innerHTML = socialHtml();
+  document.getElementById("footer-gu").innerHTML = Object.keys(GU_SLUG).map(g => `<a href="${guPath(g)}">${esc(g)} 빌딩 시세</a>`).join("");
   const us = document.getElementById("util-sns");
   us.innerHTML = socialHtml(false);
   us.hidden = !us.innerHTML;
