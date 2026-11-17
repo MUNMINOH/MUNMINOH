@@ -639,7 +639,7 @@ const CATS = {
   policy:   { f: "4F", name: "건물주 가이드", art: "section", desc: "빌딩을 사고, 보유하고, 임대할 때 꼭 확인할 세금·대출·임대차 기준과 계산기. 근거 법령을 함께 적었습니다." },
   players:  { f: "5F", name: "페이스메이커", art: "campus",  desc: "리츠, 자산운용사, 기관투자자. 시장의 속도를 만드는 플레이어들의 소식." },
   data:     { f: "6F", name: "랩타임",      art: "chart",   desc: "금리, 상장 리츠, 서울 빌딩 실거래. 매일 갱신되는 숫자." },
-  column:   { f: "7F", name: "칼럼",        art: "section", desc: "빌딩러너가 블로그와 유튜브에 쓴 글과 영상을 모았습니다." }
+  column:   { f: "7F", name: "칼럼",        art: "section", desc: "빌딩러너가 네이버 블로그에 쓴 글을 모았습니다." }
 };
 const ALIASES = { invest: "policy", people: "players", guide: "policy", columns: "column" };   // 예전 주소
 const RATE_ORDER = ["base", "ktb3", "ktb10", "corp", "cd91", "usd"];
@@ -1494,7 +1494,6 @@ function columnItems() {
     if (v) used.add(v.link);
     return { ...b, video: v || null };
   });
-  vids.filter(v => !used.has(v.link)).forEach(v => items.push({ ...v, video: null }));
   return items.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
 }
 const cleanVideoTitle = t => String(t || "").replace(/\s*#\S+/g, "").trim();
@@ -1525,7 +1524,7 @@ function columnGrid(limit) {
   if (limit) items = items.slice(0, limit);
   return items.length ? `<div class="grid">${items.map(columnCard).join("")}</div>` : columnsEmpty();
 }
-const colSource = `<p class="foot-note">빌딩러너 <a href="${esc(SOCIAL.find(s => s.id === "blog").url)}" target="_blank" rel="noopener">네이버 블로그</a>와 <a href="${esc(SOCIAL.find(s => s.id === "youtube").url)}" target="_blank" rel="noopener">유튜브</a>에 올라온 글과 영상을 자동으로 모읍니다. 새 글은 3시간 안에 반영됩니다.</p>`;
+const colSource = `<p class="foot-note">빌딩러너 <a href="${esc(SOCIAL.find(s => s.id === "blog").url)}" target="_blank" rel="noopener">네이버 블로그</a>에 올라온 글을 자동으로 모읍니다. 같은 주제의 쇼츠가 있으면 함께 연결합니다. 새 글은 3시간 안에 반영됩니다.</p>`;
 function renderColumns() {
   const c = CATS.column;
   const tab = (t, label) => `<button type="button" class="pill${COL_FILTER.type === t ? " on" : ""}" data-col="${t}" aria-pressed="${COL_FILTER.type === t}">${label}</button>`;
@@ -1535,7 +1534,6 @@ function renderColumns() {
     <div><h1>${esc(c.name)}</h1><p>${esc(c.desc)}</p></div>
   </section>
   <section>
-    <div class="col-tabs">${tab("all", "전체")}${tab("blog", "블로그 글")}${tab("youtube", "영상")}</div>
     <div id="col-grid">${columnGrid()}</div>
     ${colSource}
   </section>
