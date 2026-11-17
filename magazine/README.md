@@ -32,9 +32,13 @@
 | 랩타임 | `#data` | 금리·환율, 리츠, 구별 시세, 월별 거래, 금액대 분포, 실거래 검색 |
 | 의뢰 | `#inquiry` `#sell` `#buy` | 매도·매수 의뢰서 (FormSubmit으로 메일 전달) |
 
+## 칼럼
+
+7F 칼럼은 빌딩러너 네이버 블로그(morrison119) RSS에서 글을 자동으로 모읍니다. 유튜브(@building_runner_official)에 같은 주제의 쇼츠가 있으면 제목 앞부분으로 찾아 블로그 카드에 연결합니다.
+
 ## 캐릭터 넣기
 
-빌딩러너 캐릭터 이미지를 `magazine/assets/character.png`로 넣으면 상단 로고 왼쪽에 자동으로 나타납니다. 배경이 투명한 PNG, 가로 400px 안팎을 권장합니다. 파일이 없으면 글자 로고만 보입니다.
+빌딩러너 캐릭터 이미지를 `magazine/assets/character.png`로 넣고, `index.html`의 `CHARACTER_IMAGE`를 `"assets/character.png"`로 바꾸면 상단 로고 왼쪽에 나타납니다. 배경이 투명한 PNG, 가로 400px 안팎을 권장합니다. 파일이 없으면 글자 로고만 보입니다.
 
 ## 공개하기 (GitHub Pages + cadence.bldgrunner.com)
 

@@ -491,7 +491,8 @@ a.sns:hover { border-color: var(--accent); color: var(--accent); }
 .guide-links span { font-size: var(--t-sm); color: var(--muted); line-height: 1.6; }
 
 /* ---------- 실거래 검색 ---------- */
-.explorer { display: grid; gap: 16px; }
+.explorer { display: grid; gap: 16px; min-width: 0; }
+.explorer > *, #ex-out { min-width: 0; }
 .filters { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
 .filters select { padding: 10px 12px; font-size: var(--t-sm); }
 .ex-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 14px; }
@@ -655,6 +656,7 @@ const SOCIAL = [
   { id: "kakao",     name: "카카오톡 채널", url: "" }
 ];
 const INQUIRY_ENDPOINT = "https://formsubmit.co/ajax/alsdh1127@gmail.com";
+const CHARACTER_IMAGE = "";   // 캐릭터 이미지를 넣으면 경로 지정. 예: "assets/character.png"
 const NOTION_ENDPOINT = "https://api.bldgrunner.com/inquiry";   // 노션 저장용 Cloudflare Worker (workers/cadence-inquiry)
 
 const ICONS = {
@@ -1538,12 +1540,6 @@ function renderColumns() {
     ${colSource}
   </section>
   ${ctaBlock()}`;
-  view.querySelectorAll("[data-col]").forEach(b => b.addEventListener("click", () => {
-    COL_FILTER.type = b.dataset.col;
-    view.querySelectorAll("[data-col]").forEach(x => { const on = x.dataset.col === COL_FILTER.type; x.classList.toggle("on", on); x.setAttribute("aria-pressed", on); });
-    document.getElementById("col-grid").innerHTML = columnGrid();
-    drawAll();
-  }));
 }
 
 /* ================= 라우팅 ================= */
@@ -1857,9 +1853,11 @@ function loadLive() {
 
 /* ================= 초기화 ================= */
 function init() {
-  const mascot = document.getElementById("mascot");
-  mascot.onload = () => { mascot.alt = "빌딩러너 캐릭터"; mascot.hidden = false; };
-  mascot.src = "assets/character.png";
+  if (CHARACTER_IMAGE) {
+    const mascot = document.getElementById("mascot");
+    mascot.onload = () => { mascot.alt = "빌딩러너 캐릭터"; mascot.hidden = false; };
+    mascot.src = CHARACTER_IMAGE;
+  }
   document.getElementById("floors").innerHTML = `<a class="floor-btn" href="#home" data-cat="__home"><span class="lamp">L</span><span class="txt">로비</span></a>` +
     Object.entries(CATS).map(([k, c]) => `<a class="floor-btn" href="#${k}" data-cat="${k}"><span class="lamp">${c.f}</span><span class="txt">${esc(c.name)}</span></a>`).join("") +
     `<a class="floor-btn" href="#inquiry" data-cat="inquiry"><span class="lamp">RF</span><span class="txt">매도·매수 의뢰</span></a>`;
