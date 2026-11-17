@@ -1323,11 +1323,14 @@ function renderInquiry(type) {
     fetch(INQUIRY_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify(data) })
       .then(r => r.ok ? r.json() : Promise.reject(r.status))
       .then(res => {
-        if (res && (res.success === false || res.success === "false")) throw new Error(res.message || "fail");
+        if (res && (res.success === false || res.success === "false")) {
+          const m = String(res.message || "");
+          throw new Error(/activat/i.test(m) ? "접수 창구 인증이 아직 끝나지 않았습니다. 잠시 후 다시 보내 주시거나 빌딩러너 SNS 메시지로 문의해 주세요." : "");
+        }
         form.reset(); sync();
         say(`${k} 의뢰를 접수했습니다. 확인하는 대로 ${data["연락처"]}로 연락드리겠습니다.`);
       })
-      .catch(() => say("의뢰를 보내지 못했습니다. 인터넷 연결을 확인하고 다시 눌러 주세요. 계속 안 되면 빌딩러너 SNS 메시지로 문의해 주세요.", true))
+      .catch(err => say((err && err.message) || "의뢰를 보내지 못했습니다. 인터넷 연결을 확인하고 다시 눌러 주세요. 계속 안 되면 빌딩러너 SNS 메시지로 문의해 주세요.", true))
       .finally(() => { btn.disabled = false; btn.textContent = "의뢰 보내기"; });
   });
 }
