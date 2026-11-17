@@ -393,13 +393,38 @@ def fetch_news(now: dt.datetime, prev: list) -> list:
         if not x.get("date") or x["date"] > now_iso:
             x["date"] = now_iso
     cutoff = (now - dt.timedelta(days=21)).isoformat()
-    seen, out = set(), []
+    seen, out, grams = set(), [], []
     for x in sorted(found + (prev or []), key=lambda x: x.get("date") or "", reverse=True):
         key = re.sub(r"[^0-9A-Za-z가-힣]", "", x["title"])[:40]
         if not key or key in seen or (x.get("date") and x["date"] < cutoff):
             continue
-        seen.add(key); out.append(x)
+        g = (_bigrams(x["title"]), _figures(x["title"]))
+        if any(_similar(g, h) for h in grams):
+            continue  # 같은 사건을 여러 언론사가 쓴 기사는 하나만 남긴다
+        seen.add(key); out.append(x); grams.append(g)
     return out[:120]
+
+
+def _bigrams(title: str) -> set:
+    t = re.sub(r"\[[^\]]*\]|\([^)]*\)", " ", title)          # [단독], (종합) 같은 말머리 제거
+    t = re.sub(r"[^0-9A-Za-z가-힣]", "", t)
+    return {t[i:i + 2] for i in range(len(t) - 1)}
+
+
+def _figures(title: str) -> set:
+    """제목 속 % 숫자 (예: 24%, 5.7%)"""
+    return set(re.findall(r"(\d+(?:\.\d+)?)\s*%", title))
+
+
+def _similar(x: tuple, y: tuple) -> bool:
+    (a, fa), (b, fb) = x, y
+    if not a or not b:
+        return False
+    if fa and fb and not (fa & fb):
+        return False  # 둘 다 %가 있는데 숫자가 다르면 다른 기사
+    inter = len(a & b)
+    # 제목 글자쌍이 짧은 쪽 기준 60% 이상 겹치면 같은 기사로 본다
+    return inter / min(len(a), len(b)) >= 0.6
 
 # ---------------------------------------------------------------- 빌딩러너 칼럼 (네이버 블로그 글)
 NAVER_BLOG_ID = "morrison119"
