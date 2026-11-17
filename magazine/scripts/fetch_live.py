@@ -59,6 +59,8 @@ ECOS_SERIES = [
     ("corp",  "회사채 3년 (AA-)",    "817Y002", "D", "010300000", "%"),
     ("cd91",  "CD 91일",             "817Y002", "D", "010502000", "%"),
     ("usd",   "원/달러 환율",        "731Y001", "D", "0000001",   "원"),
+    ("loan_corp", "은행 기업대출 금리",    "121Y006", "M", "BECBLA02",   "%"),
+    ("loan_sme",  "은행 중소기업대출 금리", "121Y006", "M", "BECBLA0202", "%"),
 ]
 
 
@@ -74,9 +76,11 @@ def ecos_rows(stat: str, cycle: str, item: str, start: str, end: str, a: int, b:
 
 def fetch_ecos(today: dt.date) -> dict:
     out = {}
-    start = (today - dt.timedelta(days=75)).strftime("%Y%m%d")
-    end = today.strftime("%Y%m%d")
     for sid, name, stat, cycle, item, unit in ECOS_SERIES:
+        if cycle == "M":  # 월별 통계: 최근 2년
+            start, end = (today - dt.timedelta(days=730)).strftime("%Y%m"), today.strftime("%Y%m")
+        else:
+            start, end = (today - dt.timedelta(days=75)).strftime("%Y%m%d"), today.strftime("%Y%m%d")
         try:
             total, _ = ecos_rows(stat, cycle, item, start, end, 1, 1)
             # 샘플키는 한 번에 10행까지만 주므로 끝에서부터 여러 번 나눠 받는다
@@ -382,18 +386,29 @@ def fetch_news(now: dt.datetime, prev: list) -> list:
         seen.add(key); out.append(x)
     return out[:120]
 
-# ---------------------------------------------------------------- 빌딩러너 칼럼 (본인 채널 글·영상)
+# ---------------------------------------------------------------- 빌딩러너 칼럼 (네이버 블로그 글)
 NAVER_BLOG_ID = "morrison119"
-YOUTUBE_HANDLE = "building_runner_official"
-ATOM = "{http://www.w3.org/2005/Atom}"
-MEDIA = "{http://search.yahoo.com/mrss/}"
-YT = "{http://www.youtube.com/xml/schemas/2015}"
 
 
 def _plain(htmltext: str, n: int = 160) -> str:
     t = re.sub(r"<[^>]+>", " ", html.unescape(htmltext or ""))
     t = re.sub(r"\s+", " ", t).strip()
     return t if len(t) <= n else t[: n - 1].rstrip() + "…"
+
+
+def _blog_og_image(link: str) -> str:
+    """글 페이지(모바일)의 대표 이미지(og:image)."""
+    m = re.search(r"blog\.naver\.com/([^/]+)/(\d+)", link)
+    if not m:
+        return ""
+    try:
+        page = get(f"https://m.blog.naver.com/{m.group(1)}/{m.group(2)}", timeout=15).decode("utf-8", "ignore")
+        og = re.search(r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)', page) \
+            or re.search(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image', page)
+        return html.unescape(og.group(1)) if og else ""
+    except Exception as e:
+        log(f"칼럼 이미지 실패 ({link}): {e}")
+        return ""
 
 
 def fetch_blog() -> list:
@@ -406,43 +421,24 @@ def fetch_blog() -> list:
                 link = _text(it, "link").split("?")[0]
                 if not title or not link:
                     continue
+                desc = _text(it, "description")
+                m = re.search(r'<img[^>]+src=["\']([^"\']+)', html.unescape(desc or ""))
                 out.append({"type": "blog", "title": title, "link": link,
                             "date": _parse_date(_text(it, "pubDate")),
-                            "summary": _plain(_text(it, "description")),
+                            "summary": _plain(desc), "image": m.group(1) if m else "",
                             "tag": _text(it, "category")})
-            log(f"칼럼 블로그: {len(out)}건 ({url})")
+            for x in out:
+                if not x["image"]:
+                    x["image"] = _blog_og_image(x["link"])
+            log(f"칼럼 블로그: {len(out)}건, 이미지 {sum(1 for x in out if x['image'])}건 ({url})")
             return out
         except Exception as e:
             log(f"칼럼 블로그 실패 ({url}): {e}")
     return out
 
 
-def fetch_youtube() -> list:
-    out = []
-    try:
-        page = get(f"https://www.youtube.com/@{YOUTUBE_HANDLE}").decode("utf-8", "ignore")
-        m = re.search(r'"(?:externalId|channelId)":"(UC[\w-]{22})"', page) or re.search(r"channel/(UC[\w-]{22})", page)
-        if not m:
-            raise RuntimeError("채널 ID를 찾지 못함")
-        root = ET.fromstring(get(f"https://www.youtube.com/feeds/videos.xml?channel_id={m.group(1)}"))
-        for e in root.iter(f"{ATOM}entry"):
-            vid = (e.findtext(f"{YT}videoId") or "").strip()
-            link_el = e.find(f"{ATOM}link")
-            group = e.find(f"{MEDIA}group")
-            desc = group.findtext(f"{MEDIA}description") if group is not None else ""
-            out.append({"type": "youtube", "title": _clean_title(e.findtext(f"{ATOM}title") or ""),
-                        "link": link_el.get("href") if link_el is not None else f"https://www.youtube.com/watch?v={vid}",
-                        "date": _parse_date((e.findtext(f"{ATOM}published") or "").replace("+00:00", "+0000")),
-                        "summary": _plain(desc), "thumb": f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg" if vid else "",
-                        "shorts": "/shorts/" in (link_el.get("href") if link_el is not None else "")})
-        log(f"칼럼 유튜브: {len(out)}건")
-    except Exception as e:
-        log(f"칼럼 유튜브 실패: {e}")
-    return out
-
-
 def fetch_columns(prev: list) -> list:
-    items = fetch_blog() + fetch_youtube()
+    items = fetch_blog()
     if not items:
         return prev or []
     items = [x for x in items if x["title"]]

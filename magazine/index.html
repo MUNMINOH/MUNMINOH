@@ -3,16 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>CADENCE 케이던스</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="CADENCE: 빌딩러너가 만드는 상업용 부동산 리뷰. 시장, 거래, 빌딩, 투자와 매일 갱신되는 금리·리츠 지표">
+<!--SEO:start-->
+<title>CADENCE 케이던스 | 서울 빌딩·상업용 부동산 실거래·평당가</title>
+<meta name="description" content="서울 빌딩 실거래와 구역별 평당가, 금리, 상장 리츠, 상업용 부동산 뉴스를 3시간마다 모아 보여 주는 빌딩러너의 상업용 부동산 리뷰.">
 <link rel="canonical" href="https://cadence.bldgrunner.com/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="CADENCE">
-<meta property="og:title" content="CADENCE 케이던스 | 빌딩러너 상업용 부동산 리뷰">
-<meta property="og:description" content="시장의 리듬을 읽는 상업용 부동산 리뷰. 매일 갱신되는 금리·환율과 상장 리츠 시세.">
-<meta property="og:url" content="https://cadence.bldgrunner.com/">
-<meta property="og:locale" content="ko_KR">
+<!--SEO:end-->
+<meta name="theme-color" content="#2B3FC4">
+<link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Nanum+Myeongjo:wght@700;800&display=swap">
@@ -506,10 +503,9 @@ table.mini th, table.mini td { padding: 8px 6px; }
 
 
 /* ---------- 칼럼 ---------- */
-.thumb { background: var(--ink); }
+.thumb { background: var(--art-sky); }
 .thumb.noimg { background: var(--art-sky); }
 .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-.thumb .play { position: absolute; left: 12px; bottom: 12px; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: rgba(0,0,0,0.6); color: #fff; font-size: 14px; }
 .col-card h3 a:hover { color: var(--accent); }
 .col-card:hover h3 { color: inherit; }
 .col-links { display: flex; gap: 14px; flex-wrap: wrap; font-size: var(--t-sm); font-weight: 600; }
@@ -517,6 +513,20 @@ table.mini th, table.mini td { padding: 8px 6px; }
 .col-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .col-tabs { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
 .pill.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+
+/* ---------- 구역별 평당가 ---------- */
+.zones { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.zone { background: var(--surface); padding: 18px 20px; display: grid; gap: 8px; min-width: 0; }
+.zone-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.zone-top b { font-size: var(--t-md); font-weight: 700; }
+.zone-top span { font-size: var(--t-xs); color: var(--muted); }
+.zone-val small { display: block; font-size: var(--t-xs); color: var(--muted); }
+.zone-val strong { font-family: var(--f-display); font-weight: 700; font-size: 1.875rem; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.zone-val em { font-style: normal; font-family: var(--f-body); font-size: var(--t-sm); font-weight: 600; color: var(--muted); margin-left: 3px; }
+.zone-sub { display: flex; gap: 6px 12px; flex-wrap: wrap; align-items: baseline; font-size: var(--t-xs); color: var(--ink-2); }
+.filters.one { grid-template-columns: minmax(0, 320px); margin-bottom: 14px; }
+table.seg { min-width: 0; }
 
 /* ---------- 반응형 ---------- */
 @media (max-width: 1000px) {
@@ -528,6 +538,7 @@ table.mini th, table.mini td { padding: 8px 6px; }
   .toc { display: none; }
   .inq { grid-template-columns: minmax(0, 1fr); gap: 40px; }
   .calcs { grid-template-columns: minmax(0, 1fr); }
+  .zones { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .inq-side { position: static; }
 }
@@ -556,6 +567,7 @@ table.mini th, table.mini td { padding: 8px 6px; }
   .ticker .live-dot span { display: none; }
   .fields { grid-template-columns: minmax(0, 1fr); }
   .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .zones { grid-template-columns: minmax(0, 1fr); }
   .cta-btns { grid-template-columns: minmax(0, 1fr); }
   .util .wrap > span:first-child { display: none; }
 }
@@ -573,7 +585,7 @@ table.mini th, table.mini td { padding: 8px 6px; }
 
 <header class="masthead">
   <div class="wrap">
-    <a href="#home" class="brand" aria-label="CADENCE 홈">
+    <a href="/" class="brand" aria-label="CADENCE 홈">
       <img class="mascot" id="mascot" alt="" hidden>
       <span class="brand-text">
         <span class="wordmark">CADENCE</span>
@@ -606,7 +618,7 @@ table.mini th, table.mini td { padding: 8px 6px; }
   </div>
 </div>
 
-<main id="view" class="wrap"></main>
+<main id="view" class="wrap"><!--PRERENDER--></main>
 
 
 
@@ -627,6 +639,7 @@ table.mini th, table.mini td { padding: 8px 6px; }
   </div>
 </footer>
 
+<!--DATA-->
 <script>
 (() => {
 "use strict";
@@ -639,11 +652,12 @@ const CATS = {
   building: { f: "3F", name: "빌딩",        art: "remodel", desc: "개발, 리모델링, 재건축, 준공. 건물이 바뀌는 소식을 모읍니다." },
   policy:   { f: "4F", name: "건물주 가이드", art: "section", desc: "빌딩을 사고, 보유하고, 임대할 때 꼭 확인할 세금·대출·임대차 기준과 계산기. 근거 법령을 함께 적었습니다." },
   players:  { f: "5F", name: "페이스메이커", art: "campus",  desc: "리츠, 자산운용사, 기관투자자. 시장의 속도를 만드는 플레이어들의 소식." },
-  data:     { f: "6F", name: "랩타임",      art: "chart",   desc: "금리, 상장 리츠, 서울 빌딩 실거래. 매일 갱신되는 숫자." },
+  data:     { f: "6F", name: "랩타임",      art: "chart",   desc: "서울 권역·구·동별 빌딩 평당가, 금리와 은행 대출 금리, 상장 리츠. 3시간마다 갱신되는 숫자." },
   column:   { f: "7F", name: "칼럼",        art: "section", desc: "빌딩러너가 네이버 블로그에 쓴 글을 모았습니다." }
 };
 const ALIASES = { invest: "policy", people: "players", guide: "policy", columns: "column" };   // 예전 주소
-const RATE_ORDER = ["base", "ktb3", "ktb10", "corp", "cd91", "usd"];
+const RATE_ORDER = ["base", "ktb3", "ktb10", "corp", "cd91", "usd", "loan_corp", "loan_sme"];
+const DAILY_RATES = ["base", "ktb3", "ktb10", "corp", "cd91", "usd"];
 const PYEONG = 3.3058;
 
 /* ================= 운영 설정 =================
@@ -679,7 +693,7 @@ let LIVE_STATE = "loading";
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const fmt = (n, d = 1) => Number(n).toLocaleString("ko-KR", { maximumFractionDigits: d });
 const md = s => s ? `${+s.slice(4, 6)}.${+s.slice(6, 8) || ""}`.replace(/\.$/, "월") : "";
-const ymd = s => s ? `${s.slice(0, 4)}.${s.slice(4, 6)}.${s.slice(6, 8)}` : "";
+const ymd = s => !s ? "" : s.length === 6 ? `${s.slice(0, 4)}.${s.slice(4, 6)}월` : `${s.slice(0, 4)}.${s.slice(4, 6)}.${s.slice(6, 8)}`;
 const view = document.getElementById("view");
 const hashSeed = s => { let h = 7; for (const ch of String(s)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h % 100000 + 1; };
 const eok = manwon => fmt(manwon / 10000, 1);   // 만 원 → 억 원
@@ -764,10 +778,10 @@ function coverBlock() {
     ["계약일", d.date]
   ];
   return `<section class="cover" aria-label="이번 달 최대 거래">
-    <a href="#deal" tabindex="-1" aria-hidden="true">${artBox(useArt(d.use), hashSeed(d.gu + d.dong + d.amount))}</a>
+    <a href="/deal/" tabindex="-1" aria-hidden="true">${artBox(useArt(d.use), hashSeed(d.gu + d.dong + d.amount))}</a>
     <div class="cover-text">
       <div class="meta"><span class="eyebrow">이번 달 서울 최대 빌딩 거래</span>${tagFor("deal")}</div>
-      <h1><a href="#deal">서울 ${esc(d.gu)} ${esc(d.dong)} ${esc(useLabel(d.use))}, ${eok(d.amount)}억 원에 거래</a></h1>
+      <h1><a href="/deal/">서울 ${esc(d.gu)} ${esc(d.dong)} ${esc(useLabel(d.use))}, ${eok(d.amount)}억 원에 거래</a></h1>
       <p class="dek">${esc(d.date)} 계약. 연면적 ${fmt(gfaPy, 0)}평 규모로, 연면적 3.3㎡당 ${d.perPyeong ? fmt(d.perPyeong, 0) + "만 원" : "-"}입니다.</p>
       <div class="spec">
         <div class="spec-title"><span>실거래 팩트 시트</span><span>2F</span></div>
@@ -828,7 +842,7 @@ function ratesBlock() {
       ${spark(s.series)}
     </div>`;
   }).join("")}</div>
-  <p class="foot-note">출처: 한국은행 경제통계시스템(ECOS) · ${updatedLabel()} · 그래프는 최근 약 30영업일 추이, 변화는 직전 영업일 대비입니다.</p>`;
+  <p class="foot-note">출처: 한국은행 경제통계시스템(ECOS) · ${updatedLabel()} · 그래프는 최근 추이(일별 지표 약 30영업일, 은행 대출 금리는 월별 신규 취급액 기준 약 2년), 변화는 직전 값 대비입니다.</p>`;
 }
 
 function reitsBlock() {
@@ -910,7 +924,7 @@ function renderLive() {
   const tk = document.getElementById("ticker");
   const r = LIVE && LIVE.rates;
   if (r && Object.keys(r).length) {
-    const items = RATE_ORDER.filter(k => r[k]).map(k => {
+    const items = DAILY_RATES.filter(k => r[k]).map(k => {
       const s = r[k], won = s.unit === "원";
       return `<span class="tick"><span>${esc(s.name)}</span><b>${won ? fmt(s.value, 1) + "원" : s.value.toFixed(2) + "%"}</b>${change(s.value, s.prev, won ? "won" : "bp")}</span>`;
     });
@@ -934,7 +948,7 @@ function renderHome() {
   ${coverBlock()}
 
   <section aria-label="빌딩러너 칼럼">
-    ${secHead("7F", "빌딩러너 칼럼", link("#column", "칼럼 전체 보기"))}
+    ${secHead("7F", "빌딩러너 칼럼", link("/column/", "칼럼 전체 보기"))}
     ${columnGrid(3)}
   </section>
 
@@ -945,7 +959,7 @@ function renderHome() {
 
   <section class="latest" aria-label="최신 뉴스">
     <div>
-      ${secHead("", "최신 뉴스", link("#market", "마켓 뉴스 전체"))}
+      ${secHead("", "최신 뉴스", link("/market/", "마켓 뉴스 전체"))}
       ${latest.length ? `<div class="grid">${latest.map(newsCard).join("")}</div>${newsNote}` : newsEmpty()}
     </div>
     <aside class="side-news">
@@ -962,17 +976,17 @@ function renderHome() {
     <div id="live-deals">${dealsBlock()}</div>
   </section>
 
-  <section aria-label="구별 시세">
-    ${secHead("6F", "서울 구별 빌딩 시세", link("#data", "전체 구·월별 추이 보기"))}
-    ${guStats(8)}
+  <section aria-label="권역별 평당가">
+    ${secHead("6F", "서울 권역별 빌딩 평당가", link("/data/", "구·동별 평당가 전체 보기"))}
+    ${zoneCards()}
   </section>
 
   <section aria-label="건물주 가이드">
-    ${secHead("4F", "건물주 가이드", link("#policy", "기준 정리와 계산기 전체"))}
+    ${secHead("4F", "건물주 가이드", link("/guide/", "기준 정리와 계산기 전체"))}
     <div class="guide-links">
-      <a href="#policy"><b>매입 비용 계산기</b><span>취득세 4.6%, 중개보수, 건물분 부가세까지 현금이 얼마나 더 드는지</span></a>
-      <a href="#policy"><b>수익률·대출(RTI) 계산기</b><span>지금 월세로 수익률은 몇 %인지, 임대업 대출 기준 1.5배를 넘는지</span></a>
-      <a href="#policy"><b>상가 임대차 보호 범위</b><span>환산보증금 기준과 5% 증액 상한, 10년 갱신요구권 적용 여부</span></a>
+      <a href="/guide/"><b>매입 비용 계산기</b><span>취득세 4.6%, 중개보수, 건물분 부가세까지 현금이 얼마나 더 드는지</span></a>
+      <a href="/guide/"><b>수익률·대출(RTI) 계산기</b><span>지금 월세로 수익률은 몇 %인지, 임대업 대출 기준 1.5배를 넘는지</span></a>
+      <a href="/guide/"><b>상가 임대차 보호 범위</b><span>환산보증금 기준과 5% 증액 상한, 10년 갱신요구권 적용 여부</span></a>
     </div>
   </section>
 
@@ -982,7 +996,7 @@ function renderHome() {
   </section>
 
   ${molit.length ? `<section aria-label="국토교통부 보도자료">
-    ${secHead("4F", "국토교통부 보도자료", link("#policy", "정책·금융 전체"))}
+    ${secHead("4F", "국토교통부 보도자료", link("/guide/", "정책·금융 전체"))}
     ${newsList(molit)}
   </section>` : ""}`;
 }
@@ -995,9 +1009,12 @@ function renderCat(slug) {
            <section>${secHead("", "이번 달 큰 거래")}<div id="live-deals">${dealsBlock()}</div></section>
            <section>${secHead("", "어디서, 어떤 건물이 거래됐나")}${dealCharts()}</section>${ctaBlock()}`,
     players: `<section>${secHead("", "상장 리츠 시세", liveBadge())}<div id="live-reits">${reitsBlock()}</div></section>`,
-    data: `<section>${secHead("", "오늘의 금리와 환율", liveBadge())}<div id="live-rates">${ratesBlock()}</div></section>
+    data: `<section>${secHead("", "권역별 빌딩 평당가", liveBadge())}${zoneCards()}</section>
+           <section>${secHead("", "구별 빌딩 평당가")}${guStats()}</section>
+           <section>${secHead("", "동별 빌딩 평당가")}${dongBlock()}</section>
+           <section>${secHead("", "연식·용도별 평당가")}${segBlocks()}</section>
+           <section>${secHead("", "금리·환율·은행 대출 금리", liveBadge())}<div id="live-rates">${ratesBlock()}</div></section>
            <section>${secHead("", "상장 리츠 시세", liveBadge())}<div id="live-reits">${reitsBlock()}</div></section>
-           <section>${secHead("", "서울 구별 빌딩 시세", liveBadge())}${guStats()}</section>
            <section>${secHead("", "월별 빌딩 거래")}${monthTrend()}</section>
            <section>${secHead("", "금액대별 거래 분포")}${priceBuckets()}</section>
            <section>${secHead("", "서울 빌딩 실거래 검색")}${dealExplorer()}</section>`
@@ -1028,7 +1045,7 @@ function renderSearch(q) {
 }
 
 function renderNotFound() {
-  view.innerHTML = `<section class="cat-head"><div class="big">B2</div><div><h1>찾는 페이지가 없습니다</h1><p>주소가 바뀌었거나 없어진 페이지입니다. <a href="#home" style="color:var(--accent)">홈으로 돌아가기</a></p></div></section>`;
+  view.innerHTML = `<section class="cat-head"><div class="big">B2</div><div><h1>찾는 페이지가 없습니다</h1><p>주소가 바뀌었거나 없어진 페이지입니다. <a href="/" style="color:var(--accent)">홈으로 돌아가기</a></p></div></section>`;
 }
 
 function ctaBlock() {
@@ -1039,8 +1056,8 @@ function ctaBlock() {
       <p>위치와 조건을 남겨 주시면 빌딩러너가 시세와 매칭 가능성을 검토해 연락드립니다.</p>
     </div>
     <div class="cta-btns">
-      <a class="cta-btn primary" href="#sell"><b>매도 의뢰</b><span>건물을 팔고 싶어요</span></a>
-      <a class="cta-btn" href="#buy"><b>매수 의뢰</b><span>건물을 찾고 있어요</span></a>
+      <a class="cta-btn primary" href="/sell/"><b>매도 의뢰</b><span>건물을 팔고 싶어요</span></a>
+      <a class="cta-btn" href="/buy/"><b>매수 의뢰</b><span>건물을 찾고 있어요</span></a>
     </div>
   </section>`;
 }
@@ -1209,21 +1226,6 @@ const USE_GROUPS = [["업무", r => /업무/.test(r.use)], ["근린생활", r =>
 const BUCKETS = [["50억 미만", 0, 500000], ["50억~100억", 500000, 1000000], ["100억~300억", 1000000, 3000000], ["300억~1,000억", 3000000, 10000000], ["1,000억 이상", 10000000, Infinity]];
 const noHist = () => `<p class="loading">${LIVE_STATE === "loading" ? "실거래 자료를 불러오는 중입니다." : "실거래 자료가 아직 없습니다."}</p>`;
 
-function guStats(limit) {
-  const rows = histRows();
-  if (!rows.length) return noHist();
-  const by = {};
-  rows.forEach(r => (by[r.gu] = by[r.gu] || []).push(r));
-  let list = Object.entries(by).map(([gu, rs]) => ({ gu, n: rs.length, amt: median(rs.map(r => r.amount)), land: median(rs.map(landPy)), gfa: median(rs.map(gfaPy)) }))
-    .sort((a, b) => b.n - a.n);
-  if (limit) list = list.slice(0, limit);
-  return `<div class="table-scroll"><table class="gustats">
-    <thead><tr><th>구</th><th class="r">거래 건수</th><th class="r">중위 거래금액 (억 원)</th><th class="r">중위 토지 3.3㎡당 (만 원)</th><th class="r">중위 연면적 3.3㎡당 (만 원)</th></tr></thead>
-    <tbody>${list.map(x => `<tr><td><b>${esc(x.gu)}</b></td><td class="r">${x.n}</td><td class="r">${eok(x.amt)}</td><td class="r hl">${x.land ? fmt(x.land, 0) : "-"}</td><td class="r">${x.gfa ? fmt(x.gfa, 0) : "-"}</td></tr>`).join("")}</tbody>
-  </table></div>
-  <p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 서울, 건물 단위 거래 · ${periodLabel()} · 중위값은 거래를 금액순으로 줄 세웠을 때 가운데 값이라, 큰 거래 한두 건에 덜 흔들립니다. 최근 1~2개월은 신고 기한(30일) 때문에 계속 늘어납니다.</p>`;
-}
-
 function monthTrend() {
   const rows = histRows(), ms = histMonths();
   if (!rows.length || !ms.length) return noHist();
@@ -1256,6 +1258,112 @@ function priceBuckets() {
   return `<div class="stack" role="img" aria-label="금액대별 거래 비중">${list.map(x => `<div style="flex:${x.n || 0.0001};background:${x.c}" title="${x.k} ${x.n}건"></div>`).join("")}</div>
     <ul class="legend">${list.map(x => `<li><i style="background:${x.c}"></i><span>${x.k}</span><span class="num">${x.n}건</span><span class="pct">${Math.round(x.n / total * 100)}%</span></li>`).join("")}</ul>
     <p class="foot-note">서울 건물 단위 거래 ${fmt(total, 0)}건 · ${periodLabel()}</p>`;
+}
+
+/* ================= 구역별 평당가 (국토교통부 실거래, 중위값) ================= */
+const ZONES = [
+  ["서울 전체", "25개 구", "ALL"],
+  ["CBD", "종로·중구", ["종로구", "중구"]],
+  ["GBD", "강남·서초", ["강남구", "서초구"]],
+  ["YBD", "영등포", ["영등포구"]],
+  ["마포·용산", "마포·용산", ["마포구", "용산구"]],
+  ["성수권", "성동·광진", ["성동구", "광진구"]],
+  ["송파·강동", "송파·강동", ["송파구", "강동구"]],
+  ["그 밖의 구", "나머지 13개 구", null]
+];
+const ZONE_GUS = ZONES.filter(z => Array.isArray(z[2])).flatMap(z => z[2]);
+const statsOf = rs => ({ n: rs.length, amt: median(rs.map(r => r.amount)), land: median(rs.map(landPy)), gfa: median(rs.map(gfaPy)) });
+const monthOf = r => r.date.slice(0, 4) + r.date.slice(5, 7);
+// 최근 6개월 vs 그 전 6개월 중위 토지 평당가 변화 (양쪽 모두 3건 이상일 때만)
+function halfChange(rs) {
+  const ms = histMonths();
+  if (ms.length < 12) return null;
+  const recent = new Set(ms.slice(-6)), before = new Set(ms.slice(-12, -6));
+  const a = rs.filter(r => before.has(monthOf(r))), b = rs.filter(r => recent.has(monthOf(r)));
+  if (a.length < 3 || b.length < 3) return null;
+  const pa = median(a.map(landPy)), pb = median(b.map(landPy));
+  return pa ? (pb - pa) / pa * 100 : null;
+}
+const chgChip = v => v == null ? `<span class="chg flat">-</span>` : `<span class="chg ${v > 0.05 ? "up" : v < -0.05 ? "down" : "flat"}">${v > 0.05 ? "▲" : v < -0.05 ? "▼" : ""} ${Math.abs(v).toFixed(1)}%</span>`;
+const chgNote = () => histMonths().length >= 12 ? "변화는 최근 6개월과 그 전 6개월의 중위 토지 평당가를 비교한 값이며, 양쪽 모두 3건 이상일 때만 표시합니다." : "6개월 변화는 12개월치 자료가 모이면 표시됩니다.";
+
+function zoneCards() {
+  const rows = histRows();
+  if (!rows.length) return noHist();
+  return `<div class="zones">${ZONES.map(([name, sub, gus]) => {
+    const rs = gus === "ALL" ? rows : rows.filter(r => gus ? gus.includes(r.gu) : !ZONE_GUS.includes(r.gu));
+    const st = statsOf(rs);
+    return `<div class="zone">
+      <div class="zone-top"><b>${esc(name)}</b><span>${esc(sub)}</span></div>
+      <div class="zone-val"><small>토지 3.3㎡당</small><strong>${st.land ? fmt(st.land / 10000, 2) : "-"}<em>억 원</em></strong></div>
+      <div class="zone-sub"><span>연면적 3.3㎡당 ${st.gfa ? fmt(st.gfa, 0) + "만 원" : "-"}</span><span>${st.n}건</span>${chgChip(halfChange(rs))}</div>
+    </div>`;
+  }).join("")}</div>
+  <p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 서울 건물 단위 거래 · ${periodLabel()} · 모든 값은 중위값입니다. 권역은 구 단위로 묶은 것이라 실제 업무권역 경계와는 다를 수 있습니다. ${chgNote()}</p>`;
+}
+
+// 구별 표에 6개월 변화 추가
+function guStats(limit) {
+  const rows = histRows();
+  if (!rows.length) return noHist();
+  const by = {};
+  rows.forEach(r => (by[r.gu] = by[r.gu] || []).push(r));
+  let list = Object.entries(by).map(([gu, rs]) => ({ gu, ...statsOf(rs), chg: halfChange(rs) })).sort((a, b) => b.land - a.land);
+  if (limit) list = list.slice(0, limit);
+  return `<div class="table-scroll"><table class="gustats">
+    <thead><tr><th>구</th><th class="r">토지 3.3㎡당 (만 원)</th><th class="r">6개월 변화</th><th class="r">연면적 3.3㎡당 (만 원)</th><th class="r">중위 거래금액 (억 원)</th><th class="r">거래 건수</th></tr></thead>
+    <tbody>${list.map(x => `<tr><td><b>${esc(x.gu)}</b></td><td class="r hl">${x.land ? fmt(x.land, 0) : "-"}</td><td class="r">${chgChip(x.chg)}</td><td class="r">${x.gfa ? fmt(x.gfa, 0) : "-"}</td><td class="r">${eok(x.amt)}</td><td class="r">${x.n}</td></tr>`).join("")}</tbody>
+  </table></div>
+  <p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 서울 건물 단위 거래 · ${periodLabel()} · 토지 평당가가 높은 순 · 모두 중위값 · ${chgNote()} 거래가 적은 구는 한두 건에 크게 움직입니다.</p>`;
+}
+
+const DONG = { gu: "" };
+function dongBlock() {
+  const rows = histRows();
+  if (!rows.length) return noHist();
+  const gus = [...new Set(rows.map(r => r.gu))].sort();
+  return `<div class="dong">
+    <div class="filters one"><div class="field"><label for="dong-gu">구 선택</label><select id="dong-gu"><option value="">서울 전체 (거래 많은 동)</option>${gus.map(g => `<option${g === DONG.gu ? " selected" : ""}>${esc(g)}</option>`).join("")}</select></div></div>
+    <div id="dong-out"></div>
+  </div>`;
+}
+function renderDong() {
+  const out = document.getElementById("dong-out");
+  if (!out) return;
+  const rows = histRows().filter(r => !DONG.gu || r.gu === DONG.gu);
+  const by = {};
+  rows.forEach(r => { const k = r.gu + " " + r.dong; (by[k] = by[k] || []).push(r); });
+  const list = Object.entries(by).map(([k, rs]) => ({ k, ...statsOf(rs) })).filter(x => x.n >= 2)
+    .sort((a, b) => DONG.gu ? b.land - a.land : b.n - a.n).slice(0, DONG.gu ? 60 : 30);
+  out.innerHTML = list.length ? `<div class="table-scroll"><table class="gustats">
+    <thead><tr><th>동</th><th class="r">토지 3.3㎡당 (만 원)</th><th class="r">연면적 3.3㎡당 (만 원)</th><th class="r">중위 거래금액 (억 원)</th><th class="r">거래 건수</th></tr></thead>
+    <tbody>${list.map(x => `<tr><td><b>${esc(x.k)}</b></td><td class="r hl">${x.land ? fmt(x.land, 0) : "-"}</td><td class="r">${x.gfa ? fmt(x.gfa, 0) : "-"}</td><td class="r">${eok(x.amt)}</td><td class="r">${x.n}</td></tr>`).join("")}</tbody>
+  </table></div>` : `<p class="empty">거래가 2건 이상인 동이 없습니다.</p>`;
+}
+function bindDong() {
+  const sel = document.getElementById("dong-gu");
+  if (!sel) return;
+  sel.addEventListener("change", () => { DONG.gu = sel.value; renderDong(); });
+  renderDong();
+}
+
+const AGES = [["1980년 이전", 0, 1980], ["1980년대", 1980, 1990], ["1990년대", 1990, 2000], ["2000년대", 2000, 2010], ["2010년대", 2010, 2020], ["2020년 이후", 2020, 9999]];
+function segTable(title, groups) {
+  const rows = histRows();
+  if (!rows.length) return noHist();
+  const list = groups.map(([k, f]) => ({ k, ...statsOf(rows.filter(f)) })).filter(x => x.n);
+  return `<div class="panel"><h3>${esc(title)}</h3><div class="table-scroll"><table class="mini seg">
+    <thead><tr><th>구분</th><th class="r">토지 3.3㎡당</th><th class="r">연면적 3.3㎡당</th><th class="r">건수</th></tr></thead>
+    <tbody>${list.map(x => `<tr><td>${esc(x.k)}</td><td class="r hl">${x.land ? fmt(x.land, 0) + "만" : "-"}</td><td class="r">${x.gfa ? fmt(x.gfa, 0) + "만" : "-"}</td><td class="r">${x.n}</td></tr>`).join("")}</tbody>
+  </table></div></div>`;
+}
+function segBlocks() {
+  if (!histRows().length) return noHist();
+  return `<div class="data">
+    ${segTable("준공 연도별", AGES.map(([k, lo, hi]) => [k, r => { const y = parseInt(r.built, 10); return y >= lo && y < hi; }]))}
+    ${segTable("용도별", USE_GROUPS)}
+  </div>
+  <p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 서울 건물 단위 거래 · ${periodLabel()} · 모두 중위값. 위치 차이가 섞여 있어 연식·용도만의 효과는 아닙니다.</p>`;
 }
 
 /* 실거래 검색 */
@@ -1328,16 +1436,9 @@ function bindExplorer() {
 
 /* ================= 건물주 가이드: 기준 정리 + 계산기 ================= */
 const LAW = name => `https://www.law.go.kr/법령/${encodeURIComponent(name)}`;
-const FACTS_CHECKED = "2026.11.17";
-const FACTS = [
-  { q: "상가·빌딩을 사면 취득세는 얼마인가요?", a: "매매가의 4.6%", d: "취득세 4% + 지방교육세 0.4% + 농어촌특별세 0.2%. 주택이 아닌 건물·토지의 유상 취득 기준이며, 취득일부터 60일 안에 신고·납부합니다. 법인이 수도권 과밀억제권역에서 취득하는 경우 등은 중과될 수 있습니다.", law: "지방세법" },
-  { q: "빌딩 매매 중개보수는 얼마까지인가요?", a: "거래금액의 0.9% 이내에서 협의", d: "주택이 아닌 건물·토지의 상한요율입니다. 상한이지 고정 요율이 아니라 협의로 정합니다. 임대차는 보증금 + 월세×100(합계 5천만 원 미만이면 ×70)을 거래금액으로 봅니다. 중개사무소가 일반과세자면 부가세가 별도로 붙습니다.", law: "공인중개사법 시행규칙" },
-  { q: "건물을 사고팔 때 부가세도 내나요?", a: "토지분 면세, 건물분 10%", d: "매매대금을 토지와 건물 가액으로 나눠 건물분에만 부가세가 붙습니다. 임대사업을 통째로 넘기는 포괄양수도 요건을 갖추면 건물분 부가세 없이 거래할 수 있습니다. 계약서에 토지·건물 가액을 나눠 적는 것이 중요합니다.", law: "부가가치세법" },
-  { q: "임차인이 계약 갱신을 요구하면 거절할 수 있나요?", a: "최초 계약 포함 10년까지는 원칙적으로 갱신", d: "임차인은 계약 만료 6개월 전부터 1개월 전 사이에 갱신을 요구할 수 있고, 전체 임대차기간 10년 범위에서 인정됩니다. 차임 연체 등 법에 정한 사유가 있으면 거절할 수 있습니다.", law: "상가건물 임대차보호법" },
-  { q: "월세는 한 번에 얼마까지 올릴 수 있나요?", a: "환산보증금 기준 이하면 5%까지", d: "환산보증금(보증금 + 월세×100)이 지역 기준 이하인 임대차는 증액 상한이 5%입니다. 서울 기준은 9억 원입니다. 기준을 넘으면 5% 상한은 적용되지 않지만, 10년 갱신요구권과 권리금 회수 기회 보호는 그대로 적용됩니다. 아래 계산기로 확인할 수 있습니다.", law: "상가건물 임대차보호법 시행령" },
-  { q: "빌딩 담보로 임대업 대출을 받을 때 기준은?", a: "RTI 1.5배 이상 (비주택)", d: "RTI는 연간 임대소득을 연간 대출 이자로 나눈 값입니다. 은행권 가이드라인상 비주택 임대업 대출은 1.5배 이상이어야 신규 취급하며, 은행에 따라 더 엄격할 수 있습니다. 예: 연 이자 1억 원이면 연 임대소득 1.5억 원 이상.", law: "", src: "은행연합회 여신심사 가이드라인" },
-  { q: "빌딩도 종합부동산세를 내나요?", a: "부속토지 공시가격 합계 80억 원 초과 시", d: "상가·사무실 부속토지 같은 별도합산토지는 공시가격 합계가 80억 원을 넘으면 종합부동산세 대상이 됩니다. 건물분에는 종부세가 없고 재산세만 부과됩니다.", law: "종합부동산세법" }
-];
+const GUIDE = window.GUIDE_DATA || { checked: "", facts: [] };   // content/guide.json (빌드 때 넣음)
+const FACTS_CHECKED = GUIDE.checked;
+const FACTS = GUIDE.facts;
 
 function factCards() {
   return `<div class="facts">${FACTS.map(f => `<article class="fact">
@@ -1353,9 +1454,12 @@ const num0 = id => { const v = parseFloat(String(document.getElementById(id)?.va
 const won = man => man >= 10000 ? `${fmt(man / 10000, 2)}억 원` : `${fmt(man, 0)}만 원`;   // 만 원 단위 입력
 const pct = (v, d = 2) => isFinite(v) ? `${v.toFixed(d)}%` : "-";
 
+function loanHint() {
+  const l = LIVE && LIVE.rates && LIVE.rates.loan_sme;
+  return l ? `참고: 은행 중소기업대출 평균 금리 ${l.value.toFixed(2)}% (${ymd(l.date)} 신규 취급, 한국은행). 실제 금리는 은행에 확인하세요.` : "실제 대출 금리는 은행에 확인하세요.";
+}
 function calcBlock() {
-  const corp = LIVE && LIVE.rates && LIVE.rates.corp;
-  const rateHint = corp ? `참고: 오늘 회사채(AA-) 3년 금리 ${corp.value.toFixed(2)}% (한국은행)` : "실제 대출 금리는 은행에 확인하세요.";
+  const rateHint = loanHint();
   return `<div class="calcs">
     <form class="calc" id="calc-buy" novalidate>
       <h3>매입 비용 계산기</h3>
@@ -1464,8 +1568,8 @@ function refreshGuide() {
   const gu = document.getElementById("guide-gu"), nw = document.getElementById("guide-news");
   if (gu) gu.innerHTML = guStats(10);
   if (nw) { nw.innerHTML = guideNews(); drawAll(); }
-  const corp = LIVE && LIVE.rates && LIVE.rates.corp, hint = document.querySelector("#calc-yield .field.full small");
-  if (corp && hint) hint.textContent = `참고: 오늘 회사채(AA-) 3년 금리 ${corp.value.toFixed(2)}% (한국은행)`;
+  const hint = document.querySelector("#calc-yield .field.full small");
+  if (hint) hint.textContent = loanHint();
 }
 function renderGuide() {
   const c = CATS.policy;
@@ -1476,44 +1580,25 @@ function renderGuide() {
   </section>
   <section>${secHead("", "건물주가 가장 많이 묻는 기준")}${factCards()}</section>
   <section>${secHead("", "계산기")}${calcBlock()}</section>
-  <section>${secHead("", "서울 구별 빌딩 시세", link("#data", "랩타임에서 더 보기"))}<div id="guide-gu">${guStats(10)}</div></section>
+  <section>${secHead("", "서울 구별 빌딩 시세", link("/data/", "랩타임에서 더 보기"))}<div id="guide-gu">${guStats(10)}</div></section>
   <section>${secHead("", "세금·대출·규제 뉴스")}<div id="guide-news">${guideNews()}</div></section>`;
   bindCalcs();
 }
 
-/* ================= 빌딩러너 칼럼 (블로그 글 + 유튜브 영상) ================= */
-const COL_FILTER = { type: "all" };
-const colKey = t => String(t || "").replace(/#\S+/g, "").replace(/[^0-9A-Za-z가-힣]/g, "").replace(/요$/, "").slice(0, 14);
-// 같은 주제의 블로그 글과 쇼츠를 한 칼럼으로 묶는다
+/* ================= 빌딩러너 칼럼 (네이버 블로그 글) ================= */
 function columnItems() {
   const raw = (LIVE && Array.isArray(LIVE.columns)) ? LIVE.columns : [];
-  const blogs = raw.filter(x => x.type === "blog"), vids = raw.filter(x => x.type === "youtube");
-  const used = new Set();
-  const items = blogs.map(b => {
-    const k = colKey(b.title);
-    const common = (a, b) => { let i = 0; while (i < a.length && a[i] === b[i]) i++; return i; };
-    const v = vids.find(v => !used.has(v.link) && common(k, colKey(v.title)) >= 8);
-    if (v) used.add(v.link);
-    return { ...b, video: v || null };
-  });
-  return items.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  return raw.filter(x => x.type === "blog").sort((a, b) => (b.date || "").localeCompare(a.date || ""));
 }
-const cleanVideoTitle = t => String(t || "").replace(/\s*#\S+/g, "").trim();
 function columnCard(c) {
-  const isVideo = c.type === "youtube";
-  const thumb = isVideo ? c.thumb : (c.video && c.video.thumb);
-  const main = c.link;
   return `<article class="card col-card">
-    <a class="col-media" href="${esc(main)}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
-      ${thumb ? `<div class="art thumb"><img src="${esc(thumb)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.thumb').classList.add('noimg');this.remove()">${isVideo ? `<span class="play">▶</span>` : ""}</div>` : artBox("section", hashSeed(c.title))}
+    <a class="col-media" href="${esc(c.link)}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+      ${c.image ? `<div class="art thumb"><img src="${esc(c.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.thumb').classList.add('noimg');this.remove()"></div>` : artBox("section", hashSeed(c.title))}
     </a>
-    <div class="meta"><span class="tag"><span class="f">7F</span>칼럼</span><span>${isVideo ? "빌딩러너 유튜브" : "빌딩러너 블로그"}</span><span class="num">${newsDate(c.date).split(" ")[0]}</span></div>
-    <h3><a href="${esc(main)}" target="_blank" rel="noopener">${esc(isVideo ? cleanVideoTitle(c.title) : c.title)}</a></h3>
+    <div class="meta"><span class="tag"><span class="f">7F</span>칼럼</span><span>빌딩러너 블로그</span><span class="num">${newsDate(c.date).split(" ")[0]}</span></div>
+    <h3><a href="${esc(c.link)}" target="_blank" rel="noopener">${esc(c.title)}</a></h3>
     ${c.summary ? `<p>${esc(c.summary)}</p>` : ""}
-    <div class="col-links">
-      <a href="${esc(main)}" target="_blank" rel="noopener">${isVideo ? "영상 보기" : "글 읽기"} ↗</a>
-      ${c.video ? `<a href="${esc(c.video.link)}" target="_blank" rel="noopener">▶ 쇼츠로 보기 ↗</a>` : ""}
-    </div>
+    <div class="col-links"><a href="${esc(c.link)}" target="_blank" rel="noopener">글 읽기 ↗</a></div>
   </article>`;
 }
 function columnsEmpty() {
@@ -1521,15 +1606,12 @@ function columnsEmpty() {
 }
 function columnGrid(limit) {
   let items = columnItems();
-  if (COL_FILTER.type === "blog") items = items.filter(x => x.type === "blog");
-  if (COL_FILTER.type === "youtube") items = items.filter(x => x.type === "youtube" || x.video);
   if (limit) items = items.slice(0, limit);
   return items.length ? `<div class="grid">${items.map(columnCard).join("")}</div>` : columnsEmpty();
 }
-const colSource = `<p class="foot-note">빌딩러너 <a href="${esc(SOCIAL.find(s => s.id === "blog").url)}" target="_blank" rel="noopener">네이버 블로그</a>에 올라온 글을 자동으로 모읍니다. 같은 주제의 쇼츠가 있으면 함께 연결합니다. 새 글은 3시간 안에 반영됩니다.</p>`;
+const colSource = `<p class="foot-note">빌딩러너 <a href="${esc(SOCIAL.find(s => s.id === "blog").url)}" target="_blank" rel="noopener">네이버 블로그</a>에 올라온 글을 자동으로 모읍니다. 새 글은 3시간 안에 반영됩니다.</p>`;
 function renderColumns() {
   const c = CATS.column;
-  const tab = (t, label) => `<button type="button" class="pill${COL_FILTER.type === t ? " on" : ""}" data-col="${t}" aria-pressed="${COL_FILTER.type === t}">${label}</button>`;
   view.innerHTML = `
   <section class="cat-head">
     <div class="big">${c.f}</div>
@@ -1550,12 +1632,26 @@ function setActive(slug) {
   const cur = document.querySelector(".floor-btn[aria-current]");
   if (cur) cur.scrollIntoView({ block: "nearest", inline: "nearest" });
 }
+const PATHS = { home: "/", market: "/market/", deal: "/deal/", building: "/building/", policy: "/guide/", players: "/players/", data: "/data/", column: "/column/", inquiry: "/inquiry/", sell: "/sell/", buy: "/buy/" };
+const pathOf = k => PATHS[k] || "/";
+function currentSlug() {
+  const seg = location.pathname.replace(/^\/+|\/+$/g, "").split("/")[0].replace(/\.html$/, "");
+  if (!seg || seg === "index") return "home";
+  if (seg === "guide") return "policy";
+  return ALIASES[seg] || seg;
+}
+// 예전 #주소(#deal 등)로 들어오면 새 주소로 보낸다
+function legacyHash() {
+  const h = location.hash.replace(/^#/, "");
+  if (!h) return false;
+  const k = ALIASES[h] || h;
+  if (PATHS[k] || /^a\d+$/.test(h)) { location.replace(PATHS[k] || "/"); return true; }
+  return false;
+}
 let lastHash = null;
 // keep = true: 데이터가 도착해 같은 화면을 다시 그릴 때 (스크롤 위치 유지, 의뢰서 작성 중이면 건드리지 않음)
 function route(keep) {
-  let h = location.hash.replace(/^#/, "");
-  h = ALIASES[h] || h;
-  if (/^a\d+$/.test(h)) h = "home";   // 예전 기사 주소
+  const h = currentSlug();
   const isInquiry = h === "inquiry" || h === "sell" || h === "buy";
   const hasInputs = isInquiry || h === "policy";
   if (keep === true && hasInputs && h === lastHash && document.querySelector("#view form, #view .calc")) { refreshGuide(); return; }
@@ -1570,6 +1666,7 @@ function route(keep) {
   if (keep !== true || h !== lastHash) window.scrollTo(0, 0);
   lastHash = h;
   bindExplorer();
+  bindDong();
   drawAll();
 }
 
@@ -1845,7 +1942,7 @@ function drawAll() {
 
 /* ================= 실시간 데이터 ================= */
 function loadLive() {
-  fetch("data/live.json", { cache: "no-store" })
+  fetch("/data/live.json", { cache: "no-store" })
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(d => { LIVE = d; LIVE_STATE = "ok"; renderLive(); })
     .catch(() => { LIVE_STATE = "failed"; renderLive(); });
@@ -1853,17 +1950,18 @@ function loadLive() {
 
 /* ================= 초기화 ================= */
 function init() {
+  if (legacyHash()) return;
   if (CHARACTER_IMAGE) {
     const mascot = document.getElementById("mascot");
     mascot.onload = () => { mascot.alt = "빌딩러너 캐릭터"; mascot.hidden = false; };
     mascot.src = CHARACTER_IMAGE;
   }
-  document.getElementById("floors").innerHTML = `<a class="floor-btn" href="#home" data-cat="__home"><span class="lamp">L</span><span class="txt">로비</span></a>` +
-    Object.entries(CATS).map(([k, c]) => `<a class="floor-btn" href="#${k}" data-cat="${k}"><span class="lamp">${c.f}</span><span class="txt">${esc(c.name)}</span></a>`).join("") +
-    `<a class="floor-btn" href="#inquiry" data-cat="inquiry"><span class="lamp">RF</span><span class="txt">매도·매수 의뢰</span></a>`;
-  document.getElementById("board").innerHTML = `<li><a href="#inquiry"><span class="mono">RF</span><b>매도·매수 의뢰</b><span>팔고 싶은 빌딩, 찾고 있는 빌딩을 알려 주세요.</span></a></li>` +
+  document.getElementById("floors").innerHTML = `<a class="floor-btn" href="/" data-cat="__home"><span class="lamp">L</span><span class="txt">로비</span></a>` +
+    Object.entries(CATS).map(([k, c]) => `<a class="floor-btn" href="${pathOf(k)}" data-cat="${k}"><span class="lamp">${c.f}</span><span class="txt">${esc(c.name)}</span></a>`).join("") +
+    `<a class="floor-btn" href="/inquiry/" data-cat="inquiry"><span class="lamp">RF</span><span class="txt">매도·매수 의뢰</span></a>`;
+  document.getElementById("board").innerHTML = `<li><a href="/inquiry/"><span class="mono">RF</span><b>매도·매수 의뢰</b><span>팔고 싶은 빌딩, 찾고 있는 빌딩을 알려 주세요.</span></a></li>` +
     Object.entries(CATS).slice().reverse()
-    .map(([k, c]) => `<li><a href="#${k}"><span class="mono">${c.f}</span><b>${esc(c.name)}</b><span>${esc(c.desc)}</span></a></li>`).join("");
+    .map(([k, c]) => `<li><a href="${pathOf(k)}"><span class="mono">${c.f}</span><b>${esc(c.name)}</b><span>${esc(c.desc)}</span></a></li>`).join("");
   document.getElementById("footer-sns").innerHTML = socialHtml();
   const us = document.getElementById("util-sns");
   us.innerHTML = socialHtml(false);
@@ -1880,7 +1978,7 @@ function init() {
     if (q.trim()) { renderSearch(q); window.scrollTo(0, 0); }
   });
 
-  window.addEventListener("hashchange", route);
+  window.addEventListener("hashchange", legacyHash);
   let t;
   window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(drawAll, 120); });
   try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll); } catch (e) {}
