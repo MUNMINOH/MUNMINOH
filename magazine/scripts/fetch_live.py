@@ -234,16 +234,28 @@ def fetch_deals(key: str, today: dt.date) -> dict | None:
 # ---------------------------------------------------------------- 뉴스 (제목·출처·링크만 저장)
 NEWS_FEEDS = [
     # (이름, 주소, 기본 섹션) — 언론사·기관의 공개 RSS
-    ("국토교통부", "https://www.korea.kr/rss/dept_molit.xml", "policy"),
     ("한국경제", "https://www.hankyung.com/feed/realestate", None),
     ("매일경제", "https://www.mk.co.kr/rss/50300009/", None),
     ("연합뉴스", "https://www.yna.co.kr/rss/economy.xml", None),
     ("조선비즈", "https://biz.chosun.com/arc/outboundfeeds/rss/category/real_estate/?outputType=xml", None),
     ("아시아경제", "https://www.asiae.co.kr/rss/realestate.htm", None),
 ]
-NEWS_QUERIES = ["오피스 빌딩 매각", "꼬마빌딩 매매", "물류센터 매각", "상업용 부동산", "리츠 오피스", "데이터센터 부지", "지식산업센터 공실"]
+NEWS_QUERIES = ["오피스 빌딩 매각", "꼬마빌딩 매매", "물류센터 매각", "상업용 부동산", "리츠 오피스", "오피스 공실률",
+                "빌딩 리모델링", "호텔 매각", "상업용 부동산 PF", "데이터센터 부지 매입", "지식산업센터 공실"]
 
-CRE = re.compile(r"빌딩|오피스(?!텔)|사옥|상가|상업용|물류센터|물류 센터|데이터센터|리츠|REIT|꼬마빌딩|지식산업센터|지산|호텔|리테일|쇼핑몰|복합쇼핑|공실률|임대료|프라임|자산운용|업무시설|근린생활|오피스 시장|CBD|GBD|YBD")
+# 상업용 부동산이 분명한 단어
+CRE = re.compile(r"빌딩|오피스(?!텔)|사옥|상가|상업용|물류센터|물류 센터|리츠|REIT|꼬마빌딩|지식산업센터|호텔 매각|호텔 인수|리테일 부동산|쇼핑몰|업무시설|근린생활|프라임 오피스|CBD|GBD|YBD")
+# 데이터센터는 부동산 관점(부지·매각·개발 등)일 때만
+DC_RE = r"(부지 (확보|매입|매각)|매각|매입|인수|착공|준공|건립|부동산|펀드|리츠|임차)"
+DATACENTER = re.compile(r"데이터센터.*" + DC_RE + r"|" + DC_RE + r".*데이터센터")
+# 주택 기사 (상업용 단어가 없으면 뺀다)
+HOUSING = re.compile(r"세입자|전세|월세|아파트|집값|주택|청약|신혼부부|빌라|분양|무주택|내집|내 집")
+
+
+def is_cre(title: str) -> bool:
+    if CRE.search(title) or DATACENTER.search(title):
+        return not (HOUSING.search(title) and not re.search(r"빌딩|오피스(?!텔)|상가|물류센터|리츠|지식산업센터|상업용", title))
+    return False
 SECTIONS = [  # 먼저 맞는 섹션으로 분류
     ("deal", re.compile(r"매각|매입|인수|손바뀜|팔렸|팔아|사들|우선협상|낙찰|매매|거래액|거래 ")),
     ("players", re.compile(r"리츠|REIT|운용사|자산운용|펀드|연기금|공제회|기관투자|상장|증권사")),
@@ -309,7 +321,7 @@ def fetch_news(now: dt.datetime, prev: list) -> list:
             for x in _items(get(url)):
                 if not x["title"] or not x["link"].startswith("http"):
                     continue
-                if not CRE.search(x["title"]):
+                if not is_cre(x["title"]):
                     continue  # 상업용 부동산과 관계없는 기사(아파트 등)는 뺀다
                 x["source"] = name
                 x["section"] = _section(x["title"], default)
@@ -322,18 +334,23 @@ def fetch_news(now: dt.datetime, prev: list) -> list:
         try:
             n = 0
             for x in _items(get(url)):
-                if not x["title"] or not CRE.search(x["title"]):
+                if not x["title"] or not is_cre(x["title"]):
                     continue
                 # 구글 뉴스 제목은 "제목 - 언론사" 형식
                 if x["source"] and x["title"].endswith(" - " + x["source"]):
                     x["title"] = x["title"][: -len(" - " + x["source"])].strip()
                 x["source"] = x["source"] or "Google 뉴스"
+                x["title"] = re.sub(r"\s+By\s+\S+.*$", "", x["title"]).strip()
                 x["section"] = _section(x["title"], None)
                 found.append(x); n += 1
             log(f"뉴스 검색 '{q}': {n}건")
         except Exception as e:
             log(f"뉴스 검색 '{q}' 실패: {e}")
 
+    now_iso = now.isoformat(timespec="minutes")
+    for x in found:
+        if not x.get("date") or x["date"] > now_iso:
+            x["date"] = now_iso
     cutoff = (now - dt.timedelta(days=21)).isoformat()
     seen, out = set(), []
     for x in sorted(found + (prev or []), key=lambda x: x.get("date") or "", reverse=True):
