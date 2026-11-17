@@ -811,7 +811,7 @@ function ratesBlock() {
       ${spark(s.series)}
     </div>`;
   }).join("")}</div>
-  <p class="foot-note">출처: 한국은행 경제통계시스템(ECOS) · ${updatedLabel()} · 그래프는 최근 약 30영업일 추이, 변화는 직전 영업일 대비입니다. 기준금리가 오르면 대출 금리와 빌딩 매입 수익률의 간격이 좁아집니다.</p>`;
+  <p class="foot-note">출처: 한국은행 경제통계시스템(ECOS) · ${updatedLabel()} · 그래프는 최근 약 30영업일 추이, 변화는 직전 영업일 대비입니다.</p>`;
 }
 
 function reitsBlock() {
@@ -1750,8 +1750,6 @@ function drawArt(cv, C) {
   g.strokeStyle = C.ink; g.lineWidth = 1.5; g.beginPath(); g.moveTo(0, gl + 0.5); g.lineTo(w, gl + 0.5); g.stroke();
   g.fillStyle = C.muted; g.font = `500 ${fs}px "IBM Plex Mono", monospace`; g.textAlign = "left";
   g.fillText("GL ±0", 10, gl + fs + 6);
-  g.textAlign = "right"; g.fillText("ELEVATION 1:500", w - 10, gl + fs + 6); g.textAlign = "left";
-  if (d && w > 260) dim(g, d.left ? d.x : Math.min(d.x, w - 24), d.top, gl, d.label, C, fs);
 }
 function drawAll() {
   const C = palette();
