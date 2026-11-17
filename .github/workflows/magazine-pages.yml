@@ -1,0 +1,53 @@
+# STOREY 매거진을 GitHub Pages로 배포합니다.
+# 배포할 때마다 공개 API에서 최신 지표를 받아 data/live.json에 넣습니다.
+# 저장소에 커밋하지 않고, 배포본에만 최신 데이터를 담습니다.
+name: 매거진 배포
+
+on:
+  push:
+    branches: [claude/pensive-ptolemy-ycux69]
+    paths:
+      - "magazine/**"
+      - ".github/workflows/magazine-pages.yml"
+  schedule:
+    - cron: "10 0 * * 1-5"   # 평일 09:10 KST
+    - cron: "10 9 * * 1-5"   # 평일 18:10 KST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: magazine-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 최신 지표 받기
+        env:
+          ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        # 수집이 실패해도 저장소에 있는 마지막 데이터로 배포한다
+        run: python magazine/scripts/fetch_live.py || echo "::warning::지표 수집에 실패해 저장된 데이터로 배포합니다"
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: magazine
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
