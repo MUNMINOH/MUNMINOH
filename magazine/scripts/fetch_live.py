@@ -14,8 +14,11 @@
 from __future__ import annotations
 
 import datetime as dt
+import email.utils
+import html
 import json
 import os
+import re
 import sys
 import time
 import urllib.parse
@@ -215,17 +218,130 @@ def fetch_deals(key: str, today: dt.date) -> dict | None:
         return None
     buildings = [x for x in deals if x["type"] in ("일반", "")]  # 집합(구분상가)이 아닌 건물 단위 거래
     buildings.sort(key=lambda x: x["amount"], reverse=True)
-    by_gu = {}
+    by_gu, by_use = {}, {}
     for x in buildings:
-        g = by_gu.setdefault(x["gu"], {"count": 0, "amount": 0})
-        g["count"] += 1
-        g["amount"] += x["amount"]
+        for table, k in ((by_gu, x["gu"]), (by_use, x["use"] or "기타")):
+            g = table.setdefault(k, {"count": 0, "amount": 0})
+            g["count"] += 1
+            g["amount"] += x["amount"]
     return {
         "source": "국토교통부 상업업무용 부동산 매매 신고 자료",
         "months": months, "count": len(buildings), "totalAmount": sum(x["amount"] for x in buildings),
-        "top": buildings[:12], "byGu": by_gu,
+        "top": buildings[:12], "byGu": by_gu, "byUse": by_use,
     }
 
+
+# ---------------------------------------------------------------- 뉴스 (제목·출처·링크만 저장)
+NEWS_FEEDS = [
+    # (이름, 주소, 기본 섹션) — 언론사·기관의 공개 RSS
+    ("국토교통부", "https://www.korea.kr/rss/dept_molit.xml", "policy"),
+    ("한국경제", "https://www.hankyung.com/feed/realestate", None),
+    ("매일경제", "https://www.mk.co.kr/rss/50300009/", None),
+    ("연합뉴스", "https://www.yna.co.kr/rss/economy.xml", None),
+    ("조선비즈", "https://biz.chosun.com/arc/outboundfeeds/rss/category/real_estate/?outputType=xml", None),
+    ("아시아경제", "https://www.asiae.co.kr/rss/realestate.htm", None),
+]
+NEWS_QUERIES = ["오피스 빌딩 매각", "꼬마빌딩 매매", "물류센터 매각", "상업용 부동산", "리츠 오피스", "데이터센터 부지", "지식산업센터 공실"]
+
+CRE = re.compile(r"빌딩|오피스(?!텔)|사옥|상가|상업용|물류센터|물류 센터|데이터센터|리츠|REIT|꼬마빌딩|지식산업센터|지산|호텔|리테일|쇼핑몰|복합쇼핑|공실률|임대료|프라임|자산운용|업무시설|근린생활|오피스 시장|CBD|GBD|YBD")
+SECTIONS = [  # 먼저 맞는 섹션으로 분류
+    ("deal", re.compile(r"매각|매입|인수|손바뀜|팔렸|팔아|사들|우선협상|낙찰|매매|거래액|거래 ")),
+    ("players", re.compile(r"리츠|REIT|운용사|자산운용|펀드|연기금|공제회|기관투자|상장|증권사")),
+    ("building", re.compile(r"리모델링|재개발|재건축|준공|착공|신축|개발|용적률|설계|공사|인허가|용도 변경|용도변경")),
+    ("policy", re.compile(r"정책|규제|세금|취득세|양도세|보유세|대출|금리|국토부|국토교통부|기준금리|DSR|PF|법안|개정|시행")),
+]
+
+
+def _text(el, tag):
+    t = el.find(tag)
+    return (t.text or "").strip() if t is not None and t.text else ""
+
+
+def _parse_date(s: str) -> str:
+    s = (s or "").strip()
+    try:  # RSS 표준 형식 (GMT, +0900 등 시간대 포함)
+        d = email.utils.parsedate_to_datetime(s)
+        if d.tzinfo is None:
+            d = d.replace(tzinfo=dt.timezone.utc)
+        return d.astimezone(KST).isoformat(timespec="minutes")
+    except Exception:
+        pass
+    for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%d %H:%M:%S", "%Y.%m.%d %H:%M:%S"):
+        try:
+            d = dt.datetime.strptime(s, fmt)
+            if d.tzinfo is None:
+                d = d.replace(tzinfo=KST)
+            return d.astimezone(KST).isoformat(timespec="minutes")
+        except Exception:
+            continue
+    return ""
+
+
+def _clean_title(t: str) -> str:
+    t = re.sub(r"<[^>]+>", "", html.unescape(t or "")).strip()
+    return re.sub(r"\s+", " ", t)
+
+
+def _section(title: str, default):
+    for name, rx in SECTIONS:
+        if rx.search(title):
+            return name
+    return default or "market"
+
+
+def _items(xml: bytes):
+    root = ET.fromstring(xml)
+    for it in root.iter("item"):
+        src = it.find("source")
+        yield {
+            "title": _clean_title(_text(it, "title")),
+            "link": _text(it, "link"),
+            "date": _parse_date(_text(it, "pubDate") or _text(it, "{http://purl.org/dc/elements/1.1/}date")),
+            "source": (src.text or "").strip() if src is not None and src.text else "",
+        }
+
+
+def fetch_news(now: dt.datetime, prev: list) -> list:
+    found = []
+    for name, url, default in NEWS_FEEDS:
+        try:
+            n = 0
+            for x in _items(get(url)):
+                if not x["title"] or not x["link"].startswith("http"):
+                    continue
+                if not CRE.search(x["title"]):
+                    continue  # 상업용 부동산과 관계없는 기사(아파트 등)는 뺀다
+                x["source"] = name
+                x["section"] = _section(x["title"], default)
+                found.append(x); n += 1
+            log(f"뉴스 {name}: {n}건")
+        except Exception as e:
+            log(f"뉴스 {name} 실패: {e}")
+    for q in NEWS_QUERIES:
+        url = "https://news.google.com/rss/search?" + urllib.parse.urlencode({"q": q + " when:14d", "hl": "ko", "gl": "KR", "ceid": "KR:ko"})
+        try:
+            n = 0
+            for x in _items(get(url)):
+                if not x["title"] or not CRE.search(x["title"]):
+                    continue
+                # 구글 뉴스 제목은 "제목 - 언론사" 형식
+                if x["source"] and x["title"].endswith(" - " + x["source"]):
+                    x["title"] = x["title"][: -len(" - " + x["source"])].strip()
+                x["source"] = x["source"] or "Google 뉴스"
+                x["section"] = _section(x["title"], None)
+                found.append(x); n += 1
+            log(f"뉴스 검색 '{q}': {n}건")
+        except Exception as e:
+            log(f"뉴스 검색 '{q}' 실패: {e}")
+
+    cutoff = (now - dt.timedelta(days=21)).isoformat()
+    seen, out = set(), []
+    for x in sorted(found + (prev or []), key=lambda x: x.get("date") or "", reverse=True):
+        key = re.sub(r"[^0-9A-Za-z가-힣]", "", x["title"])[:40]
+        if not key or key in seen or (x.get("date") and x["date"] < cutoff):
+            continue
+        seen.add(key); out.append(x)
+    return out[:120]
 
 # ---------------------------------------------------------------- 실행
 def main() -> int:
@@ -249,6 +365,14 @@ def main() -> int:
         deals = prev["deals"]  # 이번에 실패하면 지난번 값을 유지
     if deals:
         data["deals"] = deals
+
+    data["news"] = fetch_news(now, prev.get("news", []))
+    by = {}
+    for x in data["news"]:
+        by[x["section"]] = by.get(x["section"], 0) + 1
+    log(f"뉴스 합계 {len(data['news'])}건 {by}")
+    for x in data["news"][:8]:
+        log(f"  [{x['section']}] {x['date'][:16]} {x['source']} | {x['title']}")
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")

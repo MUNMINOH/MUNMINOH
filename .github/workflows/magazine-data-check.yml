@@ -1,0 +1,24 @@
+# 수집 스크립트를 바꿨을 때 GitHub 서버에서 실제로 돌려 보고 결과만 로그로 남깁니다.
+# 배포하거나 커밋하지 않습니다.
+name: 매거진 데이터 수집 점검
+
+on:
+  push:
+    paths:
+      - "magazine/scripts/**"
+      - ".github/workflows/magazine-data-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 수집 스크립트 실행
+        run: python magazine/scripts/fetch_live.py
