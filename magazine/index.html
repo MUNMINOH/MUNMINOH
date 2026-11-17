@@ -590,6 +590,7 @@ const SOCIAL = [
   { id: "kakao",     name: "카카오톡 채널", url: "" }
 ];
 const INQUIRY_ENDPOINT = "https://formsubmit.co/ajax/alsdh1127@gmail.com";
+const NOTION_ENDPOINT = "https://api.bldgrunner.com/inquiry";   // 노션 저장용 Cloudflare Worker (workers/cadence-inquiry)
 
 const ICONS = {
   instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>',
@@ -1073,6 +1074,7 @@ function renderInquiry(type) {
     if (val("f-memo")) data["문의 내용"] = val("f-memo");
     data._subject = `[CADENCE] ${k} 의뢰 · ${data["이름"]}`;
     data._template = "table";
+    data._honey = val("f-hp");
     data._captcha = "false";
 
     if (!INQUIRY_ENDPOINT) {
@@ -1081,17 +1083,29 @@ function renderInquiry(type) {
     }
     const btn = document.getElementById("inq-submit");
     btn.disabled = true; btn.textContent = "보내는 중…";
-    fetch(INQUIRY_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify(data) })
+    // 메일(FormSubmit)과 노션(Cloudflare Worker)으로 동시에 보내고, 한 곳이라도 받으면 접수로 본다
+    const toMail = fetch(INQUIRY_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify(data) })
       .then(r => r.ok ? r.json() : Promise.reject(r.status))
       .then(res => {
         if (res && (res.success === false || res.success === "false")) {
           const m = String(res.message || "");
           throw { mine: /activat/i.test(m) ? "접수 창구 인증이 아직 끝나지 않았습니다. 잠시 후 다시 보내 주시거나 빌딩러너 SNS 메시지로 문의해 주세요." : "" };
         }
-        form.reset(); sync();
-        say(`${k} 의뢰를 접수했습니다. 확인하는 대로 ${data["연락처"]}로 연락드리겠습니다.`);
+      });
+    const toNotion = NOTION_ENDPOINT
+      ? fetch(NOTION_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) })
+          .then(r => r.ok ? r.json() : Promise.reject(r.status))
+          .then(res => { if (!res || !res.ok) throw res; })
+      : Promise.reject("off");
+    Promise.allSettled([toMail, toNotion])
+      .then(([m, n]) => {
+        if (m.status === "fulfilled" || n.status === "fulfilled") {
+          form.reset(); sync();
+          say(`${k} 의뢰를 접수했습니다. 확인하는 대로 ${data["연락처"]}로 연락드리겠습니다.`);
+        } else {
+          say((m.reason && m.reason.mine) || "의뢰를 보내지 못했습니다. 인터넷 연결을 확인하고 다시 눌러 주세요. 계속 안 되면 빌딩러너 SNS 메시지로 문의해 주세요.", true);
+        }
       })
-      .catch(err => say((err && err.mine) || "의뢰를 보내지 못했습니다. 인터넷 연결을 확인하고 다시 눌러 주세요. 계속 안 되면 빌딩러너 SNS 메시지로 문의해 주세요.", true))
       .finally(() => { btn.disabled = false; btn.textContent = "의뢰 보내기"; });
   });
 }
