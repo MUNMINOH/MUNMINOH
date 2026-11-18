@@ -1,0 +1,47 @@
+# CADENCE 정기 갱신 릴레이
+# GitHub 예약 실행(schedule)은 자주 빠지므로, 이 워크플로가 3시간마다 '매거진 배포'를 실행하고
+# 끝나기 전에 자기 자신을 다시 실행해 사슬처럼 이어 갑니다. GITHUB_TOKEN만 씁니다(별도 토큰 불필요).
+# - 사이트 데이터가 이미 2시간 안에 갱신됐으면(다른 경로로 갱신된 경우) 배포는 건너뜁니다.
+# - 사슬이 끊기면 아래 예비 예약 실행이 다시 이어 붙입니다. 동시에 하나만 돕니다.
+name: 매거진 정기 갱신
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "47 */6 * * *"   # 예비: 사슬이 끊겼을 때 다시 시작
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: magazine-refresh
+  cancel-in-progress: false
+
+jobs:
+  relay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 200
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      REF: ${{ github.event.repository.default_branch }}
+    steps:
+      - name: 사이트 데이터가 오래됐으면 배포 실행
+        run: |
+          updated=$(curl -sf --max-time 30 https://cadence.bldgrunner.com/data/live.json | python3 -c "import json,sys; print(json.load(sys.stdin).get('updatedAt',''))" || true)
+          age=$(python3 -c "import datetime as d,sys; s=sys.argv[1]; print(int((d.datetime.now(d.timezone.utc)-d.datetime.fromisoformat(s)).total_seconds()//60) if s else 9999)" "$updated")
+          echo "사이트 데이터 갱신 시각: ${updated:-알 수 없음} (${age}분 전)"
+          if [ "$age" -lt 120 ]; then echo "최근에 갱신됨, 건너뜀"; exit 0; fi
+          if [ "$(gh run list -R "$REPO" -w magazine-pages.yml --json status --jq '[.[] | select(.status=="in_progress" or .status=="queued")] | length')" != "0" ]; then
+            echo "배포가 이미 진행 중, 건너뜀"; exit 0
+          fi
+          gh workflow run magazine-pages.yml -R "$REPO" --ref "$REF" -f source=cron
+          echo "배포 실행 요청함"
+
+      - name: 3시간 기다리기
+        run: sleep 10500
+
+      - name: 다음 릴레이 실행
+        if: success() || failure()   # 사람이 취소하면 사슬을 멈춘다
+        run: gh workflow run magazine-refresh.yml -R "$REPO" --ref "$REF"
