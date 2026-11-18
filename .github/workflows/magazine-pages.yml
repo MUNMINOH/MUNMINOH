@@ -10,9 +10,17 @@ on:
     paths:
       - "magazine/**"
       - ".github/workflows/magazine-pages.yml"
+  # 3시간마다 갱신. GitHub 예약 실행은 자주 늦거나 빠지므로,
+  # Cloudflare Worker(workers/cadence-inquiry)가 같은 주기로 workflow_dispatch(source=cron)를 보낸다.
+  # 아래 GitHub 예약은 예비용.
   schedule:
-    - cron: "17 */3 * * *"   # 3시간마다 (뉴스·금리·리츠·실거래·칼럼 갱신)
+    - cron: "17 */3 * * *"
   workflow_dispatch:
+    inputs:
+      source:
+        description: "실행 출처 (cron = 정기 갱신)"
+        required: false
+        default: "manual"
 
 permissions:
   contents: read
@@ -72,7 +80,7 @@ jobs:
         continue-on-error: true
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
         run: |
-          if [ "${{ github.event_name }}" = "schedule" ] && [ "$(date -u +%H)" != "00" ]; then echo "하루 한 번만 보냄"; exit 0; fi
+          if { [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.source }}" = "cron" ]; } && [ "$(date -u +%H)" != "00" ]; then echo "정기 갱신은 하루 한 번만 보냄"; exit 0; fi
           key=$(grep -oP 'INDEXNOW_KEY = "\K[0-9a-f]+' magazine/scripts/build_site.py)
           body=$(python3 -c "import json,sys; urls=open('_site/indexnow-urls.txt').read().split(); print(json.dumps({'host':'cadence.bldgrunner.com','key':sys.argv[1],'keyLocation':'https://cadence.bldgrunner.com/'+sys.argv[1]+'.txt','urlList':urls}))" "$key")
           for ep in https://api.indexnow.org/indexnow https://searchadvisor.naver.com/indexnow; do
@@ -83,7 +91,7 @@ jobs:
   # GitHub은 저장소에 60일 동안 커밋이 없으면 예약 실행을 멈춘다.
   # 마지막 커밋 후 45일이 지나면 이슈를 열어 주인에게 알린다 (GitHub 알림·메일).
   inactivity-notice:
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'schedule' || inputs.source == 'cron'
     runs-on: ubuntu-latest
     permissions:
       contents: read

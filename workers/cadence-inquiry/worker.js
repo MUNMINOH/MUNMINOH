@@ -1,10 +1,36 @@
 // CADENCE 매도·매수 의뢰 → 노션 데이터베이스
 // POST https://api.bldgrunner.com/inquiry  (JSON, 사이트 의뢰서가 보냄)
 // 환경 변수: NOTION_DB (데이터베이스 ID), NOTION_TOKEN (노션 통합 시크릿, Cloudflare 시크릿으로 저장)
+//
+// 정기 갱신: Cron Trigger(3시간마다)가 GitHub Actions '매거진 배포'를 실행시킨다.
+// GitHub 자체 예약 실행이 자주 빠져서 둔 장치. GH_TOKEN 시크릿이 필요하다
+// (GitHub fine-grained 토큰, 이 저장소만, 권한 Actions: Read and write).
+const GH_REPO = "MUNMINOH/MUNMINOH";
+const GH_WORKFLOW = "magazine-pages.yml";
+const GH_REF = "claude/pensive-ptolemy-ycux69";   // 저장소 기본 브랜치
 
 const ALLOWED_ORIGINS = ["https://cadence.bldgrunner.com", "https://munminoh.github.io"];
 
+async function dispatchRefresh(env) {
+  if (!env.GH_TOKEN) { console.log("GH_TOKEN 없음: 정기 갱신을 건너뜀"); return; }
+  const res = await fetch(`https://api.github.com/repos/${GH_REPO}/actions/workflows/${GH_WORKFLOW}/dispatches`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${env.GH_TOKEN}`,
+      "Accept": "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      "User-Agent": "cadence-refresh",
+    },
+    body: JSON.stringify({ ref: GH_REF, inputs: { source: "cron" } }),
+  });
+  console.log("정기 갱신 요청", res.status, res.status === 204 ? "" : await res.text());
+}
+
 export default {
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(dispatchRefresh(env));
+  },
+
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
     const cors = {
