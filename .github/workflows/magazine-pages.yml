@@ -11,7 +11,7 @@ on:
       - "magazine/**"
       - ".github/workflows/magazine-pages.yml"
   # 3시간마다 갱신. GitHub 예약 실행은 자주 늦거나 빠지므로,
-  # Cloudflare Worker(workers/cadence-inquiry)가 같은 주기로 workflow_dispatch(source=cron)를 보낸다.
+  # magazine-refresh.yml(릴레이)과 Cloudflare Worker(GH_TOKEN이 있을 때)가 workflow_dispatch(source=cron)를 보낸다.
   # 아래 GitHub 예약은 예비용.
   schedule:
     - cron: "17 */3 * * *"
