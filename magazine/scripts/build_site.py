@@ -13,6 +13,7 @@ from __future__ import annotations
 import datetime as dt
 import html
 import json
+import re
 import shutil
 import statistics
 from pathlib import Path
@@ -134,10 +135,95 @@ def columns_list(cols, limit=None):
     if not cols:
         return ""
     items = "".join(
-        f'<li><a href="{e(c["link"])}" rel="noopener noreferrer" target="_blank"><b>{e(c["title"])}</b>'
-        f'<small>빌딩러너 블로그 · {e((c.get("date") or "")[:10])}</small></a>'
+        f'<li><a href="{e(col_path(c))}"><b>{e(c["title"])}</b>'
+        f'<small>빌딩러너 칼럼 · {e((c.get("date") or "")[:10])}</small></a>'
         + (f'<p>{e(c.get("summary"))}</p>' if c.get("summary") else "") + "</li>" for c in cols)
     return f'<ol class="headlines">{items}</ol>'
+
+
+def col_path(c):
+    return f"/column/{c['id']}/" if c.get("id") else c["link"]
+
+
+# 칼럼 제목·요약에 나오는 동네 → 실거래 데이터 연결
+AREA_STOP = {"내수", "효자", "신정", "중앙", "대흥", "신원", "사직", "공항", "신문", "원서", "화양", "중림", "본동", "광장", "동작"}
+# 실거래 동 이름에 없는 널리 쓰는 지명 → 구
+AREA_ALIAS = {"압구정": ("강남구", "압구정동"), "가로수길": ("강남구", "신사동"), "청담": "강남구", "테헤란로": "강남구", "강남역": "강남구",
+              "한남": "용산구", "용리단길": "용산구", "신용산": "용산구", "이태원": "용산구", "해방촌": "용산구",
+              "성수": "성동구", "을지로": "중구", "명동": "중구", "여의도": "영등포구", "문래": "영등포구",
+              "연남": "마포구", "홍대": "마포구", "합정": "마포구", "망원": "마포구", "잠실": "송파구",
+              "익선": "종로구", "서촌": "종로구", "북촌": "종로구", "반포": ("서초구", "반포동"), "잠수교": ("서초구", "반포동")}
+
+
+def area_index(rows):
+    """{지명: [(구, 동 또는 None, 거래 건수)]}. 예: '여의도' → [('영등포구', '여의도동', n)]"""
+    count = {}
+    for r in rows:
+        count[(r["gu"], r["dong"])] = count.get((r["gu"], r["dong"]), 0) + 1
+    idx = {}
+    for (gu, dong), n in count.items():
+        base = re.sub(r"\d+가$", "", dong)
+        for k in {dong, base, re.sub(r"\d*동$", "", base)}:
+            if len(k) >= 2 and k not in AREA_STOP:
+                idx.setdefault(k, []).append((gu, dong, n))
+    for k, v in AREA_ALIAS.items():
+        gu, dong = v if isinstance(v, tuple) else (v, None)
+        idx.setdefault(k, []).append((gu, dong, count.get((gu, dong), 0)))
+    for gu in GU_SLUG:
+        for k in {gu, gu[:-1]}:
+            if len(k) >= 2 and k not in AREA_STOP:
+                idx.setdefault(k, []).append((gu, None, 0))
+    return idx
+
+
+def _area_hits(text, idx):
+    hits, taken = [], [False] * len(text)
+    for k in sorted(idx, key=len, reverse=True):
+        i = text.find(k)
+        if i >= 0 and not any(taken[i:i + len(k)]):
+            taken[i:i + len(k)] = [True] * len(k)
+            hits.append((i, max(idx[k], key=lambda x: x[2])))
+    return [h for _, h in sorted(hits)]
+
+
+def areas_for(title, summary, idx, limit=2):
+    """제목에 나온 지명을 먼저, 모자라면 요약에서. 같은 구는 한 번만."""
+    found = {}
+    for gu, dong, _ in _area_hits(title, idx) + _area_hits(summary or "", idx):
+        if gu not in found:
+            found[gu] = dong
+        elif not found[gu] and dong:
+            found[gu] = dong   # 같은 구면 동까지 알려 주는 쪽을 쓴다
+    return list(found.items())[:limit]
+
+
+def area_block(c, rows, idx):
+    out = []
+    for gu, dong in areas_for(c["title"], c.get("summary"), idx):
+        g = [r for r in rows if r["gu"] == gu]
+        d = [r for r in g if dong and r["dong"] == dong]
+        line = []
+        if len(d) >= 2:
+            line.append(f'<li>{e(gu)} {e(dong)}: 최근 12개월 실거래 {len(d)}건, 토지 3.3㎡당 중위 {med([land_py(r) for r in d]):,.0f}만 원</li>')
+        if g:
+            line.append(f'<li>{e(gu)} 전체: 실거래 {len(g)}건, 토지 3.3㎡당 중위 {med([land_py(r) for r in g]):,.0f}만 원 · '
+                        f'<a href="/seoul/{GU_SLUG[gu]}/">{e(gu)} 빌딩 시세 보기</a></li>')
+        out += line
+    if not out:
+        return ""
+    return (f'<section><h2>이 글 속 지역의 실거래 데이터</h2><ul>{"".join(out)}</ul>'
+            '<p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 서울 건물 단위 거래 · 중위값</p></section>')
+
+
+def column_page(c, cols, rows, idx):
+    others = [x for x in cols if x.get("id") and x["id"] != c["id"]][:6]
+    return (f'<article class="col-detail"><p><a href="/column/">빌딩러너 칼럼</a>{" · " + e(c.get("tag")) if c.get("tag") else ""}</p>'
+            f'<h1>{e(c["title"])}</h1><p>빌딩러너 · {e((c.get("date") or "")[:10])}</p>'
+            + (f'<img src="{e(c["image"])}" alt="{e(c["title"])}" referrerpolicy="no-referrer">' if c.get("image") else "")
+            + (f'<p>{e(c.get("summary"))}…</p>' if c.get("summary") else "")
+            + f'<p><a href="{e(c["link"])}" rel="noopener noreferrer" target="_blank">네이버 블로그에서 전체 글 읽기</a></p></article>'
+            + area_block(c, rows, idx)
+            + (f'<section><h2>다른 칼럼</h2>{columns_list(others)}</section>' if others else ""))
 
 
 def gu_links():
@@ -212,10 +298,13 @@ def prerender(slug, name, desc, data, guide, market, gu=None):
 
 
 # ---------------------------------------------------------------- 머리말 (SEO)
-def seo_head(slug, path, title, desc, data, noindex=False):
+def seo_head(slug, path, title, desc, data, noindex=False, post=None):
     url = SITE + path
     crumbs = [{"@type": "ListItem", "position": 1, "name": "CADENCE", "item": SITE + "/"}]
-    if path != "/":
+    if post:
+        crumbs.append({"@type": "ListItem", "position": 2, "name": "빌딩러너 칼럼", "item": SITE + "/column/"})
+        crumbs.append({"@type": "ListItem", "position": 3, "name": post["title"], "item": url})
+    elif path != "/":
         crumbs.append({"@type": "ListItem", "position": 2, "name": title.split(" | ")[0], "item": url})
     graph = [
         {"@type": "WebSite", "@id": SITE + "/#website", "url": SITE + "/", "name": "CADENCE", "alternateName": "케이던스 매거진",
@@ -229,25 +318,35 @@ def seo_head(slug, path, title, desc, data, noindex=False):
         {"@type": "BreadcrumbList", "itemListElement": crumbs},
     ]
     if slug == "column":
-        posts = [c for c in data.get("columns", []) if c.get("type") == "blog"][:20]
+        posts = [c for c in data.get("columns", []) if c.get("type") == "blog"][:30]
         graph.append({"@type": "ItemList", "itemListElement": [
-            {"@type": "ListItem", "position": i + 1, "url": c["link"], "name": c["title"]} for i, c in enumerate(posts)]})
+            {"@type": "ListItem", "position": i + 1, "url": SITE + col_path(c) if c.get("id") else c["link"], "name": c["title"]}
+            for i, c in enumerate(posts)]})
+    if post:
+        graph.append({"@type": "BlogPosting", "@id": url + "#post", "headline": post["title"][:110], "description": desc,
+                      "datePublished": post.get("date", ""), "inLanguage": "ko-KR", "mainEntityOfPage": {"@id": url + "#page"},
+                      "author": {"@type": "Person", "name": "빌딩러너", "url": "https://blog.naver.com/morrison119"},
+                      "publisher": {"@id": SITE + "/#org"}, "isBasedOn": post["link"],
+                      **({"image": post["image"]} if post.get("image") else {}),
+                      **({"articleSection": post["tag"]} if post.get("tag") else {})})
     ld = json.dumps({"@context": "https://schema.org", "@graph": graph}, ensure_ascii=False).replace("</", "<\\/")
-    img = SITE + "/assets/og-image.png"
+    img = (post or {}).get("image") or SITE + "/assets/og-image.png"
     return "\n".join([
         f"<title>{e(title)}</title>",
         f'<meta name="description" content="{e(desc)}">',
         f'<meta name="robots" content="{"noindex,follow" if noindex else "index,follow,max-image-preview:large"}">',
         f'<link rel="canonical" href="{e(url)}">',
-        '<meta property="og:type" content="website">',
+        f'<meta property="og:type" content="{"article" if post else "website"}">',
         '<meta property="og:site_name" content="CADENCE">',
         '<meta property="og:locale" content="ko_KR">',
         f'<meta property="og:title" content="{e(title)}">',
         f'<meta property="og:description" content="{e(desc)}">',
         f'<meta property="og:url" content="{e(url)}">',
         f'<meta property="og:image" content="{img}">',
+    ] + ([] if post and post.get("image") else [
         '<meta property="og:image:width" content="1200">',
         '<meta property="og:image:height" content="630">',
+    ]) + [
         '<meta name="twitter:card" content="summary_large_image">',
         f'<meta name="twitter:title" content="{e(title)}">',
         f'<meta name="twitter:description" content="{e(desc)}">',
@@ -293,6 +392,17 @@ def build() -> None:
         target = OUT / "seoul" / gslug / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(page("gu", path, gu, title, desc, gu=gu), encoding="utf-8")
+    cols = [c for c in data.get("columns", []) if c.get("type") == "blog" and c.get("id")]
+    idx = area_index(rows)
+    for c in cols:
+        path = f"/column/{c['id']}/"
+        title = f"{c['title']} | 빌딩러너 칼럼"
+        desc = (c.get("summary") or c["title"])[:150]
+        out = template[:a] + seo_head("post", path, title, desc, data, post=c) + template[b:]
+        out = out.replace("<!--DATA-->", guide_js, 1).replace("<!--PRERENDER-->", column_page(c, cols, rows, idx), 1)
+        target = OUT / "column" / c["id"] / "index.html"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(out, encoding="utf-8")
     for old, new in REDIRECTS.items():
         t = OUT / old.strip("/") / "index.html"
         t.parent.mkdir(parents=True, exist_ok=True)
@@ -314,12 +424,14 @@ def build() -> None:
     urls = "".join(f"<url><loc>{SITE}{path}</loc><lastmod>{lastmod}</lastmod><changefreq>{'hourly' if slug in ('home', 'deal', 'price', 'news') else 'daily'}</changefreq></url>"
                    for slug, path, *_ in ROUTES if slug not in ("sell", "buy"))
     urls += "".join(f"<url><loc>{SITE}/seoul/{v}/</loc><lastmod>{lastmod}</lastmod><changefreq>daily</changefreq></url>" for v in GU_SLUG.values())
+    urls += "".join(f"<url><loc>{SITE}/column/{c['id']}/</loc><lastmod>{(c.get('date') or lastmod)[:10]}</lastmod><changefreq>weekly</changefreq></url>" for c in cols)
     (OUT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n', encoding="utf-8")
     (OUT / f"{INDEXNOW_KEY}.txt").write_text(INDEXNOW_KEY, encoding="utf-8")
     (OUT / "indexnow-urls.txt").write_text("\n".join([SITE + p for _, p, *_ in ROUTES if p not in ("/sell/", "/buy/")]
-                                                     + [f"{SITE}/seoul/{v}/" for v in GU_SLUG.values()]), encoding="utf-8")
+                                                     + [f"{SITE}/seoul/{v}/" for v in GU_SLUG.values()]
+                                                     + [f"{SITE}/column/{c['id']}/" for c in cols]), encoding="utf-8")
     (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
-    print(f"빌드 완료: {OUT} (페이지 {len(ROUTES)}개 + 구별 {len(GU_SLUG)}개 + 404, sitemap.xml, robots.txt)")
+    print(f"빌드 완료: {OUT} (페이지 {len(ROUTES)}개 + 구별 {len(GU_SLUG)}개 + 칼럼 {len(cols)}개 + 404, sitemap.xml, robots.txt)")
 
 
 if __name__ == "__main__":

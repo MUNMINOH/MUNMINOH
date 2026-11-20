@@ -476,7 +476,7 @@ def _blog_og_image(link: str) -> str:
         return ""
 
 
-def fetch_blog() -> list:
+def fetch_blog(known_images: dict | None = None) -> list:
     out = []
     for url in (f"https://rss.blog.naver.com/{NAVER_BLOG_ID}.xml", f"https://blog.rss.naver.com/{NAVER_BLOG_ID}.xml"):
         try:
@@ -490,7 +490,8 @@ def fetch_blog() -> list:
                 m = re.search(r'<img[^>]+src=["\']([^"\']+)', html.unescape(desc or ""))
                 out.append({"type": "blog", "title": title, "link": link,
                             "date": _parse_date(_text(it, "pubDate")),
-                            "summary": _plain(desc), "image": m.group(1) if m else "",
+                            "summary": re.sub(r"^\s*\d+\.\s*", "", _plain(desc)),   # 본문 첫머리의 "1. " 번호 제거
+                            "image": m.group(1) if m else (known_images or {}).get(link, ""),
                             "tag": _text(it, "category")})
             for x in out:
                 if not x["image"] and elapsed() < BUDGET_TOTAL:
@@ -503,12 +504,20 @@ def fetch_blog() -> list:
 
 
 def fetch_columns(prev: list) -> list:
-    items = fetch_blog()
-    if not items:
-        return prev or []
-    items = [x for x in items if x["title"]]
-    items.sort(key=lambda x: x.get("date") or "", reverse=True)
-    return items[:40]
+    """블로그 RSS는 최근 글 몇 편만 주므로, 지난 데이터와 합쳐 글이 계속 쌓이게 한다."""
+    prev = [x for x in (prev or []) if x.get("type") == "blog" and x.get("link") and x.get("title")]
+    known = {x["link"]: x["image"] for x in prev if x.get("image")}
+    by = {x["link"]: x for x in prev}
+    for x in fetch_blog(known):
+        if x["title"]:
+            old = by.get(x["link"], {})
+            by[x["link"]] = {**old, **{k: v for k, v in x.items() if v or k not in old}}
+    out = sorted(by.values(), key=lambda x: x.get("date") or "", reverse=True)[:300]
+    for x in out:
+        m = re.search(r"/(\d+)$", x["link"])
+        x["id"] = m.group(1) if m else ""
+        x["summary"] = re.sub(r"^\s*\d+\.\s*", "", x.get("summary") or "")
+    return out
 
 
 # ---------------------------------------------------------------- 실행
