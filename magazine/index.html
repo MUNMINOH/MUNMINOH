@@ -507,6 +507,14 @@ table.mini th, table.mini td { padding: 8px 6px; }
 .thumb.noimg { background: var(--art-sky); }
 .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .col-card h3 a:hover { color: var(--accent); }
+.col-detail { max-width: 46rem; display: grid; gap: 14px; justify-items: start; }
+.col-detail h1 { margin: 0; font-family: var(--f-head); font-weight: 800; font-size: var(--t-3xl); line-height: 1.3; letter-spacing: -0.01em; text-wrap: balance; }
+.col-crumb, .col-meta { margin: 0; color: var(--muted); font-size: var(--t-sm); }
+.col-crumb a { color: var(--accent); }
+.col-hero { width: 100%; aspect-ratio: 16 / 9; }
+.col-hero img { width: 100%; height: 100%; object-fit: cover; }
+.zones.fit { grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); }
+.col-lead { margin: 0; color: var(--ink-2); line-height: 1.8; }
 .col-card:hover h3 { color: inherit; }
 .col-links { display: flex; gap: 14px; flex-wrap: wrap; font-size: var(--t-sm); font-weight: 600; }
 .col-links a { color: var(--accent); }
@@ -1522,13 +1530,15 @@ function columnItems() {
   const raw = (LIVE && Array.isArray(LIVE.columns)) ? LIVE.columns : [];
   return raw.filter(x => x.type === "blog").sort((a, b) => (b.date || "").localeCompare(a.date || ""));
 }
+const colPath = c => c.id ? `/column/${c.id}/` : c.link;
+const colExt = c => c.id ? "" : ` target="_blank" rel="noopener noreferrer"`;
 function columnCard(c) {
   return `<article class="card col-card">
-    <a class="col-media" href="${esc(c.link)}" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true">
+    <a class="col-media" href="${esc(colPath(c))}"${colExt(c)} tabindex="-1" aria-hidden="true">
       ${c.image ? `<div class="art thumb"><img src="${esc(c.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.thumb').classList.add('noimg');this.remove()"></div>` : artBox("section", hashSeed(c.title))}
     </a>
     <div class="meta"><span class="tag"><span class="f">${CATS.column.f}</span>칼럼</span><span>빌딩러너 블로그</span><span class="num">${newsDate(c.date).split(" ")[0]}</span></div>
-    <h3><a href="${esc(c.link)}" target="_blank" rel="noopener noreferrer">${esc(c.title)}</a></h3>
+    <h3><a href="${esc(colPath(c))}"${colExt(c)}>${esc(c.title)}</a></h3>
     ${c.summary ? `<p>${esc(c.summary)}</p>` : ""}
     <div class="col-links"><a href="${esc(c.link)}" target="_blank" rel="noopener noreferrer">글 읽기 ↗</a></div>
   </article>`;
@@ -1542,6 +1552,79 @@ function columnGrid(limit) {
   return items.length ? `<div class="grid">${items.map(columnCard).join("")}</div>` : columnsEmpty();
 }
 const colSource = `<p class="foot-note">빌딩러너 <a href="${esc(SOCIAL.find(s => s.id === "blog").url)}" target="_blank" rel="noopener noreferrer">네이버 블로그</a>에 올라온 글을 자동으로 모읍니다. 새 글은 3시간 안에 반영됩니다.</p>`;
+/* 칼럼 글 페이지: 요약 + 블로그 원문 링크 + 글 속 지역 실거래 데이터 (build_site.py와 같은 규칙) */
+const AREA_STOP = new Set(["내수", "효자", "신정", "중앙", "대흥", "신원", "사직", "공항", "신문", "원서", "화양", "중림", "본동", "광장", "동작"]);
+const AREA_ALIAS = { "압구정": ["강남구", "압구정동"], "가로수길": ["강남구", "신사동"], "청담": ["강남구"], "테헤란로": ["강남구"], "강남역": ["강남구"],
+  "한남": ["용산구"], "용리단길": ["용산구"], "신용산": ["용산구"], "이태원": ["용산구"], "해방촌": ["용산구"],
+  "성수": ["성동구"], "을지로": ["중구"], "명동": ["중구"], "여의도": ["영등포구"], "문래": ["영등포구"],
+  "연남": ["마포구"], "홍대": ["마포구"], "합정": ["마포구"], "망원": ["마포구"], "잠실": ["송파구"],
+  "익선": ["종로구"], "서촌": ["종로구"], "북촌": ["종로구"], "반포": ["서초구", "반포동"], "잠수교": ["서초구", "반포동"] };
+function areaIndex(rows) {
+  const count = {}, idx = {};
+  rows.forEach(r => { const k = r.gu + "|" + r.dong; count[k] = (count[k] || 0) + 1; });
+  const add = (k, v) => { if (k.length >= 2 && !AREA_STOP.has(k)) (idx[k] = idx[k] || []).push(v); };
+  Object.entries(count).forEach(([k, n]) => {
+    const [gu, dong] = k.split("|"), base = dong.replace(/\d+가$/, "");
+    new Set([dong, base, base.replace(/\d*동$/, "")]).forEach(x => add(x, [gu, dong, n]));
+  });
+  Object.entries(AREA_ALIAS).forEach(([k, [gu, dong]]) => (idx[k] = idx[k] || []).push([gu, dong || null, count[gu + "|" + dong] || 0]));
+  Object.keys(GU_SLUG).forEach(gu => new Set([gu, gu.slice(0, -1)]).forEach(x => add(x, [gu, null, 0])));
+  return idx;
+}
+function areaHits(text, idx) {
+  const hits = [], taken = new Array(text.length).fill(false);
+  Object.keys(idx).sort((a, b) => b.length - a.length).forEach(k => {
+    const i = text.indexOf(k);
+    if (i >= 0 && !taken.slice(i, i + k.length).some(Boolean)) {
+      for (let j = i; j < i + k.length; j++) taken[j] = true;
+      hits.push([i, idx[k].reduce((a, b) => (b[2] > a[2] ? b : a))]);
+    }
+  });
+  return hits.sort((a, b) => a[0] - b[0]).map(h => h[1]);
+}
+function areasFor(c, idx) {
+  const found = new Map();
+  [...areaHits(c.title, idx), ...areaHits(c.summary || "", idx)].forEach(([gu, dong]) => {
+    if (!found.has(gu)) found.set(gu, dong); else if (!found.get(gu) && dong) found.set(gu, dong);
+  });
+  return [...found].slice(0, 2);
+}
+function columnAreaBlock(c) {
+  const rows = histRows();
+  if (!rows.length) return "";
+  const items = areasFor(c, areaIndex(rows)).flatMap(([gu, dong]) => {
+    const g = rows.filter(r => r.gu === gu), d = dong ? g.filter(r => r.dong === dong) : [];
+    const out = [];
+    if (d.length >= 2) { const st = statsOf(d); out.push(`<div class="zone"><div class="zone-top"><b>${esc(gu)} ${esc(dong)}</b><span>${st.n}건</span></div><div class="zone-val"><small>토지 3.3㎡당 중위</small><strong>${fmt(st.land, 0)}<em>만 원</em></strong></div></div>`); }
+    if (g.length) { const st = statsOf(g); out.push(`<div class="zone"><div class="zone-top"><b>${esc(gu)} 전체</b><span>${st.n}건</span></div><div class="zone-val"><small>토지 3.3㎡당 중위</small><strong>${fmt(st.land, 0)}<em>만 원</em></strong></div><div class="zone-sub"><a href="${guPath(gu)}" style="color:var(--accent)">${esc(gu)} 빌딩 시세 →</a></div></div>`); }
+    return out;
+  });
+  if (!items.length) return "";
+  return `<section>${secHead("", "이 글 속 지역의 실거래 데이터")}<div class="zones fit">${items.join("")}</div>
+    <p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 서울 건물 단위 거래 · ${periodLabel()} · 모두 중위값</p></section>`;
+}
+function renderColumnDetail(id) {
+  const all = columnItems(), c = all.find(x => x.id === id);
+  if (!c) {
+    if (LIVE_STATE === "loading") { view.innerHTML = `<p class="loading">칼럼을 불러오는 중입니다.</p>`; return; }
+    view.innerHTML = `<section class="cat-head"><div class="big">${CATS.column.f}</div><div><h1>칼럼을 찾을 수 없습니다</h1><p><a href="/column/" style="color:var(--accent)">칼럼 목록으로</a></p></div></section>`;
+    return;
+  }
+  const others = all.filter(x => x.id && x.id !== id).slice(0, 3);
+  view.innerHTML = `
+  <article class="col-detail">
+    <p class="col-crumb"><a href="/column/">빌딩러너 칼럼</a>${c.tag ? ` · ${esc(c.tag)}` : ""}</p>
+    <h1>${esc(c.title)}</h1>
+    <p class="col-meta">빌딩러너 · ${newsDate(c.date).split(" ")[0]}</p>
+    ${c.image ? `<div class="art thumb col-hero"><img src="${esc(c.image)}" alt="${esc(c.title)}" referrerpolicy="no-referrer" onerror="this.closest('.thumb').remove()"></div>` : ""}
+    ${c.summary ? `<p class="col-lead">${esc(c.summary)}…</p>` : ""}
+    <a class="btn" href="${esc(c.link)}" target="_blank" rel="noopener noreferrer">네이버 블로그에서 전체 글 읽기 ↗</a>
+  </article>
+  ${columnAreaBlock(c)}
+  ${others.length ? `<section>${secHead(CATS.column.f, "다른 칼럼", link("/column/", "칼럼 전체"))}<div class="grid">${others.map(columnCard).join("")}</div></section>` : ""}
+  ${ctaBlock()}`;
+}
+
 function renderColumns() {
   const c = CATS.column;
   view.innerHTML = `
@@ -1774,6 +1857,7 @@ function route(keep) {
   else if (h === "report") { renderReport(); active = h; }
   else if (h === "policy") { renderGuide(); active = h; }
   else if (h === "news") { renderNews(); active = h; }
+  else if (h === "column" && seg2) { renderColumnDetail(seg2); active = h; }
   else if (h === "column") { renderColumns(); active = h; }
   else if (isInquiry) { renderInquiry(h === "buy" ? "매수" : "매도"); active = "inquiry"; }
   else renderNotFound();

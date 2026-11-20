@@ -62,6 +62,9 @@ jobs:
           echo "::warning::지표 수집이 끝나지 않아 공개된 마지막 데이터로 배포합니다"
           curl -sf --max-time 30 https://cadence.bldgrunner.com/data/live.json -o magazine/data/live.json || true
 
+      - name: 지난 URL 목록 (새 페이지 알림용)
+        run: curl -sf --max-time 20 https://cadence.bldgrunner.com/indexnow-urls.txt -o /tmp/old-urls.txt || touch /tmp/old-urls.txt
+
       - name: 페이지 만들기 (SEO)
         run: python magazine/scripts/build_site.py
 
@@ -72,6 +75,15 @@ jobs:
           path: _site
 
       - id: deployment
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
+      # GitHub Pages 배포가 가끔 일시적으로 실패하므로 한 번 더 시도한다
+      - name: 배포 다시 시도 전 대기
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 60
+      - id: deployment2
+        if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@v4
 
       # 새 페이지·바뀐 페이지를 IndexNow로 검색엔진(빙·네이버 등)에 알린다.
@@ -80,9 +92,15 @@ jobs:
         continue-on-error: true
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
         run: |
-          if { [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.source }}" = "cron" ]; } && [ "$(date -u +%H)" != "00" ]; then echo "정기 갱신은 하루 한 번만 보냄"; exit 0; fi
+          # 정기 갱신: 새 페이지(예: 새 칼럼)가 생겼으면 그 주소만 바로 알리고, 아니면 하루 한 번(00시대 UTC) 전체를 알린다
+          cp _site/indexnow-urls.txt /tmp/send-urls.txt
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.source }}" = "cron" ]; then
+            sort -u /tmp/old-urls.txt > /tmp/a; sort -u _site/indexnow-urls.txt > /tmp/b; comm -13 /tmp/a /tmp/b > /tmp/new-urls.txt
+            if [ -s /tmp/new-urls.txt ]; then echo "새 페이지 $(wc -l < /tmp/new-urls.txt)개"; cat /tmp/new-urls.txt; cp /tmp/new-urls.txt /tmp/send-urls.txt
+            elif [ "$(date -u +%H)" != "00" ]; then echo "새 페이지 없음, 전체 알림은 하루 한 번"; exit 0; fi
+          fi
           key=$(grep -oP 'INDEXNOW_KEY = "\K[0-9a-f]+' magazine/scripts/build_site.py)
-          body=$(python3 -c "import json,sys; urls=open('_site/indexnow-urls.txt').read().split(); print(json.dumps({'host':'cadence.bldgrunner.com','key':sys.argv[1],'keyLocation':'https://cadence.bldgrunner.com/'+sys.argv[1]+'.txt','urlList':urls}))" "$key")
+          body=$(python3 -c "import json,sys; urls=open('/tmp/send-urls.txt').read().split(); print(json.dumps({'host':'cadence.bldgrunner.com','key':sys.argv[1],'keyLocation':'https://cadence.bldgrunner.com/'+sys.argv[1]+'.txt','urlList':urls}))" "$key")
           for ep in https://api.indexnow.org/indexnow https://searchadvisor.naver.com/indexnow; do
             code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$ep" -H "Content-Type: application/json; charset=utf-8" -d "$body" --max-time 30)
             echo "$ep -> HTTP $code"
