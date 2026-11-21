@@ -28,3 +28,14 @@ GitHub API로 '매거진 배포' 워크플로를 실행시킵니다 (`workflow_d
   - Cloudflare 대시보드 → Workers & Pages → cadence-inquiry → Settings → Variables and Secrets에 **Secret**으로 저장합니다.
 - 토큰이 없거나 만료되면 Worker 로그에 남기고 건너뜁니다. 이때는 GitHub 예약 실행만으로 갱신됩니다.
 - 토큰 만료일이 다가오면 GitHub이 메일로 알려 줍니다. 새로 만들어 같은 이름으로 다시 저장하면 됩니다.
+
+## 방문자 수 (`POST /visit`)
+
+사이트 상단에 "오늘 방문 N · 지금 접속 N"을 보여 줍니다.
+
+- 사이트가 브라우저마다 만든 무작위 번호(`vid`, localStorage `cadence-vid`)를 보냅니다. 이름·IP 같은 개인 정보는 저장하지 않습니다.
+- Durable Object `Counter`(SQLite, 바인딩 `COUNTER`) 하나가 집계합니다.
+  - 오늘 방문: 한국 날짜 기준 서로 다른 `vid` 수 (`daily` 표). 30일 지난 방문 기록은 지웁니다.
+  - 지금 접속: 최근 3분 안에 신호를 보낸 `vid` 수. 사이트는 페이지를 보고 있는 동안 1분마다 신호를 보냅니다.
+- 자동화 브라우저(`navigator.webdriver`)는 세지 않습니다.
+- 다시 올릴 때 metadata에 `bindings: [{type: "durable_object_namespace", name: "COUNTER", class_name: "Counter"}]`를 넣습니다 (마이그레이션 `v1`은 이미 적용됨).

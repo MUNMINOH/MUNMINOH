@@ -9,6 +9,38 @@ const GH_REPO = "MUNMINOH/MUNMINOH";
 const GH_WORKFLOW = "magazine-pages.yml";
 const GH_REF = "claude/pensive-ptolemy-ycux69";   // 저장소 기본 브랜치
 
+// 방문자 수: POST /visit {vid} → {today, online}
+//   vid는 브라우저가 만든 무작위 값(개인 정보 아님). 오늘 방문자 = 한국 날짜 기준 서로 다른 vid 수,
+//   지금 접속 = 최근 3분 안에 신호를 보낸 vid 수. Durable Object(COUNTER) 하나가 집계한다.
+export class Counter {
+  constructor(ctx) {
+    this.ctx = ctx;
+    this.seen = new Map();   // vid → 마지막 신호 시각 (지금 접속)
+    this.sql = ctx.storage.sql;
+    this.sql.exec("CREATE TABLE IF NOT EXISTS visits (d TEXT, vid TEXT, PRIMARY KEY (d, vid))");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS daily (d TEXT PRIMARY KEY, n INTEGER)");
+  }
+  async fetch(request) {
+    const { vid } = await request.json().catch(() => ({}));
+    const now = Date.now();
+    const d = new Date(now + 9 * 3600e3).toISOString().slice(0, 10);   // 한국 날짜
+    if (typeof vid === "string" && /^[a-z0-9]{8,40}$/.test(vid)) {
+      const cur = this.sql.exec("INSERT OR IGNORE INTO visits (d, vid) VALUES (?, ?)", d, vid);
+      if (cur.rowsWritten > 0) {
+        this.sql.exec("INSERT INTO daily (d, n) VALUES (?, 1) ON CONFLICT(d) DO UPDATE SET n = n + 1", d);
+        if (Math.random() < 0.02) {   // 가끔 오래된 기록 정리 (30일 넘은 방문 기록)
+          const old = new Date(now + 9 * 3600e3 - 30 * 86400e3).toISOString().slice(0, 10);
+          this.sql.exec("DELETE FROM visits WHERE d < ?", old);
+        }
+      }
+      this.seen.set(vid, now);
+    }
+    for (const [k, t] of this.seen) if (now - t > 180e3) this.seen.delete(k);
+    const row = this.sql.exec("SELECT n FROM daily WHERE d = ?", d).toArray()[0];
+    return Response.json({ today: row ? row.n : 0, online: this.seen.size, date: d });
+  }
+}
+
 const ALLOWED_ORIGINS = ["https://cadence.bldgrunner.com", "https://munminoh.github.io"];
 
 async function dispatchRefresh(env) {
@@ -44,6 +76,14 @@ export default {
       new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json; charset=utf-8" } });
 
     const url = new URL(request.url);
+    if (url.pathname === "/visit") {
+      if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
+      if (request.method !== "POST" || !ALLOWED_ORIGINS.includes(origin)) return reply({ ok: false }, 403);
+      if (!env.COUNTER) return reply({ ok: false, error: "not_configured" }, 503);
+      const stub = env.COUNTER.get(env.COUNTER.idFromName("cadence"));
+      const res = await stub.fetch("https://counter/visit", { method: "POST", body: await request.text() });
+      return reply(await res.json());
+    }
     if (url.pathname !== "/inquiry") return reply({ ok: false, error: "not_found" }, 404);
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
     if (request.method !== "POST") return reply({ ok: false, error: "method" }, 405);
