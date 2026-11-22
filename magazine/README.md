@@ -103,3 +103,14 @@ GitHub은 저장소에 60일 동안 커밋이 없으면 예약 실행을 멈춥�
 ### 실거래 서비스키
 
 Settings → Secrets and variables → Actions → **Repository secrets**에 `DATA_GO_KR_KEY`로 저장합니다. 배포 로그에 "실거래 서비스키: 있음"이 나오면 연결된 것입니다.
+
+## 월간 거래 리포트 (/report/YYYY-MM/)
+
+국토교통부 실거래 누적 자료(최근 12개월)로 달마다 페이지를 자동으로 만듭니다: 거래 건수·금액 합계(전월 대비), 금액대별(10억 미만~300억 이상), 법인·개인 매수, 구별 거래, 금액 상위 10건.
+계약 후 30일 안에 신고되므로 최근 두 달은 "잠정치"로 표시하고, 다음 달 말일이 지나면 확정으로 바뀝니다. 페이지는 sitemap과 IndexNow 목록에 들어갑니다.
+
+## 구조화 데이터
+
+- 건물주 가이드(/guide/)의 질문·답은 FAQPage로 넣습니다 (content/guide.json).
+- 칼럼 페이지는 BlogPosting, 나머지는 WebPage·BreadcrumbList.
+
