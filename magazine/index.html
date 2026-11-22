@@ -517,6 +517,21 @@ table.mini th, table.mini td { padding: 8px 6px; }
 .col-hero img { width: 100%; height: 100%; object-fit: cover; }
 .kpis.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 760px) { .kpis.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn.ghost { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
+.btn.ghost:hover { background: var(--accent-soft); }
+table.month-sum { min-width: 0; }
+table.month-sum th, table.month-sum td { padding: 11px 10px; }
+.d-x { margin-left: 6px; font-size: 11px; color: var(--muted); font-weight: 600; }
+.month-sum th small { color: var(--muted); font-weight: 400; font-size: 11px; }
+.month-sum th a { color: var(--accent); }
+.lookup-teaser { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px 32px; align-items: center; padding: 24px 28px; border: 1px solid var(--line-strong); background: var(--surface); }
+.lookup-teaser h2 { margin: 0 0 6px; font-family: var(--f-head); font-weight: 800; font-size: var(--t-xl); }
+.lookup-teaser p { margin: 0; color: var(--ink-2); }
+.lt-form { display: flex; gap: 8px; }
+.lt-form select { min-width: 9rem; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: 6px; background: var(--bg); color: var(--ink); font: inherit; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-width: 760px) { .lookup-teaser { grid-template-columns: minmax(0, 1fr); padding: 20px; } .lt-form select { flex: 1; } }
 .zones.fit { grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); }
 .col-lead { margin: 0; color: var(--ink-2); line-height: 1.8; }
 .col-card:hover h3 { color: inherit; }
@@ -1720,6 +1735,65 @@ function toolLinks() {
     </div>`;
 }
 
+/* 홈: 월간 리포트 요약, 주간 딜 시트, 내 건물 시세 비교 바로가기 */
+const monthPath = m => m ? `/report/${m.slice(0, 4)}-${m.slice(4)}/` : "/report/";
+const monthKo = m => `${+m.slice(4)}월`;
+const kstToday = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+function monthlySummary() {
+  const rows = histRows(), ms = histMonths();
+  if (!rows.length || !ms.length) return noHist();
+  const last = ms.slice(-2).reverse();   // 최근 달이 앞
+  const of = m => rows.filter(r => r.date.slice(0, 4) + r.date.slice(5, 7) === m);
+  const band = (rs, lo, hi) => rs.filter(r => r.amount >= lo && r.amount < hi).length;
+  const cols = last.map(m => ({ m, rs: of(m) }));
+  const cell = (f) => cols.map(c => `<td class="r">${f(c.rs)}</td>`).join("");
+  return `<div class="table-scroll"><table class="gustats month-sum">
+    <thead><tr><th></th>${cols.map(c => `<th class="r"><a href="${monthPath(c.m)}">${monthKo(c.m)}<small> 잠정</small></a></th>`).join("")}</tr></thead>
+    <tbody>
+      <tr><td>거래 건수</td>${cell(rs => `<b>${fmt(rs.length, 0)}건</b>`)}</tr>
+      <tr><td>거래금액 합계</td>${cell(rs => `${fmt(rs.reduce((a, r) => a + r.amount, 0) / 10000, 0)}억`)}</tr>
+      <tr><td>중위 거래금액</td>${cell(rs => `${eok(median(rs.map(r => r.amount)))}억`)}</tr>
+      <tr><td>50억 미만 거래</td>${cell(rs => `${band(rs, 0, 500000)}건`)}</tr>
+      <tr><td>100억 이상 거래</td>${cell(rs => `${band(rs, 1000000, Infinity)}건`)}</tr>
+      <tr><td>법인 매수</td>${cell(rs => `${rs.filter(r => r.buyer === "법인").length}건`)}</tr>
+    </tbody></table></div>
+    <p class="foot-note">국토교통부 실거래 신고 자료 · 계약 후 30일 안에 신고되므로 최근 두 달은 잠정치이며 계속 늘어납니다. <a href="${monthPath(last[0])}" style="color:var(--accent)">${monthKo(last[0])} 리포트 자세히 →</a></p>`;
+}
+function weeklySheetCompact() {
+  const rows = histRows();
+  if (!rows.length) return noHist();
+  const to = kstToday(), from = new Date(Date.now() + 9 * 3600e3 - 6 * 864e5).toISOString().slice(0, 10);
+  // 계약일·위치·금액·면적이 모두 같은 줄(한 거래가 여러 줄로 신고된 경우 등)은 하나로 묶고 개수를 표시
+  const grp = new Map();
+  let picked = rows.filter(r => r.seen && r.seen >= from && r.seen <= to), byContract = false;
+  if (!picked.length) {   // 공개일 기록이 쌓이기 전: 최근 14일 계약 거래로 대신 보여 준다
+    const c = new Date(Date.now() + 9 * 3600e3 - 13 * 864e5).toISOString().slice(0, 10).replace(/-/g, ".");
+    picked = rows.filter(r => r.date >= c); byContract = true;
+  }
+  picked.forEach(r => {
+    const k = [r.gu, r.dong, r.date, r.amount, r.landArea, r.buildingArea, r.use].join("|");
+    const g = grp.get(k); if (g) g.n++; else grp.set(k, { ...r, n: 1 });
+  });
+  const rs = [...grp.values()].sort((a, b) => b.amount - a.amount);
+  if (!rs.length) return `<p class="empty">최근 거래가 아직 없습니다. 국토교통부 자료에 새 거래가 올라오면 여기에 바로 나옵니다 (2026년 11월 23일부터 기록).</p>
+    <p class="foot-note"><a href="/deal/" style="color:var(--accent)">지금까지의 서울 빌딩 실거래 검색 →</a></p>`;
+  return `<ol class="dlist">${rs.slice(0, 6).map(r => `<li>
+      <span class="d-amt">${eok(r.amount)}<em>억</em></span>
+      <span class="d-main"><b>${esc(r.gu)} ${esc(r.dong)}${r.n > 1 ? `<span class="d-x">×${r.n}</span>` : ""}</b><small>${esc(useLabel(r.use))} · 연면적 ${r.buildingArea ? fmt(r.buildingArea / PYEONG, 0) : "-"}평 · 계약 ${esc(r.date.slice(5))}</small></span>
+      <span class="d-pp">${landPy(r) ? fmt(landPy(r), 0) + "만" : "-"}<small>토지 3.3㎡당</small></span></li>`).join("")}</ol>
+    <p class="foot-note">${byContract ? "최근 14일 안에 계약된 거래" : "최근 7일 새로 공개된 거래"} ${rs.reduce((a, r) => a + r.n, 0)}건 중 금액 상위 · ×표시는 조건이 같은 신고 건수 · 국토교통부 실거래</p>`;
+}
+function lookupTeaser() {
+  return `<div class="lookup-teaser">
+    <div><h2>내 건물, 같은 동네에선 얼마에 거래됐을까?</h2><p>구와 동을 고르면 같은 동·구의 빌딩 실거래와 3.3㎡당 평당가 범위를 바로 비교합니다.</p></div>
+    <form class="lt-form" action="/lookup/" method="get">
+      <label class="sr-only" for="lt-gu">구</label>
+      <select id="lt-gu" name="gu">${Object.keys(GU_SLUG).map(g => `<option>${esc(g)}</option>`).join("")}</select>
+      <button class="btn" type="submit">시세 비교하기</button>
+    </form>
+  </div>`;
+}
+
 function renderHome() {
   const all = news();
   view.innerHTML = `
@@ -1729,10 +1803,22 @@ function renderHome() {
       <p>국토교통부 실거래, 한국은행 금리, 한국부동산원 통계를 3시간마다 모아 건물주와 예비 건물주가 바로 쓸 수 있게 정리합니다. <span class="num">${updatedLabel()}</span></p>
     </div>
     ${heroKpis()}
+    <div class="hero-actions">
+      <a class="btn" href="/lookup/">내 건물 시세 비교</a>
+      <a class="btn ghost" href="/deal-sheet/">이번 주 딜 시트</a>
+      <a class="btn ghost" href="${monthPath(histMonths().slice(-1)[0])}">월간 거래 리포트</a>
+    </div>
   </section>
 
+  <section class="two" aria-label="월간 리포트와 주간 딜 시트">
+    <div>${secHead("3F", "월간 서울 빌딩 거래 리포트", link("/report/", "월별 리포트 전체"))}${monthlySummary()}</div>
+    <div>${secHead("2F", "이번 주 딜 시트", link("/deal-sheet/", "딜 시트 전체"))}${weeklySheetCompact()}</div>
+  </section>
+
+  <section aria-label="내 건물 시세 비교">${lookupTeaser()}</section>
+
   <section class="two" aria-label="큰 거래와 뉴스">
-    <div>${secHead("2F", "이번 달 큰 거래", link("/deal-sheet/", "이번 주 딜 시트"))}${bigDealsCompact()}</div>
+    <div>${secHead("2F", "이번 달 큰 거래", link("/deal/", "실거래 검색"))}${bigDealsCompact()}</div>
     <div>${secHead("5F", "최신 뉴스", link("/news/", "뉴스 전체"))}${newsRows(all.slice(0, 9))}</div>
   </section>
 
@@ -1772,6 +1858,10 @@ function rangeLine(rs, f) {
   return rs.length >= 4 ? `${fmt(quant(rs.map(f), 0.25), 0)} ~ ${fmt(quant(rs.map(f), 0.75), 0)}만 원` : "거래가 적어 범위 생략";
 }
 function renderLookup() {
+  try {
+    const q = new URLSearchParams(location.search);
+    if (q.get("gu") && GU_SLUG[q.get("gu")] && !LOOK.gu) { LOOK.gu = q.get("gu"); LOOK.dong = q.get("dong") || ""; }
+  } catch (e) {}
   view.innerHTML = `<section class="cat-head"><div class="big">1F</div><div><h1>내 건물 시세 비교</h1>
     <p>구와 동을 고르면 같은 동·같은 구에서 최근 12개월 동안 거래된 빌딩의 실거래와 평당가 범위를 보여 줍니다. 국토교통부 신고 자료 기준이며, 감정가나 매매 가능 가격이 아닙니다.</p></div></section>
   <section><div class="filters" id="lk-form"></div><div id="lk-out"></div></section>
