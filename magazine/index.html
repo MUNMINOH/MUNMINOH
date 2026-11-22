@@ -514,6 +514,8 @@ table.mini th, table.mini td { padding: 8px 6px; }
 .col-crumb a { color: var(--accent); }
 .col-hero { width: 100%; aspect-ratio: 16 / 9; }
 .col-hero img { width: 100%; height: 100%; object-fit: cover; }
+.kpis.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 760px) { .kpis.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .zones.fit { grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); }
 .col-lead { margin: 0; color: var(--ink-2); line-height: 1.8; }
 .col-card:hover h3 { color: inherit; }
@@ -1776,8 +1778,16 @@ function renderDeals() {
   ${ctaBlock()}`;
 }
 
+function monthlyLinks() {
+  const ms = histMonths().slice().reverse();
+  if (!ms.length) return "";
+  return `<section>${secHead("", "월간 서울 빌딩 거래 리포트")}
+    <div class="gu-chips">${ms.map(m => `<a class="chip" href="/report/${m.slice(0, 4)}-${m.slice(4)}/">${monthLabel(m)}</a>`).join("")}</div>
+    <p class="foot-note">국토교통부 실거래 신고 자료로 매달 자동 집계합니다. 최근 두 달은 신고 기한(계약 후 30일) 때문에 잠정치입니다.</p></section>`;
+}
 function renderReport() {
   view.innerHTML = `${pageHead(CATS.report)}
+  ${monthlyLinks()}
   <section>${secHead("", `기관별 시장 지표 · ${esc(MARKET.quarter)}`)}${marketBoard(false)}</section>
   <section>${secHead("", "금리·환율·은행 대출 금리", liveBadge())}<div id="live-rates">${ratesBlock()}</div></section>
   <section>${secHead("", "상장 리츠 시세", liveBadge())}<div id="live-reits">${reitsBlock()}</div></section>
@@ -1856,6 +1866,7 @@ function route(keep) {
   else if (h === "price") { DONG.gu = ""; renderPrice(); active = h; }
   else if (h === "seoul" && SLUG_GU[seg2]) { renderGu(SLUG_GU[seg2]); active = "price"; }
   else if (h === "deal") { renderDeals(); active = h; }
+  else if (h === "report" && /^\d{4}-\d{2}$/.test(seg2)) { active = h; }   // 월간 리포트: 빌드 때 만든 본문을 그대로 둔다
   else if (h === "report") { renderReport(); active = h; }
   else if (h === "policy") { renderGuide(); active = h; }
   else if (h === "news") { renderNews(); active = h; }

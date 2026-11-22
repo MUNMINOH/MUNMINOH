@@ -226,6 +226,88 @@ def column_page(c, cols, rows, idx):
             + (f'<section><h2>다른 칼럼</h2>{columns_list(others)}</section>' if others else ""))
 
 
+# ---------------------------------------------------------------- 월간 거래 리포트 (/report/YYYY-MM/)
+BANDS = [("10억 미만", 0, 100000), ("10억~50억", 100000, 500000), ("50억~100억", 500000, 1000000),
+         ("100억~300억", 1000000, 3000000), ("300억 이상", 3000000, float("inf"))]
+
+
+def month_key(r):
+    return r["date"][:4] + r["date"][5:7]
+
+
+def month_label(m):
+    return f"{m[:4]}년 {int(m[4:])}월"
+
+
+def month_slug(m):
+    return f"{m[:4]}-{m[4:]}"
+
+
+def month_settled(m, today):
+    """신고 기한(계약 후 30일)이 지나 숫자가 거의 확정된 달인지: 다음 달 말일이 지났으면 확정."""
+    y, mo = int(m[:4]), int(m[4:])
+    y2, mo2 = (y, mo + 2) if mo <= 10 else (y + 1, mo - 10)
+    return today >= dt.date(y2, mo2, 1)
+
+
+def pct(a, b):
+    return f"{(a - b) / b * 100:+.1f}%" if b else "-"
+
+
+def kpi_html(label, value, unit, sub):
+    return (f'<div class="kpi"><span class="kpi-l">{e(label)}</span><strong>{value}<em>{e(unit)}</em></strong>'
+            f'<span class="kpi-s">{sub}</span><span class="kpi-src">국토교통부 실거래</span></div>')
+
+
+def monthly_page(m, months, rows, today):
+    rs = [r for r in rows if month_key(r) == m]
+    i = months.index(m)
+    prev = months[i - 1] if i > 0 else None
+    ps = [r for r in rows if prev and month_key(r) == prev]
+    total, ptotal = sum(r["amount"] for r in rs), sum(r["amount"] for r in ps)
+    settled = month_settled(m, today)
+    status = ("확정치에 가까운 숫자입니다 (신고 기한이 지났습니다)." if settled else
+              "잠정치입니다. 계약 후 30일 안에 신고되므로 이 달 거래는 앞으로 더 늘어납니다.")
+    vs = f"전월 {len(ps)}건" if prev else "전월 자료 없음"
+    kpis = (kpi_html("거래 건수", f"{len(rs):,}", "건", f'{e(vs)}{" · " + pct(len(rs), len(ps)) if prev else ""}')
+            + kpi_html("거래금액 합계", f"{total / 10000:,.0f}", "억 원", f'{"전월 대비 " + pct(total, ptotal) if prev else ""}')
+            + kpi_html("중위 거래금액", eok(med([r["amount"] for r in rs])), "억 원", "건물 단위 매매")
+            + kpi_html("토지 3.3㎡당 중위", f"{med([land_py(r) for r in rs]):,.0f}", "만 원", "서울 전체"))
+    band_rows = "".join(
+        f'<tr><td>{e(n)}</td><td class="r hl">{sum(1 for r in rs if lo <= r["amount"] < hi)}</td>'
+        f'<td class="r">{sum(1 for r in ps if lo <= r["amount"] < hi) if prev else "-"}</td>'
+        f'<td class="r">{sum(r["amount"] for r in rs if lo <= r["amount"] < hi) / 10000:,.0f}</td></tr>' for n, lo, hi in BANDS)
+    by = {}
+    for r in rs:
+        by.setdefault(r["gu"], []).append(r)
+    gu_rows = "".join(
+        f'<tr><td><a href="/seoul/{GU_SLUG.get(g, "")}/"><b>{e(g)}</b></a></td><td class="r hl">{len(v)}</td>'
+        f'<td class="r">{sum(r["amount"] for r in v) / 10000:,.0f}</td><td class="r">{med([land_py(r) for r in v]):,.0f}</td></tr>'
+        for g, v in sorted(by.items(), key=lambda kv: (-len(kv[1]), kv[0])))
+    corp = sum(1 for r in rs if r.get("buyer") == "법인")
+    indiv = sum(1 for r in rs if r.get("buyer") == "개인")
+    top = sorted(rs, key=lambda r: -r["amount"])[:10]
+    top_rows = "".join(
+        f'<tr><td class="num">{e(r["date"])}</td><td><b>{e(r["gu"])} {e(r["dong"])}</b></td><td>{e(r.get("use") or "")}</td>'
+        f'<td class="r"><b>{eok(r["amount"])}</b></td><td class="r hl">{land_py(r):,.0f}</td></tr>' for r in top)
+    nav = " · ".join(f'<a href="/report/{month_slug(x)}/">{month_label(x)}</a>' if x != m else f"<b>{month_label(x)}</b>"
+                     for x in reversed(months))
+    sec = lambda t: f'<div class="sec-head"><h2>{e(t)}</h2></div>'
+    note = '<p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 서울 25개 구 건물 단위(일반) 거래 · 지분 거래 제외 · 건물명과 지번은 공개되지 않습니다.</p>'
+    return (f'<section class="cat-head"><div class="big">3F</div><div><h1>{month_label(m)} 서울 빌딩 매매 거래 리포트</h1>'
+            f'<p>국토교통부 실거래 신고 자료로 집계한 {month_label(m)} 서울 빌딩(상업·업무용 건물) 매매 거래입니다. {e(status)}</p></div></section>'
+            f'<section><div class="kpis four">{kpis}</div>{note}</section>'
+            f'<section>{sec("금액대별 거래")}<div class="table-scroll"><table class="gustats"><thead><tr><th>금액대</th><th class="r">거래 건수</th>'
+            f'<th class="r">전월</th><th class="r">거래금액 합계 (억 원)</th></tr></thead><tbody>{band_rows}</tbody></table></div></section>'
+            f'<section>{sec("매수자")}<p>법인 {corp}건 · 개인 {indiv}건'
+            f'{" · 기타·미상 " + str(len(rs) - corp - indiv) + "건" if len(rs) - corp - indiv else ""}</p></section>'
+            f'<section>{sec("구별 거래")}<div class="table-scroll"><table class="gustats"><thead><tr><th>구</th><th class="r">거래 건수</th>'
+            f'<th class="r">거래금액 합계 (억 원)</th><th class="r">토지 3.3㎡당 중위 (만 원)</th></tr></thead><tbody>{gu_rows}</tbody></table></div></section>'
+            f'<section>{sec("금액 상위 거래")}<div class="table-scroll"><table class="deals"><thead><tr><th>계약일</th><th>위치</th><th>용도</th>'
+            f'<th class="r">거래금액 (억 원)</th><th class="r">토지 3.3㎡당 (만 원)</th></tr></thead><tbody>{top_rows}</tbody></table></div>{note}</section>'
+            f'<section>{sec("다른 달 리포트")}<p>{nav}</p><p><a href="/deal/">서울 빌딩 실거래 검색 →</a></p></section>')
+
+
 def gu_links():
     return "<nav class=\"gu-chips\">" + "".join(f'<a href="/seoul/{v}/">{e(k)} 빌딩 시세</a>' for k, v in GU_SLUG.items()) + "</nav>"
 
@@ -322,6 +404,10 @@ def seo_head(slug, path, title, desc, data, noindex=False, post=None):
         graph.append({"@type": "ItemList", "itemListElement": [
             {"@type": "ListItem", "position": i + 1, "url": SITE + col_path(c) if c.get("id") else c["link"], "name": c["title"]}
             for i, c in enumerate(posts)]})
+    if slug == "policy":   # 건물주 가이드의 질문·답 → FAQ 구조화 데이터
+        facts = json.loads((ROOT / "content" / "guide.json").read_text(encoding="utf-8")).get("facts", [])
+        graph.append({"@type": "FAQPage", "mainEntity": [
+            {"@type": "Question", "name": f["q"], "acceptedAnswer": {"@type": "Answer", "text": f'{f["a"]}. {f["d"]}'}} for f in facts]})
     if post:
         graph.append({"@type": "BlogPosting", "@id": url + "#post", "headline": post["title"][:110], "description": desc,
                       "datePublished": post.get("date", ""), "inLanguage": "ko-KR", "mainEntityOfPage": {"@id": url + "#page"},
@@ -403,6 +489,20 @@ def build() -> None:
         target = OUT / "column" / c["id"] / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(out, encoding="utf-8")
+    # 월간 거래 리포트
+    today = dt.datetime.now(dt.timezone(dt.timedelta(hours=9))).date()
+    report_months = [m for m in months if any(month_key(r) == m for r in rows)]
+    for m in report_months:
+        path = f"/report/{month_slug(m)}/"
+        n = sum(1 for r in rows if month_key(r) == m)
+        title = f"{month_label(m)} 서울 빌딩 매매 거래 리포트 | CADENCE"
+        desc = (f"{month_label(m)} 서울 빌딩 매매 {n}건: 거래금액, 금액대별·구별 거래, 법인·개인 매수, 금액 상위 거래. "
+                "국토교통부 실거래 신고 자료 기준.")
+        out = template[:a] + seo_head("monthly", path, title, desc, data) + template[b:]
+        out = out.replace("<!--DATA-->", guide_js, 1).replace("<!--PRERENDER-->", monthly_page(m, months, rows, today), 1)
+        target = OUT / "report" / month_slug(m) / "index.html"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(out, encoding="utf-8")
     for old, new in REDIRECTS.items():
         t = OUT / old.strip("/") / "index.html"
         t.parent.mkdir(parents=True, exist_ok=True)
@@ -424,14 +524,16 @@ def build() -> None:
     urls = "".join(f"<url><loc>{SITE}{path}</loc><lastmod>{lastmod}</lastmod><changefreq>{'hourly' if slug in ('home', 'deal', 'price', 'news') else 'daily'}</changefreq></url>"
                    for slug, path, *_ in ROUTES if slug not in ("sell", "buy"))
     urls += "".join(f"<url><loc>{SITE}/seoul/{v}/</loc><lastmod>{lastmod}</lastmod><changefreq>daily</changefreq></url>" for v in GU_SLUG.values())
+    urls += "".join(f"<url><loc>{SITE}/report/{month_slug(m)}/</loc><lastmod>{lastmod}</lastmod><changefreq>{'monthly' if month_settled(m, today) else 'daily'}</changefreq></url>" for m in report_months)
     urls += "".join(f"<url><loc>{SITE}/column/{c['id']}/</loc><lastmod>{(c.get('date') or lastmod)[:10]}</lastmod><changefreq>weekly</changefreq></url>" for c in cols)
     (OUT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n', encoding="utf-8")
     (OUT / f"{INDEXNOW_KEY}.txt").write_text(INDEXNOW_KEY, encoding="utf-8")
     (OUT / "indexnow-urls.txt").write_text("\n".join([SITE + p for _, p, *_ in ROUTES if p not in ("/sell/", "/buy/")]
                                                      + [f"{SITE}/seoul/{v}/" for v in GU_SLUG.values()]
-                                                     + [f"{SITE}/column/{c['id']}/" for c in cols]), encoding="utf-8")
+                                                     + [f"{SITE}/column/{c['id']}/" for c in cols]
+                                                     + [f"{SITE}/report/{month_slug(m)}/" for m in report_months]), encoding="utf-8")
     (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
-    print(f"빌드 완료: {OUT} (페이지 {len(ROUTES)}개 + 구별 {len(GU_SLUG)}개 + 칼럼 {len(cols)}개 + 404, sitemap.xml, robots.txt)")
+    print(f"빌드 완료: {OUT} (페이지 {len(ROUTES)}개 + 구별 {len(GU_SLUG)}개 + 칼럼 {len(cols)}개 + 월간 리포트 {len(report_months)}개 + 404, sitemap.xml, robots.txt)")
 
 
 if __name__ == "__main__":
