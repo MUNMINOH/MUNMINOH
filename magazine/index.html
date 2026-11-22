@@ -768,7 +768,8 @@ const SOCIAL = [
   { id: "blog",      name: "네이버 블로그", url: "https://blog.naver.com/morrison119" },
   { id: "threads",   name: "스레드",       url: "https://www.threads.net/@building_runner" },
   { id: "daangn",    name: "당근 카페",    url: "https://cafe.daangn.com/geonmulju-doego" },
-  { id: "kakao",     name: "카카오톡 채널", url: "" }
+  { id: "kakao",     name: "카카오톡 채널", url: "" },
+  { id: "rss",       name: "RSS 구독",     url: "/feed.xml" }
 ];
 const INQUIRY_ENDPOINT = "https://formsubmit.co/ajax/alsdh1127@gmail.com";
 const CHARACTER_IMAGE = "";   // 캐릭터 이미지를 넣으면 경로 지정. 예: "assets/character.png"
@@ -782,6 +783,7 @@ const ICONS = {
   threads: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M16.5 11.2c-.4-2.4-2-3.7-4.4-3.7-2.6 0-4.2 1.7-4.2 4.5s1.6 4.5 4.2 4.5c1.9 0 3.3-.9 3.8-2.6.5-1.8-.4-3.2-2.6-3.4-2.1-.2-3.4.6-3.3 1.8.1 1.3 1.6 1.8 3 1.5"/><path d="M19.5 7.5C18 4.9 15.4 3.5 12 3.5 6.9 3.5 3.5 7 3.5 12s3.4 8.5 8.5 8.5c3.9 0 6.6-2 7.6-5.2"/></svg>',
   tiktok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14 3.5v11.25a3.75 3.75 0 1 1-3.75-3.75"/><path d="M14 3.5c.4 2.6 2.2 4.4 5 4.6"/></svg>',
   daangn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8.5 9.5c-2.4 2.4-4.6 7.3-3.7 9.2.9 1 5.8-1.3 8.2-3.7a3.8 3.8 0 0 0-4.5-5.5z"/><path d="M13 11l4.5-4.5M14.5 6.5c1-1.5 2.5-2.5 4-2.5-.1 1.5-1 3-2.5 4M17.5 9.5c1.5-1 3-1.3 3.5-.5"/></svg>',
+  rss: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1.4" fill="currentColor" stroke="none"/></svg>',
   kakao: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 4C7 4 3 7.1 3 11c0 2.5 1.7 4.7 4.2 5.9L6.5 20.5l4.2-2.6c.4 0 .9.1 1.3.1 5 0 9-3.1 9-7S17 4 12 4z"/></svg>'
 };
 function socialHtml(withLabel = true) {
@@ -1094,6 +1096,10 @@ function renderInquiry(type) {
   };
   form.querySelectorAll('input[name="kind"]').forEach(r => r.addEventListener("change", sync));
   sync();
+  try {   // '내 건물 시세 비교'에서 넘어오면 주소를 미리 채운다
+    const addr = new URLSearchParams(location.search).get("addr");
+    if (addr && !document.getElementById("s-addr").value) document.getElementById("s-addr").value = addr.slice(0, 100);
+  } catch (e) {}
 
   const val = id => (document.getElementById(id)?.value || "").trim();
   const say = (text, err) => { msg.hidden = false; msg.className = "form-msg" + (err ? " err" : ""); msg.textContent = text; };
@@ -1726,7 +1732,7 @@ function renderHome() {
   </section>
 
   <section class="two" aria-label="큰 거래와 뉴스">
-    <div>${secHead("2F", "이번 달 큰 거래", link("/deal/", "실거래 검색"))}${bigDealsCompact()}</div>
+    <div>${secHead("2F", "이번 달 큰 거래", link("/deal-sheet/", "이번 주 딜 시트"))}${bigDealsCompact()}</div>
     <div>${secHead("5F", "최신 뉴스", link("/news/", "뉴스 전체"))}${newsRows(all.slice(0, 9))}</div>
   </section>
 
@@ -1759,8 +1765,62 @@ function pageHead(c) {
   return `<section class="cat-head"><div class="big">${c.f}</div><div><h1>${esc(c.h1 || c.name)}</h1><p>${esc(c.desc)}</p></div></section>`;
 }
 
+/* ================= 내 건물 시세 비교 (/lookup/) ================= */
+const LOOK = { gu: "", dong: "", jibun: "" };
+const quant = (arr, p) => { const a = arr.filter(v => v > 0).sort((x, y) => x - y); if (!a.length) return 0; const i = (a.length - 1) * p, lo = Math.floor(i); return a[lo] + (a[Math.min(lo + 1, a.length - 1)] - a[lo]) * (i - lo); };
+function rangeLine(rs, f) {
+  return rs.length >= 4 ? `${fmt(quant(rs.map(f), 0.25), 0)} ~ ${fmt(quant(rs.map(f), 0.75), 0)}만 원` : "거래가 적어 범위 생략";
+}
+function renderLookup() {
+  view.innerHTML = `<section class="cat-head"><div class="big">1F</div><div><h1>내 건물 시세 비교</h1>
+    <p>구와 동을 고르면 같은 동·같은 구에서 최근 12개월 동안 거래된 빌딩의 실거래와 평당가 범위를 보여 줍니다. 국토교통부 신고 자료 기준이며, 감정가나 매매 가능 가격이 아닙니다.</p></div></section>
+  <section><div class="filters" id="lk-form"></div><div id="lk-out"></div></section>
+  ${ctaBlock()}`;
+  drawLookup();
+}
+function drawLookup() {
+  const form = document.getElementById("lk-form"), out = document.getElementById("lk-out");
+  if (!form) return;
+  const rows = histRows();
+  if (!rows.length) { form.innerHTML = ""; out.innerHTML = noHist(); return; }
+  const cnt = {};
+  rows.filter(r => r.gu === LOOK.gu).forEach(r => cnt[r.dong] = (cnt[r.dong] || 0) + 1);
+  const dongs = Object.keys(cnt).sort();
+  if (LOOK.dong && !cnt[LOOK.dong]) LOOK.dong = "";
+  form.innerHTML = `
+    <div class="field"><label for="lk-gu">구</label><select id="lk-gu"><option value="">구 선택</option>${Object.keys(GU_SLUG).map(g => `<option${g === LOOK.gu ? " selected" : ""}>${esc(g)}</option>`).join("")}</select></div>
+    <div class="field"><label for="lk-dong">동</label><select id="lk-dong"${LOOK.gu ? "" : " disabled"}><option value="">${LOOK.gu ? "구 전체 (동을 모르면)" : "구를 먼저 고르세요"}</option>${dongs.map(d => `<option value="${esc(d)}"${d === LOOK.dong ? " selected" : ""}>${esc(d)} (${cnt[d]}건)</option>`).join("")}</select></div>
+    <div class="field"><label for="lk-jibun">지번 (선택)</label><input id="lk-jibun" inputmode="text" placeholder="예: 123-45" value="${esc(LOOK.jibun)}"></div>`;
+  form.querySelector("#lk-gu").addEventListener("change", e => { LOOK.gu = e.target.value; LOOK.dong = ""; drawLookup(); });
+  form.querySelector("#lk-dong").addEventListener("change", e => { LOOK.dong = e.target.value; drawLookup(); });
+  form.querySelector("#lk-jibun").addEventListener("input", e => { LOOK.jibun = e.target.value.trim(); const a = document.getElementById("lk-sell"); if (a) a.href = sellHref(); });
+  if (!LOOK.gu) { out.innerHTML = `<p class="empty">구를 고르면 비교 자료가 나옵니다.</p>`; return; }
+  const g = rows.filter(r => r.gu === LOOK.gu), d = LOOK.dong ? g.filter(r => r.dong === LOOK.dong) : [];
+  const card = (title, rs) => { const st = statsOf(rs); return `<div class="zone"><div class="zone-top"><b>${esc(title)}</b><span>${st.n}건</span></div>
+      <div class="zone-val"><small>토지 3.3㎡당 중위</small><strong>${st.land ? fmt(st.land, 0) : "-"}<em>만 원</em></strong></div>
+      <div class="zone-sub"><span>중간 50% 범위 ${rangeLine(rs, landPy)}</span></div>
+      <div class="zone-sub"><span>연면적 3.3㎡당 중위 ${st.gfa ? fmt(st.gfa, 0) + "만 원" : "-"}</span><span>중위 거래금액 ${eok(st.amt)}억 원</span></div></div>`; };
+  const list = (d.length ? d : g).slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 15);
+  out.innerHTML = `
+    <div class="zones fit">${d.length ? card(`${LOOK.gu} ${LOOK.dong}`, d) : ""}${card(`${LOOK.gu} 전체`, g)}</div>
+    <p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 서울 건물 단위 거래 · ${periodLabel()} · "중간 50% 범위"는 거래를 평당가 순으로 세웠을 때 가운데 절반이 놓인 구간입니다. 위치·연식·용도가 섞여 있어 개별 건물의 가격과는 다릅니다.</p>
+    <div class="sec-head"><h2>${esc(d.length ? LOOK.gu + " " + LOOK.dong : LOOK.gu)} 최근 실거래</h2>${link(guPath(LOOK.gu), LOOK.gu + " 시세 전체")}</div>
+    <div class="table-scroll"><table class="deals"><thead><tr><th>계약일</th><th>동</th><th>용도</th><th class="r">대지 (평)</th><th class="r">연면적 (평)</th><th class="r">준공</th><th class="r">거래금액 (억 원)</th><th class="r">토지 3.3㎡당 (만 원)</th></tr></thead>
+    <tbody>${list.map(r => `<tr><td class="num">${esc(r.date)}</td><td><b>${esc(r.dong)}</b><small>${esc(r.zone || "")}</small></td><td>${esc(useLabel(r.use))}</td><td class="r">${r.landArea ? fmt(r.landArea / PYEONG, 1) : "-"}</td><td class="r">${r.buildingArea ? fmt(r.buildingArea / PYEONG, 1) : "-"}</td><td class="r">${esc(r.built || "-")}</td><td class="r"><b>${eok(r.amount)}</b></td><td class="r hl">${landPy(r) ? fmt(landPy(r), 0) : "-"}</td></tr>`).join("")}</tbody></table></div>
+    <div class="side-box" style="margin-top:20px">
+      <h3>내 건물 정보는 여기서 무료로 확인하세요</h3>
+      <p>공시지가: <a href="https://www.realtyprice.kr" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">부동산 공시가격 알리미 ↗</a> · 건축물대장: <a href="https://www.gov.kr" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">정부24 ↗</a></p>
+      <p style="margin-top:12px"><a class="btn" id="lk-sell" href="${sellHref()}">이 건물 매도 상담 받기</a></p>
+    </div>`;
+}
+function sellHref() {
+  const addr = ["서울", LOOK.gu, LOOK.dong, LOOK.jibun].filter(Boolean).join(" ");
+  return `/sell/?addr=${encodeURIComponent(addr)}`;
+}
+
 function renderPrice() {
   view.innerHTML = `${pageHead(CATS.price)}
+  <section><a class="btn" href="/lookup/">내 건물 시세 비교하기 →</a></section>
   <section>${secHead("", "권역별 빌딩 평당가", liveBadge())}${zoneCards()}</section>
   <section>${secHead("", "구별 빌딩 평당가")}${guStats()}<h3 class="sub-h">구별 상세 페이지</h3>${guChips()}</section>
   <section>${secHead("", "동별 빌딩 평당가")}${dongBlock()}</section>
@@ -1773,7 +1833,7 @@ function renderPrice() {
 function renderDeals() {
   view.innerHTML = `${pageHead(CATS.deal)}
   <section>${secHead("", "서울 빌딩 실거래 검색", liveBadge())}${dealExplorer()}</section>
-  <section>${secHead("", "이번 달 큰 거래")}<div id="live-deals">${dealsBlock()}</div></section>
+  <section>${secHead("", "이번 달 큰 거래", link("/deal-sheet/", "이번 주 딜 시트"))}<div id="live-deals">${dealsBlock()}</div></section>
   <section>${secHead("", "어디서, 어떤 건물이 거래됐나")}${dealCharts()}</section>
   <section>${secHead("", "매매·투자 뉴스", link("/news/", "뉴스 전체"))}${newsRows(newsOf("deal").slice(0, 15))}</section>
   ${ctaBlock()}`;
@@ -1838,7 +1898,7 @@ function setActive(slug) {
   const cur = document.querySelector(".floor-btn[aria-current]");
   if (cur) cur.scrollIntoView({ block: "nearest", inline: "nearest" });
 }
-const PATHS = { home: "/", price: "/price/", deal: "/deal/", report: "/report/", policy: "/guide/", news: "/news/", column: "/column/", inquiry: "/inquiry/", sell: "/sell/", buy: "/buy/" };
+const PATHS = { home: "/", price: "/price/", lookup: "/lookup/", deal: "/deal/", report: "/report/", policy: "/guide/", news: "/news/", column: "/column/", inquiry: "/inquiry/", sell: "/sell/", buy: "/buy/" };
 const pathOf = k => PATHS[k] || "/";
 function currentSlug() {
   const seg = location.pathname.replace(/^\/+|\/+$/g, "").split("/")[0].replace(/\.html$/, "");
@@ -1868,6 +1928,8 @@ function route(keep) {
   else if (h === "seoul" && SLUG_GU[seg2]) { renderGu(SLUG_GU[seg2]); active = "price"; }
   else if (h === "deal") { renderDeals(); active = h; }
   else if (h === "report" && /^\d{4}-\d{2}$/.test(seg2)) { active = h; }   // 월간 리포트: 빌드 때 만든 본문을 그대로 둔다
+  else if (h === "deal-sheet") { active = "deal"; }   // 주간 딜 시트: 빌드 때 만든 본문을 그대로 둔다
+  else if (h === "lookup") { renderLookup(); active = "price"; }
   else if (h === "report") { renderReport(); active = h; }
   else if (h === "policy") { renderGuide(); active = h; }
   else if (h === "news") { renderNews(); active = h; }

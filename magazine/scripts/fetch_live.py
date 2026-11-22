@@ -234,6 +234,28 @@ def _months_back(today: dt.date, n: int) -> list:
     return out
 
 
+def _deal_key(r: dict) -> tuple:
+    return (r["gu"], r["dong"], r["date"], r["amount"], r.get("landArea"), r.get("buildingArea"), r.get("use"), r.get("built"))
+
+
+def _mark_seen(rows: list, old: list | None, today: dt.date) -> list:
+    """처음 공개된 날(seen)을 기록한다. 지난번에 있던 거래는 그 날짜를 이어받고,
+    이번에 처음 보이는 거래는 오늘 날짜. 예전 달을 처음 채울 때(old 없음)는 기록하지 않는다."""
+    pool = {}
+    for r in old or []:
+        pool.setdefault(_deal_key(r), []).append(r.get("seen", ""))
+    new = 0
+    for r in rows:
+        prev = pool.get(_deal_key(r))
+        if prev:
+            r["seen"] = prev.pop()
+        elif old is not None:
+            r["seen"] = today.isoformat(); new += 1
+    if old is not None:
+        log(f"  새로 공개된 거래 {new}건")
+    return rows
+
+
 def fetch_deals(key: str, today: dt.date, cache: dict) -> dict | None:
     """최근 12개월치를 월별로 쌓는다. 매번 이번 달·지난달은 새로 받고(신고 기한 30일),
     비어 있는 예전 달은 한 번에 2개월씩 채운다 (API 호출량 제한 때문)."""
@@ -247,7 +269,7 @@ def fetch_deals(key: str, today: dt.date, cache: dict) -> dict | None:
             continue
         rows = _fetch_month(key, m)
         if rows is not None:
-            months[m] = rows
+            months[m] = _mark_seen(rows, months.get(m), today)
     if not months:
         return None
     rows = [r for m in sorted(months, reverse=True) for r in months[m]]
