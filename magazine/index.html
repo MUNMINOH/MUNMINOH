@@ -2171,14 +2171,26 @@ function visitorId() {
     return v;
   } catch (e) { return (visitorId.tmp = visitorId.tmp || String(Math.random()).slice(2, 18) + "s"); }
 }
+// 운영자 기기 제외: 아무 페이지나 ?nocount=1 로 한 번 열면 이 기기는 방문으로 세지 않는다 (?nocount=0 으로 해제)
+function excludedDevice() {
+  try {
+    const q = new URLSearchParams(location.search).get("nocount");
+    if (q === "1") localStorage.setItem("cadence-nocount", "1");
+    if (q === "0") localStorage.removeItem("cadence-nocount");
+    return localStorage.getItem("cadence-nocount") === "1";
+  } catch (e) { return false; }
+}
 function pingVisit() {
   if (navigator.webdriver || document.visibilityState === "hidden") return;
-  fetch(VISIT_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ vid: visitorId() }) })
+  const mine = excludedDevice();
+  // 제외된 기기는 번호 없이 보내 숫자만 받아 온다 (집계에 안 들어감)
+  fetch(VISIT_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(mine ? {} : { vid: visitorId() }) })
     .then(r => r.ok ? r.json() : null)
     .then(d => {
       if (!d || typeof d.today !== "number") return;
       document.getElementById("visitors").innerHTML =
-        `오늘 방문 <b class="num">${fmt(d.today, 0)}</b> · 지금 접속 <b class="num">${fmt(Math.max(1, d.online), 0)}</b>`;
+        `오늘 방문 <b class="num">${fmt(d.today, 0)}</b> · 지금 접속 <b class="num">${fmt(mine ? d.online : Math.max(1, d.online), 0)}</b>` +
+        (mine ? ` <span title="이 기기는 방문자 수에서 빠집니다. ?nocount=0 으로 해제">(내 기기 제외)</span>` : "");
     })
     .catch(() => {});
 }

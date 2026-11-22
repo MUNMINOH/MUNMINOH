@@ -38,4 +38,5 @@ GitHub API로 '매거진 배포' 워크플로를 실행시킵니다 (`workflow_d
   - 오늘 방문: 한국 날짜 기준 서로 다른 `vid` 수 (`daily` 표). 30일 지난 방문 기록은 지웁니다.
   - 지금 접속: 최근 3분 안에 신호를 보낸 `vid` 수. 사이트는 페이지를 보고 있는 동안 1분마다 신호를 보냅니다.
 - 자동화 브라우저(`navigator.webdriver`)는 세지 않습니다.
+- 운영자 기기 제외: 아무 페이지나 `?nocount=1`을 붙여 한 번 열면 그 기기(브라우저)는 세지 않습니다. `?nocount=0`으로 해제. 상단에 "(내 기기 제외)"가 보이면 적용된 것입니다.
 - 다시 올릴 때 metadata에 `bindings: [{type: "durable_object_namespace", name: "COUNTER", class_name: "Counter"}]`를 넣습니다 (마이그레이션 `v1`은 이미 적용됨).
