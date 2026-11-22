@@ -329,25 +329,33 @@ def week_label(slug):
 
 
 def sheet_rows(rows, start, end):
-    return sorted([r for r in rows if r.get("seen") and start.isoformat() <= r["seen"] <= end.isoformat()],
-                  key=lambda r: -r["amount"])
+    """기간 안에 새로 공개된 거래. 조건이 모두 같은 줄은 하나로 묶고 n에 개수를 둔다."""
+    grp = {}
+    for r in rows:
+        if r.get("seen") and start.isoformat() <= r["seen"] <= end.isoformat():
+            k = (r["gu"], r["dong"], r["date"], r["amount"], r.get("landArea"), r.get("buildingArea"), r.get("use"))
+            if k in grp:
+                grp[k]["n"] += 1
+            else:
+                grp[k] = {**r, "n": 1}
+    return sorted(grp.values(), key=lambda r: -r["amount"])
 
 
 def deal_sheet(title, period, rs, weeks, current=None):
     sec = lambda t: f'<div class="sec-head"><h2>{e(t)}</h2></div>'
     note = ('<p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 서울 25개 구 건물 단위 거래 · '
-            '"공개일"은 CADENCE가 3시간마다 받는 자료에 이 거래가 처음 나타난 날입니다 (계약 후 30일 안에 신고). 건물명과 지번은 공개되지 않습니다.</p>')
+            '"공개일"은 CADENCE가 3시간마다 받는 자료에 이 거래가 처음 나타난 날입니다 (계약 후 30일 안에 신고). ×표시는 계약일·위치·금액·면적이 모두 같은 신고 건수입니다. 건물명과 지번은 공개되지 않습니다.</p>')
     if rs:
-        total = sum(r["amount"] for r in rs)
+        total = sum(r["amount"] * r["n"] for r in rs)
         by = {}
         for r in rs:
-            by[r["gu"]] = by.get(r["gu"], 0) + 1
-        kpis = (kpi_html("새로 공개된 거래", f"{len(rs):,}", "건", e(period))
+            by[r["gu"]] = by.get(r["gu"], 0) + r["n"]
+        kpis = (kpi_html("거래", f"{sum(r['n'] for r in rs):,}", "건", e(period))
                 + kpi_html("거래금액 합계", f"{total / 10000:,.0f}", "억 원", "건물 단위 매매")
                 + kpi_html("최대 거래", eok(rs[0]["amount"]), "억 원", f'{e(rs[0]["gu"])} {e(rs[0]["dong"])}')
                 + kpi_html("가장 많은 구", e(max(by, key=by.get)), "", f"{max(by.values())}건"))
         body = "".join(
-            f'<tr><td class="num">{e(r["seen"][5:].replace("-", "."))}</td><td class="num">{e(r["date"])}</td><td><b>{e(r["gu"])} {e(r["dong"])}</b></td>'
+            f'<tr><td class="num">{e(r["seen"][5:].replace("-", ".") or "-")}</td><td class="num">{e(r["date"])}</td><td><b>{e(r["gu"])} {e(r["dong"])}</b>{f' <small>×{r["n"]}</small>' if r["n"] > 1 else ""}</td>'
             f'<td>{e(r.get("use") or "")}</td><td class="r">{r["landArea"] / PYEONG:,.1f}</td><td class="r">{r["buildingArea"] / PYEONG:,.1f}</td>'
             f'<td class="r">{e(r.get("built") or "-")}</td><td class="r"><b>{eok(r["amount"])}</b></td><td class="r hl">{land_py(r):,.0f}</td>'
             f'<td>{e(r.get("seller") or "-")}→{e(r.get("buyer") or "-")}</td></tr>' for r in rs)
@@ -359,7 +367,7 @@ def deal_sheet(title, period, rs, weeks, current=None):
         main = (f'<section><p class="empty">이 기간에 새로 공개된 거래가 아직 없습니다. CADENCE는 2026년 11월 23일부터 공개일을 기록하고 있습니다.</p>{note}</section>')
     nav = " · ".join(f'<a href="/deal-sheet/{w}/">{week_label(w)}</a>' if w != current else f"<b>{week_label(w)}</b>" for w in weeks)
     return (f'<section class="cat-head"><div class="big">2F</div><div><h1>{e(title)}</h1>'
-            f'<p>{e(period)} 국토교통부 실거래 자료에 새로 공개된 서울 빌딩 매매 거래입니다.</p></div></section>'
+            f'<p>{e(period)} 국토교통부 실거래 자료의 서울 빌딩 매매 거래입니다.</p></div></section>'
             + main
             + (f'<section>{sec("지난 딜 시트")}<p>{nav}</p></section>' if weeks else "")
             + '<section><p><a href="/deal/">서울 빌딩 실거래 검색 →</a> · <a href="/report/">월간 거래 리포트 →</a></p></section>')
@@ -418,7 +426,13 @@ def prerender(slug, name, desc, data, guide, market, gu=None):
                 + (f"<li>서울 빌딩 토지 3.3㎡당 중위값 {land / 10000:,.2f}억 원 (국토교통부 실거래 {len(rows)}건)</li>" if land else "")
                 + (f'<li>이번 달 최대 거래: 서울 {e(top["gu"])} {e(top["dong"])} {e(top.get("use"))} {eok(top["amount"])}억 원 ({e(top["date"])})</li>' if top else "")
                 + "</ul></section>")
-        return (lead
+        months_ = ((data.get("deals") or {}).get("history") or {}).get("months", [])
+        quick = ('<section><h2>바로 가기</h2><ul>'
+                 '<li><a href="/lookup/">내 건물 시세 비교: 같은 동·구 빌딩 실거래와 평당가</a></li>'
+                 '<li><a href="/deal-sheet/">이번 주 서울 빌딩 딜 시트: 새로 공개된 매매 거래</a></li>'
+                 + "".join(f'<li><a href="/report/{month_slug(m)}/">{month_label(m)} 서울 빌딩 매매 거래 리포트</a></li>' for m in reversed(months_[-3:]))
+                 + '</ul></section>')
+        return (lead + quick
                 + (f'<section><h2>최신 상업용 부동산 뉴스</h2>{news_list(news, 12)}</section>' if news else "")
                 + (f'<section><h2>서울 구별 빌딩 평당가</h2>{gu_table(rows)}</section>' if rows else "")
                 + f'<section><h2>구별 빌딩 시세 바로 보기</h2>{gu_links()}</section>'
@@ -450,8 +464,18 @@ def prerender(slug, name, desc, data, guide, market, gu=None):
         today = dt.datetime.now(KST).date()
         start = today - dt.timedelta(days=6)
         weeks = sorted({week_of(dt.date.fromisoformat(r["seen"])) for r in rows if r.get("seen")}, reverse=True)[:12]
-        return deal_sheet("이번 주 서울 빌딩 딜 시트", f"최근 7일({start.month}월 {start.day}일~{today.month}월 {today.day}일)",
-                          sheet_rows(rows, start, today), weeks)
+        rs = sheet_rows(rows, start, today)
+        if rs:
+            return deal_sheet("이번 주 서울 빌딩 딜 시트", f"최근 7일({start.month}월 {start.day}일~{today.month}월 {today.day}일)", rs, weeks)
+        # 공개일 기록이 쌓이기 전: 최근 14일 안에 계약된 거래로 대신 보여 준다 (공개일 칸은 '-')
+        c = (today - dt.timedelta(days=13)).strftime("%Y.%m.%d")
+        recent = [{**r, "seen": r.get("seen") or "-"} for r in rows if r["date"] >= c]
+        grp = {}
+        for r in recent:
+            k = (r["gu"], r["dong"], r["date"], r["amount"], r.get("landArea"), r.get("buildingArea"), r.get("use"))
+            grp[k] = {**r, "n": grp[k]["n"] + 1} if k in grp else {**r, "n": 1}
+        return deal_sheet("이번 주 서울 빌딩 딜 시트", f"최근 14일 안에 계약된 거래({(today - dt.timedelta(days=13)).month}월 {(today - dt.timedelta(days=13)).day}일~)",
+                          sorted(grp.values(), key=lambda r: -r["amount"]), weeks)
     if slug == "lookup":
         return head("내 건물 시세 비교", desc) + f'<section><h2>구별 빌딩 시세</h2>{gu_links()}</section>'
     return head(name, desc)
@@ -589,7 +613,7 @@ def build() -> None:
         rs = sheet_rows(rows, a_, b_)
         path = f"/deal-sheet/{w}/"
         title = f"{week_label(w)} 서울 빌딩 딜 시트 | CADENCE"
-        desc = f"{week_label(w)} 국토교통부 실거래 자료에 새로 공개된 서울 빌딩 매매 {len(rs)}건을 금액 순으로 정리했습니다."
+        desc = f"{week_label(w)} 국토교통부 실거래 자료에 새로 공개된 서울 빌딩 매매 {sum(r['n'] for r in rs)}건을 금액 순으로 정리했습니다."
         out = template[:a] + seo_head("sheetweek", path, title, desc, data) + template[b:]
         out = out.replace("<!--DATA-->", guide_js, 1).replace("<!--PRERENDER-->", deal_sheet(f"{week_label(w)} 서울 빌딩 딜 시트", week_label(w), rs, weeks, w), 1)
         target = OUT / "deal-sheet" / w / "index.html"
@@ -606,7 +630,7 @@ def build() -> None:
     for w in weeks:
         a_, b_ = week_range(w)
         pub = min(dt.datetime(b_.year, b_.month, b_.day, 21, tzinfo=KST), now)
-        feed.append((f"{week_label(w)} 서울 빌딩 딜 시트", f"/deal-sheet/{w}/", f"새로 공개된 서울 빌딩 매매 {len(sheet_rows(rows, a_, b_))}건", pub))
+        feed.append((f"{week_label(w)} 서울 빌딩 딜 시트", f"/deal-sheet/{w}/", f"새로 공개된 서울 빌딩 매매 {sum(r['n'] for r in sheet_rows(rows, a_, b_))}건", pub))
     for c in cols:
         try:
             pub = dt.datetime.fromisoformat(c["date"])
