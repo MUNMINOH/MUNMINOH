@@ -173,6 +173,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .tick { white-space: nowrap; display: flex; gap: 8px; align-items: baseline; }
 .tick span:first-child { color: var(--ink-2); }
 .tick b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.tick small { margin-left: 4px; color: var(--muted); font-size: 11px; }
 
 .chg { font-size: var(--t-xs); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .chg.up { color: var(--up); }
@@ -755,6 +756,8 @@ const CATS = {
 const ALIASES = { invest: "policy", guide: "policy", columns: "column", data: "price", market: "news", building: "news", players: "news", people: "news" };   // 예전 주소
 const RATE_ORDER = ["base", "ktb3", "ktb10", "corp", "cd91", "usd", "loan_corp", "loan_sme"];
 const DAILY_RATES = ["base", "ktb3", "ktb10", "corp", "cd91", "usd"];
+// 상단 띠: 빌딩 대출에 직접 닿는 금리 위주 (은행 대출 금리는 월별 신규 취급액 기준)
+const TICKER_RATES = ["loan_sme", "loan_corp", "base", "cd91", "ktb3", "corp"];
 const PYEONG = 3.3058;
 
 /* ================= 운영 설정 =================
@@ -762,10 +765,8 @@ const PYEONG = 3.3058;
    INQUIRY_ENDPOINT: 의뢰서를 받을 주소. 예) "https://formsubmit.co/ajax/받을이메일" */
 const SOCIAL = [
   { id: "youtube",   name: "유튜브",       url: "https://www.youtube.com/@building_runner_official" },
-  { id: "instagram", name: "인스타그램",   url: "https://www.instagram.com/building_runner/" },
   { id: "blog",      name: "네이버 블로그", url: "https://blog.naver.com/morrison119" },
   { id: "threads",   name: "스레드",       url: "https://www.threads.net/@building_runner" },
-  { id: "tiktok",    name: "틱톡",         url: "https://www.tiktok.com/@0xmorrison" },
   { id: "daangn",    name: "당근 카페",    url: "https://cafe.daangn.com/geonmulju-doego" },
   { id: "kakao",     name: "카카오톡 채널", url: "" }
 ];
@@ -958,11 +959,11 @@ function renderLive() {
   const tk = document.getElementById("ticker");
   const r = LIVE && LIVE.rates;
   if (r && Object.keys(r).length) {
-    const items = DAILY_RATES.filter(k => r[k]).map(k => {
+    const items = TICKER_RATES.filter(k => r[k]).map(k => {
       const s = r[k], won = s.unit === "원";
-      return `<span class="tick"><span>${esc(s.name)}</span><b>${won ? fmt(s.value, 1) + "원" : s.value.toFixed(2) + "%"}</b>${change(s.value, s.prev, won ? "won" : "bp")}</span>`;
+      const when = /^\d{6}$/.test(s.date || "") ? `<small>${+s.date.slice(4)}월</small>` : "";   // 월별 지표는 기준 월 표시
+      return `<span class="tick"><span>${esc(s.name)}${when}</span><b>${won ? fmt(s.value, 1) + "원" : s.value.toFixed(2) + "%"}</b>${change(s.value, s.prev, won ? "won" : "bp")}</span>`;
     });
-    (LIVE.reits || []).slice(0, 3).forEach(x => items.push(`<span class="tick"><span>${esc(x.name)}</span><b>${fmt(x.price, 0)}원</b>${change(x.price, x.prev, "pct")}</span>`));
     tk.innerHTML = items.join("");
     document.getElementById("ticker-when").textContent = updatedLabel() ? `실시간 · ${updatedLabel()}` : "실시간 지표";
   } else if (LIVE_STATE === "failed") {

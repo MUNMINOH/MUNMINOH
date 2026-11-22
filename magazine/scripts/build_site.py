@@ -35,9 +35,7 @@ GA4_ID = ""
 SOCIAL = [
     "https://blog.naver.com/morrison119",
     "https://www.youtube.com/@building_runner_official",
-    "https://www.instagram.com/building_runner/",
     "https://www.threads.net/@building_runner",
-    "https://www.tiktok.com/@0xmorrison",
     "https://cafe.daangn.com/geonmulju-doego",
 ]
 
