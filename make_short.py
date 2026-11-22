@@ -1,6 +1,6 @@
 """주제 하나로 유튜브 쇼츠(세로 1080x1920) 영상을 자동으로 만드는 스크립트.
 
-흐름: 주제 → 대본(Claude) → 음성(edge-tts) → 배경 + 자막 → mp4
+흐름: 주제 → 대본(Claude) → 음성(ElevenLabs 또는 edge-tts) → 배경 + 자막 → mp4
 
 사용 예:
     python make_short.py "블랙홀에 대한 놀라운 사실"
@@ -18,6 +18,7 @@ import re
 import shutil
 import subprocess
 import sys
+import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
@@ -31,6 +32,7 @@ GAP_AFTER_LINE = 0.25  # 문장 사이 쉬는 시간(초)
 
 DEFAULT_MODEL = "claude-opus-5-5"
 DEFAULT_VOICE = "ko-KR-SunHiNeural"
+DEFAULT_ELEVEN_MODEL = "eleven_multilingual_v2"
 
 FONT_CANDIDATES = [
     # Windows
@@ -184,9 +186,49 @@ async def _edge_tts_all(lines: list[str], paths: list[Path], voice: str, rate: s
         await edge_tts.Communicate(text, voice, rate=rate).save(str(path))
 
 
-def make_voice(lines: list[str], work: Path, voice: str, rate: str, engine: str) -> list[Path]:
+def _elevenlabs_all(lines: list[str], paths: list[Path], voice_id: str, model: str) -> None:
+    """문장마다 ElevenLabs로 mp3를 만든다. 앞뒤 문장을 같이 넘겨서 억양이 자연스럽게 이어지게 한다."""
+    api_key = os.environ["ELEVENLABS_API_KEY"]
+    url = (f"https://api.elevenlabs.io/v1/text-to-speech/{urllib.parse.quote(voice_id)}"
+           "?output_format=mp3_44100_128")
+    for i, (text, path) in enumerate(zip(lines, paths)):
+        body = {"text": text, "model_id": model}
+        if i > 0:
+            body["previous_text"] = lines[i - 1]
+        if i + 1 < len(lines):
+            body["next_text"] = lines[i + 1]
+        req = urllib.request.Request(
+            url, data=json.dumps(body).encode("utf-8"), method="POST",
+            headers={"xi-api-key": api_key, "Content-Type": "application/json", "Accept": "audio/mpeg"})
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            path.write_bytes(resp.read())
+
+
+def pick_tts_engine(engine: str, eleven_voice: str | None) -> str:
+    """auto: ElevenLabs 키와 목소리가 있으면 ElevenLabs, 없으면 무료 edge-tts."""
+    if engine != "auto":
+        return engine
+    return "elevenlabs" if os.environ.get("ELEVENLABS_API_KEY") and eleven_voice else "edge"
+
+
+def make_voice(lines: list[str], work: Path, voice: str, rate: str, engine: str,
+               eleven_voice: str | None = None, eleven_model: str = DEFAULT_ELEVEN_MODEL) -> list[Path]:
     paths = [work / f"voice_{i:03d}.mp3" for i in range(len(lines))]
-    if engine == "edge":
+    if engine == "elevenlabs":
+        if not os.environ.get("ELEVENLABS_API_KEY"):
+            sys.exit("ELEVENLABS_API_KEY 가 설정되어 있지 않습니다. (README 의 'ElevenLabs 목소리' 참고)\n"
+                     "무료 음성으로 만들려면 --tts edge 를 쓰세요.")
+        if not eleven_voice:
+            sys.exit("ElevenLabs 목소리 ID가 없습니다. --eleven-voice 로 넣거나 ELEVENLABS_VOICE_ID 를 설정하세요.")
+        try:
+            _elevenlabs_all(lines, paths, eleven_voice, eleven_model)
+        except urllib.error.HTTPError as e:
+            detail = e.read().decode("utf-8", "replace")[:300]
+            sys.exit(f"ElevenLabs 음성 생성 실패 (HTTP {e.code}): {detail}\n"
+                     "키·목소리 ID·남은 크레딧을 확인하거나 --tts edge 로 무료 음성을 쓰세요.")
+        except Exception as e:  # 네트워크 문제 등
+            sys.exit(f"ElevenLabs 음성 생성 실패: {e}\n--tts edge 로 무료 음성을 쓸 수 있습니다.")
+    elif engine == "edge":
         try:
             asyncio.run(_edge_tts_all(lines, paths, voice, rate))
         except Exception as e:  # 네트워크 문제 등
@@ -395,7 +437,13 @@ def main() -> None:
     p.add_argument("--voice", default=DEFAULT_VOICE,
                    help="edge-tts 목소리 (예: ko-KR-SunHiNeural 여성, ko-KR-InJoonNeural 남성)")
     p.add_argument("--rate", default="+10%", help="말하기 속도 (기본 +10%%)")
-    p.add_argument("--tts", choices=["edge", "silent"], default="edge", help="silent: 음성 없이 테스트")
+    p.add_argument("--tts", choices=["auto", "elevenlabs", "edge", "silent"], default="auto",
+                   help="음성 엔진. auto(기본): ElevenLabs 키가 있으면 ElevenLabs, 없으면 무료 edge-tts. "
+                        "silent: 음성 없이 테스트")
+    p.add_argument("--eleven-voice", default=os.environ.get("ELEVENLABS_VOICE_ID"),
+                   help="ElevenLabs 목소리 ID (기본: ELEVENLABS_VOICE_ID 환경 변수)")
+    p.add_argument("--eleven-model", default=DEFAULT_ELEVEN_MODEL,
+                   help=f"ElevenLabs 음성 모델 (기본 {DEFAULT_ELEVEN_MODEL})")
     p.add_argument("--images", type=Path, help="배경으로 쓸 내 이미지 폴더")
     p.add_argument("--bgm", type=Path, help="배경음악 파일 (mp3 등)")
     p.add_argument("--bgm-volume", type=float, default=0.12, help="배경음악 볼륨 (기본 0.12)")
@@ -426,8 +474,10 @@ def main() -> None:
     work.mkdir(parents=True, exist_ok=True)
 
     # 2. 음성
-    print(f"[2/5] 음성 만드는 중 ({args.voice if args.tts == 'edge' else '무음 테스트'})")
-    voices = make_voice(script.lines, work, args.voice, args.rate, args.tts)
+    engine = pick_tts_engine(args.tts, args.eleven_voice)
+    label = {"elevenlabs": f"ElevenLabs {args.eleven_voice}", "edge": args.voice, "silent": "무음 테스트"}[engine]
+    print(f"[2/5] 음성 만드는 중 ({label})")
+    voices = make_voice(script.lines, work, args.voice, args.rate, engine, args.eleven_voice, args.eleven_model)
     durations = [media_duration(v) + GAP_AFTER_LINE for v in voices]
 
     # 3. 배경 + 자막 이미지

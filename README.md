@@ -80,7 +80,7 @@ python make_short.py "fun facts about octopus" --language English --voice en-US-
 | `--script` | 직접 쓴 대본 파일 사용 (API 키 불필요) |
 | `--font` | 자막 폰트 파일 (기본: 맑은 고딕 Bold) |
 | `--out` | 결과 폴더 (기본 `output`) |
-| `--tts silent` | 음성 없이 빠르게 화면만 테스트 |
+| `--tts silent` | 음성 없이 빠르게 화면만 테스트 (ElevenLabs 는 아래 참고) |
 
 ### 배경 사진 자동으로 넣기 (선택, 무료)
 
@@ -91,6 +91,33 @@ setx PEXELS_API_KEY "여기에키붙여넣기"
 ```
 
 키가 없으면 색 그라데이션 배경이 자동으로 들어갑니다.
+
+### ElevenLabs 목소리 (선택, 유료)
+
+ElevenLabs 키와 목소리 ID를 등록해 두면 자동으로 ElevenLabs 음성을 씁니다. 없으면 지금처럼 무료 edge-tts 를 씁니다.
+
+1. https://elevenlabs.io 에서 가입하고, Voices 에서 쓸 목소리를 골라 **Voice ID** 를 복사합니다.
+2. Profile → API Keys 에서 키를 만들고, 키와 Voice ID 를 1Password `AI` 금고에 저장합니다.
+3. PowerShell 에서 등록한 뒤 **PowerShell 을 새로 엽니다**:
+
+```powershell
+setx ELEVENLABS_API_KEY "여기에키붙여넣기"
+setx ELEVENLABS_VOICE_ID "여기에VoiceID붙여넣기"
+```
+
+```powershell
+python make_short.py "블랙홀에 대한 놀라운 사실"                 # 키가 있으면 ElevenLabs 로 자동
+python make_short.py "블랙홀에 대한 놀라운 사실" --tts edge       # 무료 음성으로 강제
+python make_short.py "블랙홀에 대한 놀라운 사실" --eleven-voice 다른VoiceID
+```
+
+| 옵션 | 설명 |
+|---|---|
+| `--tts` | `auto`(기본) / `elevenlabs` / `edge` / `silent` |
+| `--eleven-voice` | ElevenLabs 목소리 ID (기본: `ELEVENLABS_VOICE_ID`) |
+| `--eleven-model` | ElevenLabs 음성 모델 (기본 `eleven_multilingual_v2`) |
+
+`--voice`, `--rate` 는 edge-tts 에만 적용됩니다. 문장마다 앞뒤 문장을 같이 보내서 억양이 끊기지 않게 이어 읽습니다.
 
 ### 대본 직접 넣기
 
