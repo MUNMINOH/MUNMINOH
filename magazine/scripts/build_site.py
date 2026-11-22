@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parent.parent          # magazine/
 OUT = ROOT.parent / "_site"
 SITE = "https://cadence.bldgrunner.com"
 PYEONG = 3.3058
+KST = dt.timezone(dt.timedelta(hours=9))
 # IndexNow 키 (빙·네이버 등에 새 페이지를 알릴 때 씀. 공개되는 값)
 INDEXNOW_KEY = "c572e823172e060b976bb235ecc05f45"
 # 검색엔진 소유 확인 코드 (구글 서치 콘솔 / 네이버 서치어드바이저에서 받은 content 값)
@@ -55,6 +56,10 @@ ROUTES = [
      "오피스·상가·빌딩 매매·리츠·정책 등 상업용 부동산 뉴스를 언론사 원문 링크로 모았습니다. 3시간마다 갱신합니다."),
     ("column", "/column/", "칼럼", "빌딩러너 칼럼: 상권과 빌딩 가치 분석 | CADENCE",
      "빌딩러너가 상권과 빌딩 가치를 숫자로 풀어 쓴 칼럼을 모았습니다."),
+    ("lookup", "/lookup/", "내 건물 시세 비교", "내 빌딩 시세 비교: 같은 동 실거래·평당가 | CADENCE",
+     "구·동·지번을 넣으면 같은 동과 같은 구의 빌딩 매매 실거래, 토지·연면적 평당가 범위를 국토교통부 신고 자료로 바로 비교합니다."),
+    ("dealsheet", "/deal-sheet/", "주간 딜 시트", "이번 주 서울 빌딩 딜 시트: 새로 공개된 매매 실거래 | CADENCE",
+     "최근 7일 동안 국토교통부 실거래 자료에 새로 공개된 서울 빌딩 매매 거래를 금액 순으로 모았습니다. 매주 자동으로 쌓입니다."),
     ("inquiry", "/inquiry/", "매도·매수 의뢰", "빌딩 매도·매수 의뢰 | CADENCE",
      "팔고 싶은 빌딩, 찾고 있는 빌딩을 남겨 주세요. 빌딩러너가 조건을 검토해 연락드립니다."),
     ("sell", "/sell/", "매도 의뢰", "빌딩 매도 의뢰 | CADENCE",
@@ -306,6 +311,73 @@ def monthly_page(m, months, rows, today):
             f'<section>{sec("다른 달 리포트")}<p>{nav}</p><p><a href="/deal/">서울 빌딩 실거래 검색 →</a></p></section>')
 
 
+# ---------------------------------------------------------------- 주간 딜 시트 (/deal-sheet/)
+def week_of(d: dt.date):
+    y, w, _ = d.isocalendar()
+    return f"{y}-w{w:02d}"
+
+
+def week_range(slug):
+    y, w = int(slug[:4]), int(slug[6:])
+    mon = dt.date.fromisocalendar(y, w, 1)
+    return mon, mon + dt.timedelta(days=6)
+
+
+def week_label(slug):
+    a, b = week_range(slug)
+    return f"{a.year}년 {a.month}월 {a.day}일~{b.month}월 {b.day}일"
+
+
+def sheet_rows(rows, start, end):
+    return sorted([r for r in rows if r.get("seen") and start.isoformat() <= r["seen"] <= end.isoformat()],
+                  key=lambda r: -r["amount"])
+
+
+def deal_sheet(title, period, rs, weeks, current=None):
+    sec = lambda t: f'<div class="sec-head"><h2>{e(t)}</h2></div>'
+    note = ('<p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 서울 25개 구 건물 단위 거래 · '
+            '"공개일"은 CADENCE가 3시간마다 받는 자료에 이 거래가 처음 나타난 날입니다 (계약 후 30일 안에 신고). 건물명과 지번은 공개되지 않습니다.</p>')
+    if rs:
+        total = sum(r["amount"] for r in rs)
+        by = {}
+        for r in rs:
+            by[r["gu"]] = by.get(r["gu"], 0) + 1
+        kpis = (kpi_html("새로 공개된 거래", f"{len(rs):,}", "건", e(period))
+                + kpi_html("거래금액 합계", f"{total / 10000:,.0f}", "억 원", "건물 단위 매매")
+                + kpi_html("최대 거래", eok(rs[0]["amount"]), "억 원", f'{e(rs[0]["gu"])} {e(rs[0]["dong"])}')
+                + kpi_html("가장 많은 구", e(max(by, key=by.get)), "", f"{max(by.values())}건"))
+        body = "".join(
+            f'<tr><td class="num">{e(r["seen"][5:].replace("-", "."))}</td><td class="num">{e(r["date"])}</td><td><b>{e(r["gu"])} {e(r["dong"])}</b></td>'
+            f'<td>{e(r.get("use") or "")}</td><td class="r">{r["landArea"] / PYEONG:,.1f}</td><td class="r">{r["buildingArea"] / PYEONG:,.1f}</td>'
+            f'<td class="r">{e(r.get("built") or "-")}</td><td class="r"><b>{eok(r["amount"])}</b></td><td class="r hl">{land_py(r):,.0f}</td>'
+            f'<td>{e(r.get("seller") or "-")}→{e(r.get("buyer") or "-")}</td></tr>' for r in rs)
+        main = (f'<section><div class="kpis four">{kpis}</div></section>'
+                f'<section>{sec("거래 목록 (금액 순)")}<div class="table-scroll"><table class="deals"><thead><tr><th>공개일</th><th>계약일</th><th>위치</th><th>용도</th>'
+                f'<th class="r">대지 (평)</th><th class="r">연면적 (평)</th><th class="r">준공</th><th class="r">거래금액 (억 원)</th>'
+                f'<th class="r">토지 3.3㎡당 (만 원)</th><th>매도→매수</th></tr></thead><tbody>{body}</tbody></table></div>{note}</section>')
+    else:
+        main = (f'<section><p class="empty">이 기간에 새로 공개된 거래가 아직 없습니다. CADENCE는 2026년 11월 23일부터 공개일을 기록하고 있습니다.</p>{note}</section>')
+    nav = " · ".join(f'<a href="/deal-sheet/{w}/">{week_label(w)}</a>' if w != current else f"<b>{week_label(w)}</b>" for w in weeks)
+    return (f'<section class="cat-head"><div class="big">2F</div><div><h1>{e(title)}</h1>'
+            f'<p>{e(period)} 국토교통부 실거래 자료에 새로 공개된 서울 빌딩 매매 거래입니다.</p></div></section>'
+            + main
+            + (f'<section>{sec("지난 딜 시트")}<p>{nav}</p></section>' if weeks else "")
+            + '<section><p><a href="/deal/">서울 빌딩 실거래 검색 →</a> · <a href="/report/">월간 거래 리포트 →</a></p></section>')
+
+
+def rss_feed(items, built):
+    def item(t, link, desc, date):
+        return (f"<item><title>{e(t)}</title><link>{e(SITE + link if link.startswith('/') else link)}</link>"
+                f"<guid>{e(SITE + link if link.startswith('/') else link)}</guid><description>{e(desc)}</description>"
+                f"<pubDate>{date.strftime('%a, %d %b %Y %H:%M:%S +0900')}</pubDate></item>")
+    body = "".join(item(*x) for x in sorted(items, key=lambda x: x[3], reverse=True)[:60])
+    return ('<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>'
+            f'<title>CADENCE · 서울 빌딩 시세·실거래</title><link>{SITE}/</link>'
+            f'<atom:link href="{SITE}/feed.xml" rel="self" type="application/rss+xml"/>'
+            '<description>서울 빌딩 월간 거래 리포트, 주간 딜 시트, 빌딩러너 칼럼</description><language>ko</language>'
+            f"<lastBuildDate>{built.strftime('%a, %d %b %Y %H:%M:%S +0900')}</lastBuildDate>{body}</channel></rss>\n")
+
+
 def gu_links():
     return "<nav class=\"gu-chips\">" + "".join(f'<a href="/seoul/{v}/">{e(k)} 빌딩 시세</a>' for k, v in GU_SLUG.items()) + "</nav>"
 
@@ -374,6 +446,14 @@ def prerender(slug, name, desc, data, guide, market, gu=None):
         return head(name, desc) + news_list(news, 60)
     if slug == "column":
         return head(name, desc) + columns_list(cols)
+    if slug == "dealsheet":
+        today = dt.datetime.now(KST).date()
+        start = today - dt.timedelta(days=6)
+        weeks = sorted({week_of(dt.date.fromisoformat(r["seen"])) for r in rows if r.get("seen")}, reverse=True)[:12]
+        return deal_sheet("이번 주 서울 빌딩 딜 시트", f"최근 7일({start.month}월 {start.day}일~{today.month}월 {today.day}일)",
+                          sheet_rows(rows, start, today), weeks)
+    if slug == "lookup":
+        return head("내 건물 시세 비교", desc) + f'<section><h2>구별 빌딩 시세</h2>{gu_links()}</section>'
     return head(name, desc)
 
 
@@ -420,6 +500,7 @@ def seo_head(slug, path, title, desc, data, noindex=False, post=None):
         f'<meta name="description" content="{e(desc)}">',
         f'<meta name="robots" content="{"noindex,follow" if noindex else "index,follow,max-image-preview:large"}">',
         f'<link rel="canonical" href="{e(url)}">',
+        f'<link rel="alternate" type="application/rss+xml" title="CADENCE" href="{SITE}/feed.xml">',
         f'<meta property="og:type" content="{"article" if post else "website"}">',
         '<meta property="og:site_name" content="CADENCE">',
         '<meta property="og:locale" content="ko_KR">',
@@ -501,6 +582,38 @@ def build() -> None:
         target = OUT / "report" / month_slug(m) / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(out, encoding="utf-8")
+    # 주간 딜 시트 지난 주 페이지
+    weeks = sorted({week_of(dt.date.fromisoformat(r["seen"])) for r in rows if r.get("seen")}, reverse=True)[:12]
+    for w in weeks:
+        a_, b_ = week_range(w)
+        rs = sheet_rows(rows, a_, b_)
+        path = f"/deal-sheet/{w}/"
+        title = f"{week_label(w)} 서울 빌딩 딜 시트 | CADENCE"
+        desc = f"{week_label(w)} 국토교통부 실거래 자료에 새로 공개된 서울 빌딩 매매 {len(rs)}건을 금액 순으로 정리했습니다."
+        out = template[:a] + seo_head("sheetweek", path, title, desc, data) + template[b:]
+        out = out.replace("<!--DATA-->", guide_js, 1).replace("<!--PRERENDER-->", deal_sheet(f"{week_label(w)} 서울 빌딩 딜 시트", week_label(w), rs, weeks, w), 1)
+        target = OUT / "deal-sheet" / w / "index.html"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(out, encoding="utf-8")
+    # RSS (월간 리포트, 주간 딜 시트, 칼럼)
+    now = dt.datetime.now(KST)
+    feed = []
+    for m in report_months:
+        y, mo = int(m[:4]), int(m[4:])
+        pub = min(dt.datetime(y + (mo == 12), mo % 12 + 1, 1, 9, tzinfo=KST), now)
+        n = sum(1 for r in rows if month_key(r) == m)
+        feed.append((f"{month_label(m)} 서울 빌딩 매매 거래 리포트", f"/report/{month_slug(m)}/", f"{month_label(m)} 서울 빌딩 매매 {n}건 집계", pub))
+    for w in weeks:
+        a_, b_ = week_range(w)
+        pub = min(dt.datetime(b_.year, b_.month, b_.day, 21, tzinfo=KST), now)
+        feed.append((f"{week_label(w)} 서울 빌딩 딜 시트", f"/deal-sheet/{w}/", f"새로 공개된 서울 빌딩 매매 {len(sheet_rows(rows, a_, b_))}건", pub))
+    for c in cols:
+        try:
+            pub = dt.datetime.fromisoformat(c["date"])
+        except Exception:
+            continue
+        feed.append((c["title"], f"/column/{c['id']}/", c.get("summary") or c["title"], pub))
+    (OUT / "feed.xml").write_text(rss_feed(feed, now), encoding="utf-8")
     for old, new in REDIRECTS.items():
         t = OUT / old.strip("/") / "index.html"
         t.parent.mkdir(parents=True, exist_ok=True)
@@ -522,6 +635,7 @@ def build() -> None:
     urls = "".join(f"<url><loc>{SITE}{path}</loc><lastmod>{lastmod}</lastmod><changefreq>{'hourly' if slug in ('home', 'deal', 'price', 'news') else 'daily'}</changefreq></url>"
                    for slug, path, *_ in ROUTES if slug not in ("sell", "buy"))
     urls += "".join(f"<url><loc>{SITE}/seoul/{v}/</loc><lastmod>{lastmod}</lastmod><changefreq>daily</changefreq></url>" for v in GU_SLUG.values())
+    urls += "".join(f"<url><loc>{SITE}/deal-sheet/{w}/</loc><lastmod>{lastmod}</lastmod><changefreq>weekly</changefreq></url>" for w in weeks)
     urls += "".join(f"<url><loc>{SITE}/report/{month_slug(m)}/</loc><lastmod>{lastmod}</lastmod><changefreq>{'monthly' if month_settled(m, today) else 'daily'}</changefreq></url>" for m in report_months)
     urls += "".join(f"<url><loc>{SITE}/column/{c['id']}/</loc><lastmod>{(c.get('date') or lastmod)[:10]}</lastmod><changefreq>weekly</changefreq></url>" for c in cols)
     (OUT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n', encoding="utf-8")
@@ -529,7 +643,8 @@ def build() -> None:
     (OUT / "indexnow-urls.txt").write_text("\n".join([SITE + p for _, p, *_ in ROUTES if p not in ("/sell/", "/buy/")]
                                                      + [f"{SITE}/seoul/{v}/" for v in GU_SLUG.values()]
                                                      + [f"{SITE}/column/{c['id']}/" for c in cols]
-                                                     + [f"{SITE}/report/{month_slug(m)}/" for m in report_months]), encoding="utf-8")
+                                                     + [f"{SITE}/report/{month_slug(m)}/" for m in report_months]
+                                                     + [f"{SITE}/deal-sheet/{w}/" for w in weeks]), encoding="utf-8")
     (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
     print(f"빌드 완료: {OUT} (페이지 {len(ROUTES)}개 + 구별 {len(GU_SLUG)}개 + 칼럼 {len(cols)}개 + 월간 리포트 {len(report_months)}개 + 404, sitemap.xml, robots.txt)")
 

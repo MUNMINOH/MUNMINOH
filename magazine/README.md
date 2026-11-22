@@ -114,3 +114,16 @@ Settings → Secrets and variables → Actions → **Repository secrets**에 `DA
 - 건물주 가이드(/guide/)의 질문·답은 FAQPage로 넣습니다 (content/guide.json).
 - 칼럼 페이지는 BlogPosting, 나머지는 WebPage·BreadcrumbList.
 
+## 주간 딜 시트 (/deal-sheet/)
+
+수집기가 실거래 자료에 거래가 처음 나타난 날을 `seen`으로 기록합니다 (2026-11-23부터). `/deal-sheet/`는 최근 7일, `/deal-sheet/YYYY-wNN/`은 주별 기록(최근 12주)입니다.
+
+## 내 건물 시세 비교 (/lookup/)
+
+구·동·지번을 고르면 같은 동·구의 실거래와 토지 평당가 중위값·중간 50% 범위를 보여 주고, "매도 상담" 버튼은 지번을 채운 의뢰서(`/sell/?addr=`)로 이어집니다.
+공시지가·건축물대장 자동 조회는 공공데이터포털 API 활용신청(건축물대장, 개별공시지가)과 Worker 키 등록이 필요해 아직 넣지 않았습니다.
+
+## RSS (/feed.xml)
+
+월간 리포트, 주간 딜 시트, 칼럼 페이지 최신 60개. 모든 페이지 head에 RSS 링크가 있고, 사이트 SNS 목록에 "RSS 구독"으로 보입니다. 네이버 서치어드바이저에 RSS로 제출할 수 있습니다.
+
