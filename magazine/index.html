@@ -734,7 +734,7 @@ table.gustats td a:hover b { color: var(--accent); text-decoration: underline; t
 <div class="util">
   <div class="wrap">
     <span id="today" class="num">2026.11.17 (화)</span>
-    <span class="util-right"><span class="util-sns" id="util-sns"></span><span id="visitors">매일 갱신</span></span>
+    <span class="util-right"><span class="util-sns" id="util-sns"></span><span id="visitors">3시간마다 갱신</span></span>
   </div>
 </div>
 
@@ -752,7 +752,7 @@ table.gustats td a:hover b { color: var(--accent); text-decoration: underline; t
     </a>
     <div class="tagline">
       <strong>서울 빌딩 시세·실거래와 상업용 부동산 리뷰</strong>
-      <small>국토교통부 실거래 · 한국은행 금리 · 한국부동산원 통계 · 상업용 부동산 뉴스, 3시간마다 갱신</small>
+      <small>국토교통부 실거래 · 한국은행 금리 · 상업용 부동산 뉴스 3시간마다 갱신 · 기관 통계는 분기별</small>
     </div>
   </div>
 </header>
@@ -766,9 +766,9 @@ table.gustats td a:hover b { color: var(--accent); text-decoration: underline; t
   </div>
 </nav>
 
-<div class="ticker" id="ticker-bar" aria-label="실시간 시장 지표">
+<div class="ticker" id="ticker-bar" aria-label="금리 지표">
   <div class="wrap">
-    <span class="live-dot"><span id="ticker-when">실시간 지표</span></span>
+    <span class="live-dot"><span id="ticker-when">금리 지표</span></span>
     <div class="ticker-items" id="ticker"><span class="tick"><span>지표를 불러오는 중입니다</span></span></div>
   </div>
 </div>
@@ -1013,7 +1013,7 @@ function dealCharts() {
   <p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 (서울, 건물 단위 거래 ${fmt(d.count, 0)}건) · ${updatedLabel()}</p>`;
 }
 
-function liveBadge() { return `<span class="badge live">실시간</span>`; }
+function liveBadge() { return `<span class="badge live">3시간마다 갱신</span>`; }
 
 function renderLive() {
   const tk = document.getElementById("ticker");
@@ -1025,7 +1025,7 @@ function renderLive() {
       return `<span class="tick"><span>${esc(s.name)}${when}</span><b>${won ? fmt(s.value, 1) + "원" : s.value.toFixed(2) + "%"}</b>${change(s.value, s.prev, won ? "won" : "bp")}</span>`;
     });
     tk.innerHTML = items.join("");
-    document.getElementById("ticker-when").textContent = updatedLabel() ? `실시간 · ${updatedLabel()}` : "실시간 지표";
+    document.getElementById("ticker-when").textContent = updatedLabel() || "금리 지표";
   } else if (LIVE_STATE === "failed") {
     document.getElementById("ticker-bar").hidden = true;
   }
@@ -1627,11 +1627,11 @@ function columnGrid(limit) {
 const colSource = `<p class="foot-note">빌딩러너 <a href="${esc(SOCIAL.find(s => s.id === "blog").url)}" target="_blank" rel="noopener noreferrer">네이버 블로그</a>에 올라온 글을 자동으로 모읍니다. 새 글은 3시간 안에 반영됩니다.</p>`;
 /* 칼럼 글 페이지: 요약 + 블로그 원문 링크 + 글 속 지역 실거래 데이터 (build_site.py와 같은 규칙) */
 const AREA_STOP = new Set(["내수", "효자", "신정", "중앙", "대흥", "신원", "사직", "공항", "신문", "원서", "화양", "중림", "본동", "광장", "동작"]);
-const AREA_ALIAS = { "압구정": ["강남구", "압구정동"], "가로수길": ["강남구", "신사동"], "청담": ["강남구"], "테헤란로": ["강남구"], "강남역": ["강남구"],
+const AREA_ALIAS = { "압구정": ["강남구", "압구정동"], "가로수길": ["강남구", "신사동"], "청담": ["강남구"], "테헤란로": ["강남구"],
   "한남": ["용산구"], "용리단길": ["용산구"], "신용산": ["용산구"], "이태원": ["용산구"], "해방촌": ["용산구"],
   "성수": ["성동구"], "을지로": ["중구"], "명동": ["중구"], "여의도": ["영등포구"], "문래": ["영등포구"],
   "연남": ["마포구"], "홍대": ["마포구"], "합정": ["마포구"], "망원": ["마포구"], "잠실": ["송파구"],
-  "익선": ["종로구"], "서촌": ["종로구"], "북촌": ["종로구"], "반포": ["서초구", "반포동"], "잠수교": ["서초구", "반포동"] };
+  "익선": ["종로구"], "서촌": ["종로구"], "북촌": ["종로구"], "반포": ["서초구", "반포동"] };
 function areaIndex(rows) {
   const count = {}, idx = {};
   rows.forEach(r => { const k = r.gu + "|" + r.dong; count[k] = (count[k] || 0) + 1; });
@@ -1841,21 +1841,21 @@ function bindMap() {
 const OWNER_CAL = [
   [1, "부가가치세 2기 확정신고·납부", "1월 25일까지", "전년 7~12월 임대료분. 간이과세자는 전년 1년분"],
   [3, "법인세 신고·납부", "3월 31일까지", "빌딩을 법인으로 보유한 경우 (12월 결산 법인)"],
-  [4, "부가가치세 1기 예정", "4월 25일까지", "법인은 예정신고, 개인 일반과세자는 고지서로 납부"],
+  [4, "부가가치세 1기 예정", "4월 25일까지", "법인은 1~3월분 예정신고. 개인 일반과세자는 직전기 세액의 절반을 고지서로 납부(소액은 고지 안 함)"],
   [5, "종합소득세 신고·납부", "5월 31일까지", "개인 임대소득. 성실신고확인 대상은 6월 30일까지"],
-  [5, "개별공시지가 결정·공시", "5월 31일", "보유세·양도세 계산의 기준. 이의신청은 공시 후 30일 안에"],
-  [6, "재산세·종합부동산세 과세기준일", "6월 1일", "이날 소유자에게 그해 보유세가 나옵니다. 매매 잔금일을 정할 때 확인"],
+  [5, "개별공시지가 결정·공시", "5월 31일까지", "1월 1일 기준 땅값. 보유세 계산의 기준이 되며, 이의신청은 공시일부터 30일 안에"],
+  [6, "재산세·종합부동산세 과세기준일", "6월 1일", "이날 소유자에게 그해 보유세가 나옵니다. 6월 1일에 잔금을 치르면 매수인 부담"],
   [7, "재산세(건물분) 납부", "7월 16일~31일", "6월 1일 소유자 기준"],
   [7, "부가가치세 1기 확정신고·납부", "7월 25일까지", "1~6월 임대료분"],
   [9, "재산세(토지분) 납부", "9월 16일~30일", "6월 1일 소유자 기준"],
-  [10, "부가가치세 2기 예정", "10월 25일까지", "법인은 예정신고, 개인 일반과세자는 고지서로 납부"],
+  [10, "부가가치세 2기 예정", "10월 25일까지", "법인은 7~9월분 예정신고. 개인 일반과세자는 직전기 세액의 절반을 고지서로 납부(소액은 고지 안 함)"],
   [12, "종합부동산세 납부", "12월 1일~15일", "상가·빌딩 부속토지는 공시지가 합계 80억 원 초과 시 (별도합산)"],
 ];
 function ownerCalendar(compact) {
   const m = new Date(Date.now() + 9 * 3600e3).getUTCMonth() + 1;
   const item = x => `<li><span class="cal-m">${x[0]}월</span><span><b>${esc(x[1])}</b> <em>${esc(x[2])}</em><small>${esc(x[3])}</small></span></li>`;
   if (!compact) return `<ol class="owner-cal">${OWNER_CAL.map(x => item(x).replace("<li>", x[0] === m ? '<li class="now">' : "<li>")).join("")}</ol>
-    <p class="foot-note">개인 일반과세자·12월 결산 법인 기준의 일반적인 일정입니다. 실제 기한은 그해 고지서와 국세청(홈택스)·위택스 안내가 우선합니다.</p>`;
+    <p class="foot-note">개인 일반과세자·12월 결산 법인 기준입니다. 기한이 토·일요일이나 공휴일이면 다음 영업일까지로 늦춰집니다(국세기본법 제5조). 근거: 지방세법 제114·115조(재산세), 종합부동산세법(12월 1~15일, 별도합산 토지 80억 원), 부가가치세법(예정·확정신고), 소득세법(5월 31일, 성실신고 6월 30일), 법인세법(사업연도 종료 후 3개월), 부동산 가격공시에 관한 법률(개별공시지가). 2026.11.23 확인 · 실제 기한은 그해 고지서와 홈택스·위택스 안내가 우선합니다.</p>`;
   const now = OWNER_CAL.filter(x => x[0] === m);
   const next = OWNER_CAL.filter(x => x[0] > m).concat(OWNER_CAL.filter(x => x[0] < m)).slice(0, now.length ? 1 : 2);
   return `<div class="panel cal-box"><h3>${m}월 건물주 할 일</h3>
@@ -1962,7 +1962,7 @@ function renderHome() {
   <section class="hero" aria-label="오늘의 숫자">
     <div class="hero-head">
       <h1>서울 빌딩 시세와 실거래, 오늘의 숫자</h1>
-      <p>국토교통부 실거래, 한국은행 금리, 한국부동산원 통계를 3시간마다 모아 건물주와 예비 건물주가 바로 쓸 수 있게 정리합니다. <span class="num">${updatedLabel()}</span></p>
+      <p>국토교통부 실거래와 한국은행 금리는 3시간마다, 한국부동산원 등 기관 통계는 분기마다 모아 건물주와 예비 건물주가 바로 쓸 수 있게 정리합니다. <span class="num">${updatedLabel()}</span></p>
     </div>
     ${heroKpis()}
     ${insightHome()}
