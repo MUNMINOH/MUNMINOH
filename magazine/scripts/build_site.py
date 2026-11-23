@@ -56,6 +56,8 @@ ROUTES = [
      "오피스·상가·빌딩 매매·리츠·정책 등 상업용 부동산 뉴스를 언론사 원문 링크로 모았습니다. 3시간마다 갱신합니다."),
     ("column", "/column/", "칼럼", "빌딩러너 칼럼: 상권과 빌딩 가치 분석 | CADENCE",
      "빌딩러너가 상권과 빌딩 가치를 숫자로 풀어 쓴 칼럼을 모았습니다."),
+    ("insight", "/insight/", "빌딩러너 인덱스", "빌딩러너 인덱스: 꼬마빌딩 평당가·매수 주체·용도지역별 시세 | CADENCE",
+     "국토교통부 실거래로 CADENCE가 직접 계산한 서울 빌딩 지표. 50억 미만 꼬마빌딩 평당가 추이, 개인·법인 매수·매도 흐름, 용도지역별 평당가, 동별 순위, 금리와 거래량."),
     ("lookup", "/lookup/", "내 건물 시세 비교", "내 빌딩 시세 비교: 같은 동 실거래·평당가 | CADENCE",
      "구·동·지번을 넣으면 같은 동과 같은 구의 빌딩 매매 실거래, 토지·연면적 평당가 범위를 국토교통부 신고 자료로 바로 비교합니다."),
     ("dealsheet", "/deal-sheet/", "주간 딜 시트", "이번 주 서울 빌딩 딜 시트: 새로 공개된 매매 실거래 | CADENCE",
@@ -386,6 +388,133 @@ def rss_feed(items, built):
             f"<lastBuildDate>{built.strftime('%a, %d %b %Y %H:%M:%S +0900')}</lastBuildDate>{body}</channel></rss>\n")
 
 
+# ---------------------------------------------------------------- 빌딩러너 인덱스 (/insight/)
+KKOMA = 500000   # 꼬마빌딩: 거래금액 50억 원 미만 (만 원)
+
+
+def spark_svg(vals, w=320, h=64):
+    vals = [v for v in vals if v]
+    if len(vals) < 2:
+        return ""
+    lo, hi = min(vals), max(vals)
+    span = (hi - lo) or 1
+    x = lambda i: i / (len(vals) - 1) * (w - 4) + 2
+    y = lambda v: h - 4 - (v - lo) / span * (h - 8)
+    d = "".join(f'{"L" if i else "M"}{x(i):.1f},{y(v):.1f}' for i, v in enumerate(vals))
+    return (f'<svg class="spark" viewBox="0 0 {w} {h}" preserveAspectRatio="none" aria-hidden="true">'
+            f'<path class="area" d="{d}L{x(len(vals) - 1):.1f},{h}L{x(0):.1f},{h}Z"/><path class="ln" d="{d}" vector-effect="non-scaling-stroke"/>'
+            f'<circle class="end" cx="{x(len(vals) - 1):.1f}" cy="{y(vals[-1]):.1f}" r="2.5"/></svg>')
+
+
+def compute_insight(data):
+    """인덱스 숫자를 한곳에서 계산한다 (인덱스 페이지와 홈 카드가 같이 씀)."""
+    hist = (data.get("deals") or {}).get("history") or {}
+    rows, months = hist.get("rows", []), hist.get("months", [])
+    if not rows or len(months) < 6:
+        return None
+    by_m = {m: [r for r in rows if month_key(r) == m] for m in months}
+    kk = [r for r in rows if r["amount"] < KKOMA]
+    monthly = [{"m": m, "n": len(by_m[m]), "kn": sum(1 for r in by_m[m] if r["amount"] < KKOMA),
+                "kland": round(med([land_py(r) for r in by_m[m] if r["amount"] < KKOMA])),
+                "kgfa": round(med([gfa_py(r) for r in by_m[m] if r["amount"] < KKOMA])),
+                "corp": round(sum(1 for r in by_m[m] if r.get("buyer") == "법인") / len(by_m[m]) * 100) if by_m[m] else 0}
+               for m in months]
+    # 이번 달은 신고가 거의 안 쌓였으므로 빼고, 지난달까지 3개월 vs 그 전 3개월
+    w3, wp3 = months[-4:-1], months[-7:-4]
+    last3 = [r for m in w3 for r in by_m[m] if r["amount"] < KKOMA]
+    prev3 = [r for m in wp3 for r in by_m[m] if r["amount"] < KKOMA]
+    k3, kp3 = med([land_py(r) for r in last3]), med([land_py(r) for r in prev3])
+    flows = {}
+    for r in rows:
+        if r.get("seller") in ("개인", "법인") and r.get("buyer") in ("개인", "법인"):
+            k = f'{r["seller"]}→{r["buyer"]}'
+            flows[k] = flows.get(k, 0) + 1
+    zones = []
+    for z in sorted({r.get("zone") or "" for r in rows}):
+        zr = [r for r in rows if (r.get("zone") or "") == z]
+        if z and len(zr) >= 10:
+            zones.append({"zone": z, "n": len(zr), "land": round(med([land_py(r) for r in zr])),
+                          "gfa": round(med([gfa_py(r) for r in zr])), "amt": round(med([r["amount"] for r in zr]))})
+    zones.sort(key=lambda z: -z["land"])
+    dong = {}
+    for r in rows:
+        dong.setdefault((r["gu"], r["dong"]), []).append(r)
+    dongs = [{"gu": g, "dong": d, "n": len(v), "land": round(med([land_py(r) for r in v]))} for (g, d), v in dong.items() if len(v) >= 5]
+    rate = ((data.get("rates") or {}).get("loan_sme") or {})
+    rate_by_m = {m: v for m, v in rate.get("series", [])}
+    return {
+        "months": months, "monthly": monthly, "n": len(rows), "kn": len(kk),
+        "k3": round(k3), "kp3": round(kp3), "w3": f"{int(w3[0][4:])}~{int(w3[-1][4:])}월", "wp3": f"{int(wp3[0][4:])}~{int(wp3[-1][4:])}월", "k3chg": round((k3 - kp3) / kp3 * 100, 1) if kp3 else None,
+        "corpBuy": round(sum(1 for r in rows if r.get("buyer") == "법인") / len(rows) * 100),
+        "indivSell": round(sum(1 for r in rows if r.get("seller") == "개인") / len(rows) * 100),
+        "flows": flows, "zones": zones,
+        "topLand": sorted(dongs, key=lambda x: -x["land"])[:10],
+        "topCount": sorted(dongs, key=lambda x: (-x["n"], -x["land"]))[:10],
+        "rates": [{"m": m, "rate": rate_by_m.get(m), "n": len(by_m[m])} for m in months],
+        "rateName": rate.get("name", ""), "rateLast": rate.get("value"), "rateDate": rate.get("date", ""),
+        "rateYearAgo": rate_by_m.get(f"{int(rate.get('date', '000000')[:4]) - 1}{rate.get('date', '000000')[4:]}") if rate.get("date") else None,
+    }
+
+
+def insight_sentences(ins):
+    if not ins:
+        return []
+    s = [f'최근 12개월 서울에서 신고된 빌딩 매매 {ins["n"]:,}건 중 {ins["kn"]:,}건({round(ins["kn"] / ins["n"] * 100)}%)이 50억 원 미만 꼬마빌딩이었습니다.']
+    if ins["flows"]:
+        top = max(ins["flows"], key=ins["flows"].get)
+        s.append(f'매수자의 {ins["corpBuy"]}%는 법인, 매도자의 {ins["indivSell"]}%는 개인이었고, 가장 많은 거래 조합은 {top} {ins["flows"][top]:,}건입니다.')
+    if ins["k3chg"] is not None:
+        s.append(f'꼬마빌딩 토지 3.3㎡당 중위값은 {ins["w3"]} {ins["k3"]:,}만 원으로 {ins["wp3"]}보다 {abs(ins["k3chg"]):.1f}% '
+                 f'{"올랐습니다" if ins["k3chg"] > 0 else "내렸습니다" if ins["k3chg"] < 0 else "같았습니다"} (10월 이후는 잠정치).'.replace("10월", f'{int(ins["months"][-2][4:])}월'))
+    if ins["rateLast"] and ins["rateYearAgo"]:
+        d = ins["rateLast"] - ins["rateYearAgo"]
+        s.append(f'{ins["rateName"]}(신규 취급)는 {int(ins["rateDate"][4:])}월 {ins["rateLast"]:.2f}%로 1년 전보다 {abs(d):.2f}%p '
+                 f'{"높습니다" if d > 0 else "낮습니다" if d < 0 else "같습니다"}.')
+    return s
+
+
+def insight_page(ins):
+    sec = lambda f, t, sub="": f'<div class="sec-head"><h2><span class="fl">{f}</span>{e(t)}</h2>{sub}</div>'
+    src = '<p class="foot-note">출처: 국토교통부 상업업무용 부동산 매매 신고 자료 · 서울 25개 구 건물 단위 거래 · 최근 12개월 · CADENCE 계산 · 모두 중위값 · 계약 후 30일 안에 신고되므로 최근 두 달은 잠정치입니다.</p>'
+    head_ = ('<section class="cat-head"><div class="big">7F</div><div><h1>빌딩러너 인덱스</h1>'
+             '<p>국토교통부 실거래 원자료로 CADENCE가 직접 계산하는 서울 빌딩 지표입니다. 꼬마빌딩 평당가, 누가 사고 누가 파는지, 용도지역별 시세처럼 건물주가 궁금한 숫자를 3시간마다 다시 계산합니다.</p></div></section>')
+    if not ins:
+        return head_ + '<section><p class="empty">실거래 자료가 쌓이면 지표가 나타납니다.</p></section>'
+    summary = "".join(f"<li>{e(x)}</li>" for x in insight_sentences(ins))
+    mo = ins["monthly"]
+    krows = "".join(f'<tr><td>{month_label(x["m"])}</td><td class="r">{x["kn"]}</td><td class="r hl">{x["kland"]:,}</td><td class="r">{x["kgfa"]:,}</td><td class="r">{x["n"]}</td></tr>'
+                    for x in reversed(mo))
+    chg = ins["k3chg"]
+    kcard = (f'<div class="ix-card"><span class="kpi-l">꼬마빌딩 토지 3.3㎡당 ({ins["w3"]} 중위)</span><strong>{ins["k3"]:,}<em>만 원</em></strong>'
+             f'<span class="kpi-s">{ins["wp3"] + " 대비 " + f"{chg:+.1f}%" if chg is not None else ""}</span>{spark_svg([x["kland"] for x in mo])}'
+             f'<span class="kpi-src">월별 중위값 12개월 · 50억 원 미만 거래</span></div>')
+    f = ins["flows"]; tot = sum(f.values()) or 1
+    cell = lambda k: f'<td class="r"><b>{f.get(k, 0):,}</b><small> {round(f.get(k, 0) / tot * 100)}%</small></td>'
+    flow = (f'<div class="table-scroll"><table class="gustats ix-flow"><thead><tr><th>매도 ↓ / 매수 →</th><th class="r">개인이 삼</th><th class="r">법인이 삼</th></tr></thead>'
+            f'<tbody><tr><td>개인이 팖</td>{cell("개인→개인")}{cell("개인→법인")}</tr><tr><td>법인이 팖</td>{cell("법인→개인")}{cell("법인→법인")}</tr></tbody></table></div>'
+            f'<p class="foot-note">개인·법인이 아닌 거래(공공기관·기타)는 뺐습니다. 월별 법인 매수 비중: '
+            + " · ".join(f'{int(x["m"][4:])}월 {x["corp"]}%' for x in mo[-6:]) + '</p>')
+    zrows = "".join(f'<tr><td><b>{e(z["zone"])}</b></td><td class="r hl">{z["land"]:,}</td><td class="r">{z["gfa"]:,}</td><td class="r">{eok(z["amt"])}</td><td class="r">{z["n"]}</td></tr>' for z in ins["zones"])
+    drow = lambda xs: "".join(f'<tr><td>{i + 1}</td><td><a href="/seoul/{GU_SLUG.get(x["gu"], "")}/"><b>{e(x["gu"])} {e(x["dong"])}</b></a></td><td class="r hl">{x["land"]:,}</td><td class="r">{x["n"]}</td></tr>' for i, x in enumerate(xs))
+    rrows = "".join(f'<tr><td>{month_label(x["m"])}</td><td class="r">{f"{x["rate"]:.2f}%" if x["rate"] else "-"}</td><td class="r hl">{x["n"]}</td></tr>' for x in reversed(ins["rates"]))
+    return (head_
+            + f'<section>{sec("요약", "이번 주 숫자로 본 서울 빌딩 시장")}<ul class="ix-summary">{summary}</ul>{src}</section>'
+            + f'<section>{sec("01", "꼬마빌딩 평당가")}<div class="ix-split">{kcard}<div class="table-scroll"><table class="gustats"><thead><tr><th>월</th><th class="r">꼬마빌딩 거래</th>'
+              f'<th class="r">토지 3.3㎡당 (만 원)</th><th class="r">연면적 3.3㎡당 (만 원)</th><th class="r">전체 거래</th></tr></thead><tbody>{krows}</tbody></table></div></div>'
+              '<p class="foot-note">꼬마빌딩은 거래금액 50억 원 미만 건물 단위 매매로 정의했습니다. 달마다 거래된 건물의 위치·연식이 달라 단순 비교에는 한계가 있습니다.</p></section>'
+            + f'<section>{sec("02", "누가 팔고, 누가 사나")}{flow}</section>'
+            + f'<section>{sec("03", "용도지역별 평당가")}<div class="table-scroll"><table class="gustats"><thead><tr><th>용도지역</th><th class="r">토지 3.3㎡당 (만 원)</th>'
+              f'<th class="r">연면적 3.3㎡당 (만 원)</th><th class="r">중위 거래금액 (억 원)</th><th class="r">거래 건수</th></tr></thead><tbody>{zrows}</tbody></table></div>'
+              '<p class="foot-note">같은 구라도 용도지역에 따라 지을 수 있는 건물 규모(용적률)가 달라 땅값 차이가 큽니다. 내 땅의 용도지역은 '
+              '<a href="https://www.eum.go.kr" target="_blank" rel="noopener noreferrer">토지이음 ↗</a>에서 지번으로 확인할 수 있습니다. 거래 10건 이상인 용도지역만 표시합니다.</p></section>'
+            + f'<section>{sec("04", "동별 순위")}<div class="data"><div class="panel"><h3>토지 평당가 높은 동</h3><div class="table-scroll"><table class="mini"><thead><tr><th>#</th><th>동</th><th class="r">토지 3.3㎡당</th><th class="r">건수</th></tr></thead><tbody>{drow(ins["topLand"])}</tbody></table></div></div>'
+              f'<div class="panel"><h3>거래 많은 동</h3><div class="table-scroll"><table class="mini"><thead><tr><th>#</th><th>동</th><th class="r">토지 3.3㎡당</th><th class="r">건수</th></tr></thead><tbody>{drow(ins["topCount"])}</tbody></table></div></div></div>'
+              '<p class="foot-note">최근 12개월 거래 5건 이상인 동 · 토지 3.3㎡당 단위 만 원 · 큰 거래 한두 건에 순위가 바뀔 수 있습니다</p></section>'
+            + f'<section>{sec("05", "금리와 거래량")}<div class="table-scroll"><table class="gustats"><thead><tr><th>월</th><th class="r">{e(ins["rateName"] or "대출 금리")} (신규)</th><th class="r">서울 빌딩 거래 건수</th></tr></thead><tbody>{rrows}</tbody></table></div>'
+              '<p class="foot-note">금리: 한국은행 경제통계시스템(ECOS), 월별 신규 취급액 기준 · 거래: 국토교통부 실거래 (최근 두 달 잠정)</p>'
+              f'<p><a href="/report/">월간 거래 리포트 →</a> · <a href="/lookup/">내 건물 시세 비교 →</a></p></section>')
+
+
 def gu_links():
     return "<nav class=\"gu-chips\">" + "".join(f'<a href="/seoul/{v}/">{e(k)} 빌딩 시세</a>' for k, v in GU_SLUG.items()) + "</nav>"
 
@@ -476,6 +605,8 @@ def prerender(slug, name, desc, data, guide, market, gu=None):
             grp[k] = {**r, "n": grp[k]["n"] + 1} if k in grp else {**r, "n": 1}
         return deal_sheet("이번 주 서울 빌딩 딜 시트", f"최근 14일 안에 계약된 거래({(today - dt.timedelta(days=13)).month}월 {(today - dt.timedelta(days=13)).day}일~)",
                           sorted(grp.values(), key=lambda r: -r["amount"]), weeks)
+    if slug == "insight":
+        return insight_page(compute_insight(data))
     if slug == "lookup":
         return head("내 건물 시세 비교", desc) + f'<section><h2>구별 빌딩 시세</h2>{gu_links()}</section>'
     return head(name, desc)
@@ -555,7 +686,14 @@ def build() -> None:
     data = json.loads(data_path.read_text(encoding="utf-8")) if data_path.exists() else {}
     guide = json.loads((ROOT / "content" / "guide.json").read_text(encoding="utf-8"))
     market = json.loads((ROOT / "content" / "market.json").read_text(encoding="utf-8"))
-    guide_js = ("<script>window.GUIDE_DATA = " + json.dumps(guide, ensure_ascii=False).replace("</", "<\\/") + ";\n"
+    ins = compute_insight(data)
+    ins_js = {k: ins[k] for k in ("k3", "k3chg", "w3", "wp3", "corpBuy", "indivSell", "flows", "topLand", "n", "kn")} if ins else None
+    if ins:
+        ins_js["kspark"] = [x["kland"] for x in ins["monthly"]]
+        ins_js["corpSpark"] = [x["corp"] for x in ins["monthly"]]
+        ins_js["sentences"] = insight_sentences(ins)
+    guide_js = ("<script>window.INSIGHT = " + json.dumps(ins_js, ensure_ascii=False).replace("</", "<\\/") + ";\n"
+                "window.GUIDE_DATA = " + json.dumps(guide, ensure_ascii=False).replace("</", "<\\/") + ";\n"
                 "window.MARKET_DATA = " + json.dumps(market, ensure_ascii=False).replace("</", "<\\/") + ";</script>")
 
     a, b = template.index("<!--SEO:start-->"), template.index("<!--SEO:end-->") + len("<!--SEO:end-->")
@@ -656,7 +794,7 @@ def build() -> None:
             shutil.copytree(ROOT / d, OUT / d, dirs_exist_ok=True)
 
     lastmod = (data.get("updatedAt") or dt.datetime.now(dt.timezone.utc).isoformat())[:10]
-    urls = "".join(f"<url><loc>{SITE}{path}</loc><lastmod>{lastmod}</lastmod><changefreq>{'hourly' if slug in ('home', 'deal', 'price', 'news') else 'daily'}</changefreq></url>"
+    urls = "".join(f"<url><loc>{SITE}{path}</loc><lastmod>{lastmod}</lastmod><changefreq>{'hourly' if slug in ('home', 'deal', 'price', 'news', 'insight') else 'daily'}</changefreq></url>"
                    for slug, path, *_ in ROUTES if slug not in ("sell", "buy"))
     urls += "".join(f"<url><loc>{SITE}/seoul/{v}/</loc><lastmod>{lastmod}</lastmod><changefreq>daily</changefreq></url>" for v in GU_SLUG.values())
     urls += "".join(f"<url><loc>{SITE}/deal-sheet/{w}/</loc><lastmod>{lastmod}</lastmod><changefreq>weekly</changefreq></url>" for w in weeks)

@@ -518,6 +518,23 @@ table.mini th, table.mini td { padding: 8px 6px; }
 .kpis.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 760px) { .kpis.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+/* 빌딩러너 인덱스 */
+.ix-home { border: 2px solid var(--accent); background: var(--surface); padding: 20px 22px; display: grid; gap: 14px; }
+.ix-head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; font-size: var(--t-sm); color: var(--muted); }
+.ix-head a { margin-left: auto; color: var(--accent); font-weight: 600; }
+.ix-summary { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; color: var(--ink); line-height: 1.65; }
+.ix-summary li::marker { color: var(--accent); }
+.ix-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.ix-card { display: grid; gap: 4px; align-content: start; padding: 14px 16px; border: 1px solid var(--line); background: var(--bg); min-width: 0; }
+a.ix-card:hover { border-color: var(--accent); }
+.ix-card strong { font-family: var(--f-display); font-weight: 700; font-size: 1.875rem; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.ix-card strong em { font-style: normal; font-family: var(--f-body); font-size: var(--t-sm); font-weight: 600; color: var(--muted); margin-left: 3px; }
+.ix-card strong.ix-name { font-family: var(--f-body); font-size: 1.5rem; }
+.ix-card .spark { width: 100%; height: 40px; margin-top: 4px; }
+.ix-split { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 24px; align-items: start; }
+.ix-split .spark { width: 100%; height: 64px; }
+.ix-flow td small { color: var(--muted); }
+@media (max-width: 760px) { .ix-cards, .ix-split { grid-template-columns: minmax(0, 1fr); } .ix-home { padding: 16px; } .ix-head a { margin-left: 0; } }
 .btn.ghost { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
 .btn.ghost:hover { background: var(--accent-soft); }
 table.month-sum { min-width: 0; }
@@ -766,7 +783,8 @@ const CATS = {
   report: { f: "3F", name: "시장 리포트",  art: "skyline", h1: "상업용 부동산 시장 리포트", desc: "한국부동산원·알스퀘어·JLL·CBRE의 분기 지표, 금리와 은행 대출 금리, 상장 리츠 시세를 한곳에 모았습니다." },
   policy: { f: "4F", name: "건물주 가이드", art: "section", h1: "건물주 가이드 · 세금·대출·임대차 기준과 계산기", desc: "빌딩을 사고, 보유하고, 임대할 때 꼭 확인할 세금·대출·임대차 기준과 계산기. 근거 법령을 함께 적었습니다." },
   news:   { f: "5F", name: "뉴스",        art: "skyline", h1: "상업용 부동산 뉴스", desc: "오피스·상가·빌딩 매매·리츠·정책 뉴스를 언론사 원문 링크로 모았습니다. 3시간마다 갱신합니다." },
-  column: { f: "6F", name: "칼럼",        art: "section", h1: "빌딩러너 칼럼", desc: "빌딩러너가 네이버 블로그에 쓴 글을 모았습니다." }
+  column: { f: "6F", name: "칼럼",        art: "section", h1: "빌딩러너 칼럼", desc: "빌딩러너가 네이버 블로그에 쓴 글을 모았습니다." },
+  insight: { f: "7F", name: "인덱스",     art: "chart",   h1: "빌딩러너 인덱스", desc: "국토교통부 실거래로 CADENCE가 직접 계산하는 꼬마빌딩 평당가, 매수·매도 주체, 용도지역별 시세, 동별 순위, 금리와 거래량." }
 };
 const ALIASES = { invest: "policy", guide: "policy", columns: "column", data: "price", market: "news", building: "news", players: "news", people: "news" };   // 예전 주소
 const RATE_ORDER = ["base", "ktb3", "ktb10", "corp", "cd91", "usd", "loan_corp", "loan_sme"];
@@ -1735,6 +1753,26 @@ function toolLinks() {
     </div>`;
 }
 
+/* 홈: 빌딩러너 인덱스 (빌드 때 계산한 window.INSIGHT) */
+function insightHome() {
+  const I = window.INSIGHT;
+  if (!I) return "";
+  const sp = v => spark(v.map((n, i) => [i, n]), 200, 40);
+  const f = I.flows || {}, tot = Object.values(f).reduce((a, b) => a + b, 0) || 1, top = I.topLand && I.topLand[0];
+  return `<div class="ix-home">
+    <div class="ix-head"><span class="badge live">7F 빌딩러너 인덱스</span><span>CADENCE가 실거래 원자료로 직접 계산한 숫자</span><a href="/insight/">인덱스 전체 →</a></div>
+    <ul class="ix-summary">${(I.sentences || []).slice(0, 3).map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+    <div class="ix-cards">
+      <a class="ix-card" href="/insight/"><span class="kpi-l">꼬마빌딩 토지 3.3㎡당</span><strong>${fmt(I.k3, 0)}<em>만 원</em></strong>
+        <span class="kpi-s">${esc(I.w3 || "최근 3개월")} 중위 · 50억 미만${I.k3chg != null ? ` · ${esc(I.wp3 || "")} 대비 ${I.k3chg > 0 ? "▲" : I.k3chg < 0 ? "▼" : ""} ${Math.abs(I.k3chg).toFixed(1)}%` : ""}</span>${sp(I.kspark || [])}</a>
+      <a class="ix-card" href="/insight/"><span class="kpi-l">개인이 팔고 법인이 산 거래</span><strong>${Math.round((f["개인→법인"] || 0) / tot * 100)}<em>%</em></strong>
+        <span class="kpi-s">법인 매수 ${I.corpBuy}% · 개인 매도 ${I.indivSell}% · 최근 12개월</span>${sp(I.corpSpark || [])}</a>
+      ${top ? `<a class="ix-card" href="${guPath(top.gu)}"><span class="kpi-l">토지 평당가 1위 동</span><strong class="ix-name">${esc(top.gu)} ${esc(top.dong)}</strong>
+        <span class="kpi-s">토지 3.3㎡당 ${fmt(top.land, 0)}만 원 · ${top.n}건 · 최근 12개월 (5건 이상)</span></a>` : ""}
+    </div>
+  </div>`;
+}
+
 /* 홈: 월간 리포트 요약, 주간 딜 시트, 내 건물 시세 비교 바로가기 */
 const monthPath = m => m ? `/report/${m.slice(0, 4)}-${m.slice(4)}/` : "/report/";
 const monthKo = m => `${+m.slice(4)}월`;
@@ -1803,6 +1841,7 @@ function renderHome() {
       <p>국토교통부 실거래, 한국은행 금리, 한국부동산원 통계를 3시간마다 모아 건물주와 예비 건물주가 바로 쓸 수 있게 정리합니다. <span class="num">${updatedLabel()}</span></p>
     </div>
     ${heroKpis()}
+    ${insightHome()}
     <div class="hero-actions">
       <a class="btn" href="/lookup/">내 건물 시세 비교</a>
       <a class="btn ghost" href="/deal-sheet/">이번 주 딜 시트</a>
@@ -1988,7 +2027,7 @@ function setActive(slug) {
   const cur = document.querySelector(".floor-btn[aria-current]");
   if (cur) cur.scrollIntoView({ block: "nearest", inline: "nearest" });
 }
-const PATHS = { home: "/", price: "/price/", lookup: "/lookup/", deal: "/deal/", report: "/report/", policy: "/guide/", news: "/news/", column: "/column/", inquiry: "/inquiry/", sell: "/sell/", buy: "/buy/" };
+const PATHS = { home: "/", insight: "/insight/", price: "/price/", lookup: "/lookup/", deal: "/deal/", report: "/report/", policy: "/guide/", news: "/news/", column: "/column/", inquiry: "/inquiry/", sell: "/sell/", buy: "/buy/" };
 const pathOf = k => PATHS[k] || "/";
 function currentSlug() {
   const seg = location.pathname.replace(/^\/+|\/+$/g, "").split("/")[0].replace(/\.html$/, "");
@@ -2018,7 +2057,8 @@ function route(keep) {
   else if (h === "seoul" && SLUG_GU[seg2]) { renderGu(SLUG_GU[seg2]); active = "price"; }
   else if (h === "deal") { renderDeals(); active = h; }
   else if (h === "report" && /^\d{4}-\d{2}$/.test(seg2)) { active = h; }   // 월간 리포트: 빌드 때 만든 본문을 그대로 둔다
-  else if (h === "deal-sheet") { active = "deal"; }   // 주간 딜 시트: 빌드 때 만든 본문을 그대로 둔다
+  else if (h === "deal-sheet") { active = "deal"; }
+  else if (h === "insight") { active = h; }   // 빌딩러너 인덱스: 빌드 때 계산한 본문을 그대로 둔다   // 주간 딜 시트: 빌드 때 만든 본문을 그대로 둔다
   else if (h === "lookup") { renderLookup(); active = "price"; }
   else if (h === "report") { renderReport(); active = h; }
   else if (h === "policy") { renderGuide(); active = h; }
