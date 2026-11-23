@@ -388,6 +388,22 @@ def rss_feed(items, built):
             f"<lastBuildDate>{built.strftime('%a, %d %b %Y %H:%M:%S +0900')}</lastBuildDate>{body}</channel></rss>\n")
 
 
+# 건물주 세금·공시 캘린더 (index.html의 OWNER_CAL과 같은 내용)
+OWNER_CAL = [
+    (1, "부가가치세 2기 확정신고·납부", "1월 25일까지", "전년 7~12월 임대료분. 간이과세자는 전년 1년분"),
+    (3, "법인세 신고·납부", "3월 31일까지", "빌딩을 법인으로 보유한 경우 (12월 결산 법인)"),
+    (4, "부가가치세 1기 예정", "4월 25일까지", "법인은 예정신고, 개인 일반과세자는 고지서로 납부"),
+    (5, "종합소득세 신고·납부", "5월 31일까지", "개인 임대소득. 성실신고확인 대상은 6월 30일까지"),
+    (5, "개별공시지가 결정·공시", "5월 31일", "보유세·양도세 계산의 기준. 이의신청은 공시 후 30일 안에"),
+    (6, "재산세·종합부동산세 과세기준일", "6월 1일", "이날 소유자에게 그해 보유세가 나옵니다"),
+    (7, "재산세(건물분) 납부", "7월 16일~31일", "6월 1일 소유자 기준"),
+    (7, "부가가치세 1기 확정신고·납부", "7월 25일까지", "1~6월 임대료분"),
+    (9, "재산세(토지분) 납부", "9월 16일~30일", "6월 1일 소유자 기준"),
+    (10, "부가가치세 2기 예정", "10월 25일까지", "법인은 예정신고, 개인 일반과세자는 고지서로 납부"),
+    (12, "종합부동산세 납부", "12월 1일~15일", "상가·빌딩 부속토지는 공시지가 합계 80억 원 초과 시 (별도합산)"),
+]
+
+
 # ---------------------------------------------------------------- 빌딩러너 인덱스 (/insight/)
 KKOMA = 500000   # 꼬마빌딩: 거래금액 50억 원 미만 (만 원)
 
@@ -582,7 +598,8 @@ def prerender(slug, name, desc, data, guide, market, gu=None):
         facts = "".join(
             f'<article class="fact"><h3>{e(f["q"])}</h3><p class="fact-a">{e(f["a"])}</p><p>{e(f["d"])}</p>'
             f'<p class="fact-src">근거: {e(f.get("law") or f.get("src"))}</p></article>' for f in guide.get("facts", []))
-        return (head(name, desc) + f'<section><h2>건물주가 가장 많이 묻는 기준</h2><div class="facts">{facts}</div>'
+        cal = "".join(f"<li>{m}월 · {e(t)} ({e(w)}): {e(d)}</li>" for m, t, w, d in OWNER_CAL)
+        return (head(name, desc) + f'<section><h2>건물주 세금·공시 캘린더</h2><ul>{cal}</ul></section>' + f'<section><h2>건물주가 가장 많이 묻는 기준</h2><div class="facts">{facts}</div>'
                 f'<p class="foot-note">{e(guide.get("checked"))} 기준으로 법령과 공개 자료를 확인해 정리했습니다.</p></section>'
                 + news_list([n for n in news if n.get("section") == "policy"], 20))
     if slug == "news":
