@@ -2499,13 +2499,24 @@ function searchFromUrl() {
 /* ================= 방문자 수 (오늘 방문 · 지금 접속) =================
    브라우저마다 무작위 번호 하나를 만들어 보낸다. 이름·IP 같은 개인 정보는 보내지 않는다.
    페이지를 보고 있는 동안 1분마다 신호를 보내 '지금 접속' 수를 맞춘다. */
+// 같은 브라우저는 같은 번호: localStorage → 쿠키 → sessionStorage 순서로 저장해 둔다
+// (카카오톡·인스타그램 앱 안 브라우저처럼 localStorage가 막힌 곳에서 페이지마다 새 사람으로 세지 않게)
 function visitorId() {
-  try {
-    let v = localStorage.getItem("cadence-vid");
-    if (!v) { v = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()).replace(/[^a-z0-9]/gi, "").toLowerCase().slice(0, 32); localStorage.setItem("cadence-vid", v); }
-    return v;
-  } catch (e) { return (visitorId.tmp = visitorId.tmp || String(Math.random()).slice(2, 18) + "s"); }
+  if (visitorId.v) return visitorId.v;
+  const fresh = () => (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()).replace(/[^a-z0-9]/gi, "").toLowerCase().slice(0, 32);
+  const ok = v => /^[a-z0-9]{8,40}$/.test(v || "");
+  let v = "";
+  try { v = localStorage.getItem("cadence-vid") || ""; } catch (e) {}
+  if (!ok(v)) { const m = document.cookie.match(/(?:^|; )cadence_vid=([a-z0-9]+)/); v = m ? m[1] : ""; }
+  if (!ok(v)) { try { v = sessionStorage.getItem("cadence-vid") || ""; } catch (e) {} }
+  if (!ok(v)) v = fresh();
+  try { localStorage.setItem("cadence-vid", v); } catch (e) {}
+  try { document.cookie = `cadence_vid=${v}; max-age=31536000; path=/; SameSite=Lax; Secure`; } catch (e) {}
+  try { sessionStorage.setItem("cadence-vid", v); } catch (e) {}
+  return (visitorId.v = v);
 }
+// 검색엔진 로봇·미리보기 수집기는 세지 않는다 (서버에서도 한 번 더 거름)
+const BOT_UA = /bot|crawl|spider|slurp|yeti|daumoa|headless|lighthouse|phantom|puppeteer|playwright|preview|scrap|facebookexternalhit|python|curl|wget/i;
 // 운영자 기기 제외: 아무 페이지나 ?nocount=1 로 한 번 열면 이 기기는 방문으로 세지 않는다 (?nocount=0 으로 해제)
 function excludedDevice() {
   try {
@@ -2516,7 +2527,7 @@ function excludedDevice() {
   } catch (e) { return false; }
 }
 function pingVisit() {
-  if (navigator.webdriver || document.visibilityState === "hidden") return;
+  if (navigator.webdriver || BOT_UA.test(navigator.userAgent || "") || document.visibilityState === "hidden") return;
   const mine = excludedDevice();
   // 제외된 기기는 번호 없이 보내 숫자만 받아 온다 (집계에 안 들어감)
   fetch(VISIT_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(mine ? {} : { vid: visitorId() }) })
@@ -2524,7 +2535,7 @@ function pingVisit() {
     .then(d => {
       if (!d || typeof d.today !== "number") return;
       document.getElementById("visitors").innerHTML =
-        `오늘 방문 <b class="num">${fmt(d.today, 0)}</b> · 지금 접속 <b class="num">${fmt(mine ? d.online : Math.max(1, d.online), 0)}</b>` +
+        `오늘 방문 <b class="num">${fmt(d.today, 0)}</b> · 지금 접속 <b class="num">${fmt(d.online, 0)}</b>` +
         (mine ? ` <span title="이 기기는 방문자 수에서 빠집니다. ?nocount=0 으로 해제">(내 기기 제외)</span>` : "");
     })
     .catch(() => {});

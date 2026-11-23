@@ -41,6 +41,8 @@ export class Counter {
   }
 }
 
+const BOT_UA = /bot|crawl|spider|slurp|yeti|daumoa|headless|lighthouse|phantom|puppeteer|playwright|preview|scrap|facebookexternalhit|python|curl|wget|google-inspectiontool|googleother|bingpreview/i;
+
 const ALLOWED_ORIGINS = ["https://cadence.bldgrunner.com", "https://munminoh.github.io"];
 
 async function dispatchRefresh(env) {
@@ -80,8 +82,12 @@ export default {
       if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
       if (request.method !== "POST" || !ALLOWED_ORIGINS.includes(origin)) return reply({ ok: false }, 403);
       if (!env.COUNTER) return reply({ ok: false, error: "not_configured" }, 503);
+      // 검색엔진 로봇(자바스크립트를 실행하는 구글·네이버·빙 등)과 미리보기 수집기는 세지 않고 숫자만 돌려준다
+      const ua = request.headers.get("User-Agent") || "";
+      const bot = !ua || BOT_UA.test(ua) || (request.cf && request.cf.botManagement && request.cf.botManagement.verifiedBot);
+      const body = bot ? "{}" : await request.text();
       const stub = env.COUNTER.get(env.COUNTER.idFromName("cadence"));
-      const res = await stub.fetch("https://counter/visit", { method: "POST", body: await request.text() });
+      const res = await stub.fetch("https://counter/visit", { method: "POST", body });
       return reply(await res.json());
     }
     if (url.pathname !== "/inquiry") return reply({ ok: false, error: "not_found" }, 404);
