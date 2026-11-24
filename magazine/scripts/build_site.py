@@ -47,7 +47,7 @@ ROUTES = [
     ("price", "/price/", "시세", "서울 빌딩 시세: 권역·구·동별 평당가 | CADENCE",
      "국토교통부 실거래로 계산한 서울 빌딩 토지·연면적 평당가. CBD·GBD·YBD 권역, 25개 구, 동별, 준공 연도별·용도별 평당가와 월별 거래 건수."),
     ("deal", "/deal/", "실거래", "서울 빌딩 매매 실거래가 검색 | CADENCE",
-     "국토교통부 신고 자료로 서울 빌딩·꼬마빌딩 매매 실거래가를 구·용도·금액대·기간별로 검색하고 이번 달 큰 거래와 매매 뉴스를 봅니다."),
+     "국토교통부 신고 자료로 서울 빌딩·꼬마빌딩 매매 실거래가를 구·용도·금액대·기간별로 검색하고 최근 두 달 큰 거래와 매매 뉴스를 봅니다."),
     ("report", "/report/", "시장 리포트", "상업용 부동산 시장 리포트: 오피스 공실률·거래액·금리 | CADENCE",
      "한국부동산원·알스퀘어·JLL·CBRE의 분기 오피스 공실률과 거래액, 금리와 은행 대출 금리, 상장 리츠 시세를 한곳에 모았습니다."),
     ("policy", "/guide/", "건물주 가이드", "건물주 가이드: 빌딩 취득세·중개보수·상가임대차보호법·RTI 계산기 | CADENCE",
@@ -569,7 +569,7 @@ def prerender(slug, name, desc, data, guide, market, gu=None):
         lead = ('<section class="hero"><div class="hero-head"><h1>서울 빌딩 시세와 실거래, 오늘의 숫자</h1>'
                 f'<p>{e(desc)}</p></div><ul>'
                 + (f"<li>서울 빌딩 토지 3.3㎡당 중위값 {land / 10000:,.2f}억 원 (국토교통부 실거래 {len(rows)}건)</li>" if land else "")
-                + (f'<li>이번 달 최대 거래: 서울 {e(top["gu"])} {e(top["dong"])} {e(top.get("use"))} {eok(top["amount"])}억 원 ({e(top["date"])})</li>' if top else "")
+                + (f'<li>최근 두 달 최대 거래: 서울 {e(top["gu"])} {e(top["dong"])} {e(top.get("use"))} {eok(top["amount"])}억 원 ({e(top["date"])})</li>' if top else "")
                 + "</ul></section>")
         months_ = ((data.get("deals") or {}).get("history") or {}).get("months", [])
         quick = ('<section><h2>바로 가기</h2><ul>'
