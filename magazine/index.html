@@ -804,7 +804,7 @@ table.gustats td a:hover b { color: var(--accent); text-decoration: underline; t
    모든 기사는 언론사·기관의 원문 링크입니다. CADENCE는 제목, 출처, 날짜만 모읍니다. */
 const CATS = {
   price:  { f: "1F", name: "시세",        art: "chart",   h1: "서울 빌딩 시세 · 권역·구·동별 평당가", desc: "국토교통부 실거래로 계산한 서울 빌딩 토지·연면적 평당가. 권역·구·동, 연식·용도별로 보고 월별 거래와 금액대 분포까지 확인합니다." },
-  deal:   { f: "2F", name: "실거래",      art: "tower",   h1: "서울 빌딩 매매 실거래", desc: "서울 빌딩 매매 신고를 구·용도·금액대·기간별로 검색하고, 이번 달 큰 거래와 매매 뉴스를 봅니다." },
+  deal:   { f: "2F", name: "실거래",      art: "tower",   h1: "서울 빌딩 매매 실거래", desc: "서울 빌딩 매매 신고를 구·용도·금액대·기간별로 검색하고, 최근 두 달 큰 거래와 매매 뉴스를 봅니다." },
   report: { f: "3F", name: "시장 리포트",  art: "skyline", h1: "상업용 부동산 시장 리포트", desc: "한국부동산원·알스퀘어·JLL·CBRE의 분기 지표, 금리와 은행 대출 금리, 상장 리츠 시세를 한곳에 모았습니다." },
   policy: { f: "4F", name: "건물주 가이드", art: "section", h1: "건물주 가이드 · 세금·대출·임대차 기준과 계산기", desc: "빌딩을 사고, 보유하고, 임대할 때 꼭 확인할 세금·대출·임대차 기준과 계산기. 근거 법령을 함께 적었습니다." },
   news:   { f: "5F", name: "뉴스",        art: "skyline", h1: "상업용 부동산 뉴스", desc: "오피스·상가·빌딩 매매·리츠·정책 뉴스를 언론사 원문 링크로 모았습니다. 3시간마다 갱신합니다." },
@@ -895,7 +895,7 @@ function change(cur, prev, kind) {
   const cls = Math.abs(d) < 1e-9 ? "flat" : d > 0 ? "up" : "down";
   const arrow = cls === "up" ? "▲" : cls === "down" ? "▼" : "";
   let txt;
-  if (kind === "bp") txt = `${fmt(Math.abs(d * 100), 1)}bp`;
+  if (kind === "bp") txt = `${Math.abs(d).toFixed(2)}%p`;
   else if (kind === "won") txt = `${fmt(Math.abs(d), 1)}원`;
   else txt = `${fmt(Math.abs(d / prev * 100), 2)}%`;
   return `<span class="chg ${cls}">${cls === "flat" ? "보합" : arrow + " " + txt}</span>`;
@@ -1743,7 +1743,7 @@ function heroKpis() {
   const items = [];
   if (rows.length) items.push(kpi("서울 빌딩 토지 3.3㎡당", `${fmt(median(rows.map(landPy)) / 10000, 2)}<em>억 원</em>`, `중위값 · 최근 ${histMonths().length}개월 ${fmt(rows.length, 0)}건`, "국토교통부 실거래"));
   if (rows.length) items.push(kpi("최근 30일 계약 신고", `${fmt(recent, 0)}<em>건</em>`, "서울 건물 단위 매매 · 신고 기한 30일", "국토교통부 실거래"));
-  if (top) items.push(kpi("이번 달 최대 거래", `${eok(top.amount)}<em>억 원</em>`, `${esc(top.gu)} ${esc(top.dong)} ${esc(useLabel(top.use))} · ${esc(top.date)}`, "국토교통부 실거래"));
+  if (top) items.push(kpi("최근 두 달 최대 거래", `${eok(top.amount)}<em>억 원</em>`, `${esc(top.gu)} ${esc(top.dong)} ${esc(useLabel(top.use))} · ${esc(top.date)}`, "국토교통부 실거래"));
   if (r.loan_sme) items.push(kpi("은행 중소기업대출 금리", `${r.loan_sme.value.toFixed(2)}<em>%</em>`, `${ymd(r.loan_sme.date)} 신규 취급 · ${change(r.loan_sme.value, r.loan_sme.prev, "bp")}`, "한국은행"));
   if (r.ktb3) items.push(kpi("국고채 3년", `${r.ktb3.value.toFixed(2)}<em>%</em>`, `${ymd(r.ktb3.date)} · ${change(r.ktb3.value, r.ktb3.prev, "bp")}`, "한국은행"));
   if (vac) items.push(kpi(`서울 ${vac.label.replace("서울 ", "")}`, `${esc(vac.value)}`, `${esc(MARKET.quarter)}`, MARKET.groups[0].source));
@@ -1986,7 +1986,7 @@ function renderHome() {
   </section>
 
   <section class="two" aria-label="큰 거래와 뉴스">
-    <div>${secHead("2F", "이번 달 큰 거래", link("/deal/", "실거래 검색"))}${bigDealsCompact()}</div>
+    <div>${secHead("2F", "최근 두 달 큰 거래", link("/deal/", "실거래 검색"))}${bigDealsCompact()}</div>
     <div>${secHead("5F", "최신 뉴스", link("/news/", "뉴스 전체"))}${newsRows(all.slice(0, 9))}</div>
   </section>
 
@@ -2092,7 +2092,7 @@ function renderPrice() {
 function renderDeals() {
   view.innerHTML = `${pageHead(CATS.deal)}
   <section>${secHead("", "서울 빌딩 실거래 검색", liveBadge())}${dealExplorer()}</section>
-  <section>${secHead("", "이번 달 큰 거래", link("/deal-sheet/", "이번 주 딜 시트"))}<div id="live-deals">${dealsBlock()}</div></section>
+  <section>${secHead("", "최근 두 달 큰 거래", link("/deal-sheet/", "이번 주 딜 시트"))}<div id="live-deals">${dealsBlock()}</div></section>
   <section>${secHead("", "어디서, 어떤 건물이 거래됐나")}${dealCharts()}</section>
   <section>${secHead("", "매매·투자 뉴스", link("/news/", "뉴스 전체"))}${newsRows(newsOf("deal").slice(0, 15))}</section>
   ${ctaBlock()}`;
@@ -2567,7 +2567,8 @@ function init() {
   us.hidden = !us.innerHTML;
 
   const days = ["일", "월", "화", "수", "목", "금", "토"];
-  const now = new Date();
+  const kst = new Date(Date.now() + 9 * 3600e3);   // 보는 사람 기기 시간대와 상관없이 한국 날짜
+  const now = { getFullYear: () => kst.getUTCFullYear(), getMonth: () => kst.getUTCMonth(), getDate: () => kst.getUTCDate(), getDay: () => kst.getUTCDay() };
   document.getElementById("today").textContent =
     `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, "0")}.${String(now.getDate()).padStart(2, "0")} (${days[now.getDay()]})`;
 
