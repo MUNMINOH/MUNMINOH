@@ -62,6 +62,8 @@ ROUTES = [
      "구·동·지번을 넣으면 같은 동과 같은 구의 빌딩 매매 실거래, 토지·연면적 평당가 범위를 국토교통부 신고 자료로 바로 비교합니다."),
     ("dealsheet", "/deal-sheet/", "주간 딜 시트", "이번 주 서울 빌딩 딜 시트: 새로 공개된 매매 실거래 | CADENCE",
      "최근 7일 동안 국토교통부 실거래 자료에 새로 공개된 서울 빌딩 매매 거래를 금액 순으로 모았습니다. 매주 자동으로 쌓입니다."),
+    ("about", "/about/", "소개", "CADENCE 소개: 건물주·예비 건물주를 위한 서울 빌딩 데이터 | CADENCE",
+     "CADENCE가 무엇을 어떻게 만드는지, 건물주·예비 건물주·매도 검토 중인 분이 어떻게 쓰면 되는지, 데이터 출처와 한계, 의뢰 진행 방식과 개인정보 처리를 정리했습니다."),
     ("inquiry", "/inquiry/", "매도·매수 의뢰", "빌딩 매도·매수 의뢰 | CADENCE",
      "팔고 싶은 빌딩, 찾고 있는 빌딩을 남겨 주세요. 빌딩러너가 조건을 검토해 연락드립니다."),
     ("sell", "/sell/", "매도 의뢰", "빌딩 매도 의뢰 | CADENCE",
@@ -531,6 +533,92 @@ def insight_page(ins):
               f'<p><a href="/report/">월간 거래 리포트 →</a> · <a href="/lookup/">내 건물 시세 비교 →</a></p></section>')
 
 
+# ---------------------------------------------------------------- 소개 (/about/)
+ABOUT_FAQ = [
+    ("CADENCE 정보는 무료인가요?", "네. 시세·실거래·리포트·계산기 등 사이트의 모든 정보는 로그인 없이 무료로 볼 수 있습니다."),
+    ("숫자는 어디서 오나요?", "국토교통부 상업업무용 부동산 매매 신고 자료, 한국은행 경제통계시스템(ECOS), 한국부동산원 상업용부동산 임대동향조사(보도 기사 기준), 각 언론사 기사입니다. 실거래와 금리는 3시간마다, 기관 통계는 분기마다 반영합니다."),
+    ("여기 나온 평당가로 내 건물 값을 알 수 있나요?", "아닙니다. 국토교통부 공개 자료에는 지번과 건물명이 없고, 평당가는 위치·연식·용도가 섞인 중위값입니다. 시세 비교 자료일 뿐 감정평가나 매매 가능 가격이 아닙니다."),
+    ("의뢰하면 내 건물 정보가 공개되나요?", "아닙니다. 의뢰서는 사이트에 게시되지 않고 빌딩러너의 메일과 업무용 노션에만 저장됩니다(전달에 FormSubmit, 보관에 Notion을 씁니다). 상담 종료 후 1년 동안 보관하며, 요청하면 바로 삭제합니다."),
+    ("매도 의뢰에 왜 정확한 지번이 필요한가요?", "등기부와 건축물대장으로 건물을 정확히 확인하기 위해서입니다. 같은 동에도 비슷한 건물이 많아 지번 없이는 검토가 어렵습니다."),
+    ("거래가 진행되면 비용이 드나요?", "의뢰와 상담은 무료입니다. 실제 거래가 진행되면 등록된 개업공인중개사가 중개하며, 중개보수는 공인중개사법 시행규칙에 따라 거래금액의 0.9% 이내에서 협의합니다(중개사무소가 일반과세자면 부가세 별도)."),
+]
+
+
+def about_page():
+    sec = lambda f, t: f'<div class="sec-head"><h2>{f"<span class=fl>{f}</span>" if f else ""}{e(t)}</h2></div>'
+    who = [
+        ("건물주", "보유 중인 빌딩의 시세와 세금·이자가 궁금한 분", [
+            ("우리 구·동 평당가와 최근 거래", "/", "홈 지도에서 구를 누르면 바로 나옵니다"),
+            ("같은 동 실거래와 평당가 범위", "/lookup/", "내 건물 시세 비교"),
+            ("이번 달 세금 일정과 대출 이자", "/guide/#owner-cal", "건물주 캘린더 · 대출 이자 한눈에"),
+            ("상가 공실률과 임대료 흐름", "/report/", "임대 시장 체크 · 한국부동산원 통계"),
+            ("임대료 인상 한도·갱신요구권 기준", "/guide/", "상가임대차법 정리와 계산기")]),
+        ("예비 건물주 · 매수 검토", "빌딩을 처음 사려고 알아보는 분", [
+            ("예산대별로 얼마나 거래되나", "/report/", "월간 리포트의 금액대별 거래"),
+            ("어느 동이 비싸고, 어디서 많이 거래되나", "/insight/", "빌딩러너 인덱스 · 동별 순위"),
+            ("살 때 드는 세금과 대출 기준", "/guide/", "취득세 4.6% · RTI 1.5배 계산기"),
+            ("이번 주 새로 공개된 거래", "/deal-sheet/", "주간 딜 시트"),
+            ("조건에 맞는 건물 찾기", "/buy/", "매수 의뢰 (지역·예산만 남기면 됩니다)")]),
+        ("매도 검토", "보유 빌딩을 팔지 고민 중인 분", [
+            ("우리 동네에서 최근 얼마에 팔렸나", "/lookup/", "같은 동·구 실거래와 평당가 범위"),
+            ("누가 사고 있나 (개인·법인)", "/insight/", "매수·매도 주체 통계"),
+            ("시장 분위기 (거래량·금리)", "/report/", "월간 리포트 · 금리와 거래량"),
+            ("팔 때 챙길 것 (부가세·포괄양수도·과세기준일)", "/guide/", "건물주 가이드"),
+            ("매도 상담", "/sell/", "지번과 희망가만 남기면 됩니다")]),
+    ]
+    cards = "".join(
+        f'<article class="who"><h3>{e(t)}</h3><p>{e(sub)}</p><ul>'
+        + "".join(f'<li><a href="{h}"><b>{e(q)}</b><small>{e(how)}</small></a></li>' for q, h, how in items)
+        + "</ul></article>" for t, sub, items in who)
+    data = [
+        ("국토교통부 상업업무용 부동산 매매 신고 자료", "서울 25개 구 건물 단위 매매, 최근 12개월", "3시간마다"),
+        ("한국은행 경제통계시스템(ECOS)", "기준금리, 국고채·회사채, CD, 은행 기업·중소기업대출 금리", "3시간마다 (대출 금리는 월별 발표)"),
+        ("한국부동산원 상업용부동산 임대동향조사", "오피스·상가 공실률, 임대가격지수 (보도 기사 기준, 2곳 이상 확인)", "분기마다"),
+        ("민간 리서치 (알스퀘어·JLL·CBRE)", "서울 오피스 공실률·거래액 (보도 기사 기준)", "분기마다"),
+        ("언론사 기사", "상업용 부동산 뉴스 (제목·출처·원문 링크만)", "3시간마다"),
+        ("빌딩러너 네이버 블로그", "칼럼 (요약과 원문 링크)", "3시간마다"),
+    ]
+    data_rows = "".join(f"<tr><td><b>{e(a)}</b></td><td>{e(b)}</td><td>{e(c)}</td></tr>" for a, b, c in data)
+    faq = "".join(f"<div><dt>{e(q)}</dt><dd>{e(a)}</dd></div>" for q, a in ABOUT_FAQ)
+    return (
+        '<section class="cat-head"><div class="big">i</div><div><h1>CADENCE 소개</h1>'
+        '<p>CADENCE는 빌딩러너가 만드는 서울 빌딩 데이터 매거진입니다. 공개된 실거래·금리·통계를 모아 건물주와 예비 건물주가 바로 쓸 수 있게 정리하고, '
+        '모든 숫자에 출처를 붙입니다.</p></div></section>'
+        f'<section>{sec("", "이런 분이, 이렇게 쓰세요")}<div class="who-grid">{cards}</div></section>'
+        f'<section>{sec("", "숫자는 이렇게 만듭니다")}<div class="table-scroll"><table class="gustats"><thead><tr><th>출처</th><th>무엇</th><th>반영 주기</th></tr></thead>'
+        f'<tbody>{data_rows}</tbody></table></div>'
+        '<ul class="principles">'
+        '<li><b>계산 방식을 밝힙니다.</b> 평당가는 거래금액 ÷ 면적(평), 대표값은 중위값입니다. 용어는 <a href="/guide/#glossary">용어 풀이</a>에 근거와 함께 정리했습니다.</li>'
+        '<li><b>한계를 함께 적습니다.</b> 국토교통부 공개 자료에는 지번·건물명이 없고, 계약 후 30일 안에 신고되므로 최근 두 달은 잠정치입니다.</li>'
+        '<li><b>확인한 것만 씁니다.</b> 법령·기관 발표·기사 원문으로 확인한 내용만 싣고, 확인 날짜를 표시합니다. 만든 기사나 지어낸 숫자는 없습니다.</li>'
+        '<li><b>틀린 곳은 고칩니다.</b> 잘못된 숫자나 문구를 발견하면 <a href="/inquiry/">문의</a>로 알려 주세요.</li>'
+        '</ul></section>'
+        f'<section id="process">{sec("", "의뢰하면 이렇게 진행됩니다")}<ol class="steps-line">'
+        '<li><b>의뢰 남기기</b><span>매도는 지번과 희망가, 매수는 지역과 예산. 1분이면 됩니다.</span></li>'
+        '<li><b>빌딩러너 연락</b><span>남긴 연락처로 조건을 자세히 여쭙니다.</span></li>'
+        '<li><b>시세·입지 검토</b><span>같은 동·구 실거래와 시장 자료로 검토합니다.</span></li>'
+        '<li><b>개업공인중개사 연결</b><span>거래가 필요하면 등록된 개업공인중개사(협업 법인)가 중개를 진행합니다.</span></li>'
+        '</ol>'
+        '<p class="foot-note">개인정보: 이름·연락처·의뢰 내용만 받으며, 상담과 회신에만 씁니다. 의뢰서는 메일 전달 서비스(FormSubmit)를 거쳐 빌딩러너 메일로, 동시에 업무용 노션(Notion)에 저장됩니다. 상담 종료 후 1년 동안 보관하고 요청하면 바로 삭제합니다. 의뢰 내용은 사이트에 공개되지 않습니다.</p></section>'
+        f'<section>{sec("", "CADENCE가 하지 않는 것")}<ul class="principles no">'
+        '<li>특정 매물을 광고하거나 알선하지 않습니다.</li>'
+        '<li>감정평가를 하지 않습니다. 시세 비교 자료는 감정가나 매매 가능 가격이 아닙니다.</li>'
+        '<li>투자를 권유하거나 수익을 보장하지 않습니다.</li>'
+        '<li>세무·법률 자문을 대신하지 않습니다. 기준 정리는 일반적인 내용이며, 개별 상황은 세무사·변호사와 확인하세요.</li>'
+        '</ul></section>'
+        f'<section>{sec("", "빌딩러너")}<p class="about-runner">서울 곳곳을 직접 달리며 상권과 빌딩을 기록합니다. '
+        '네이버 블로그 칼럼 상당수는 아침 러닝 코스에서 본 거리에서 시작하고, CADENCE는 그 기록을 공개 데이터로 뒷받침합니다.</p>'
+        '<p><a href="https://blog.naver.com/morrison119" target="_blank" rel="noopener noreferrer">네이버 블로그 ↗</a> · '
+        '<a href="https://www.youtube.com/@building_runner_official" target="_blank" rel="noopener noreferrer">유튜브 ↗</a> · '
+        '<a href="https://www.threads.net/@building_runner" target="_blank" rel="noopener noreferrer">스레드 ↗</a> · '
+        '<a href="https://cafe.daangn.com/geonmulju-doego" target="_blank" rel="noopener noreferrer">당근 카페 ↗</a></p></section>'
+        f'<section>{sec("", "자주 묻는 질문")}<dl class="glossary faq">{faq}</dl></section>'
+        '<section class="cta" aria-label="매도·매수 의뢰"><div><span class="eyebrow">빌딩러너 매도·매수 의뢰</span><h2>빌딩을 팔거나 사려고 하시나요?</h2>'
+        '<p>위치와 조건을 남겨 주시면 빌딩러너가 시세를 검토해 연락드립니다.</p></div>'
+        '<div class="cta-btns"><a class="cta-btn primary" href="/sell/"><b>매도 의뢰</b><span>건물을 팔고 싶어요</span></a>'
+        '<a class="cta-btn" href="/buy/"><b>매수 의뢰</b><span>건물을 찾고 있어요</span></a></div></section>')
+
+
 def gu_links():
     return "<nav class=\"gu-chips\">" + "".join(f'<a href="/seoul/{v}/">{e(k)} 빌딩 시세</a>' for k, v in GU_SLUG.items()) + "</nav>"
 
@@ -624,6 +712,8 @@ def prerender(slug, name, desc, data, guide, market, gu=None):
                           sorted(grp.values(), key=lambda r: -r["amount"]), weeks)
     if slug == "insight":
         return insight_page(compute_insight(data))
+    if slug == "about":
+        return about_page()
     if slug == "lookup":
         return head("내 건물 시세 비교", desc) + f'<section><h2>구별 빌딩 시세</h2>{gu_links()}</section>'
     return head(name, desc)
@@ -654,6 +744,9 @@ def seo_head(slug, path, title, desc, data, noindex=False, post=None):
         graph.append({"@type": "ItemList", "itemListElement": [
             {"@type": "ListItem", "position": i + 1, "url": SITE + col_path(c) if c.get("id") else c["link"], "name": c["title"]}
             for i, c in enumerate(posts)]})
+    if slug == "about":
+        graph.append({"@type": "FAQPage", "mainEntity": [
+            {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in ABOUT_FAQ]})
     if slug == "policy":   # 건물주 가이드의 질문·답 → FAQ 구조화 데이터
         facts = json.loads((ROOT / "content" / "guide.json").read_text(encoding="utf-8")).get("facts", [])
         graph.append({"@type": "FAQPage", "mainEntity": [

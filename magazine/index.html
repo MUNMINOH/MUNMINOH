@@ -567,6 +567,23 @@ table.mini th, table.mini td { padding: 8px 6px; }
 .cal-none { margin: 4px 0 8px; color: var(--ink-2); }
 .cal-next { margin: 12px 0 0; font-size: var(--t-xs); color: var(--muted); font-weight: 600; }
 .int-lead { margin: 0 0 10px; color: var(--ink-2); }
+.who-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.who { border: 1px solid var(--line-strong); background: var(--surface); padding: 18px 20px; display: grid; gap: 8px; align-content: start; }
+.who h3 { margin: 0; font-size: var(--t-lg, 1.25rem); font-weight: 800; }
+.who > p { margin: 0; color: var(--muted); font-size: var(--t-sm); }
+.who ul { list-style: none; margin: 4px 0 0; padding: 0; }
+.who li a { display: grid; gap: 2px; padding: 10px 0; border-top: 1px solid var(--line); }
+.who li a:hover b { color: var(--accent); }
+.who li small { color: var(--muted); font-size: var(--t-xs); }
+.principles { margin: 16px 0 0; padding-left: 1.1em; display: grid; gap: 8px; line-height: 1.7; color: var(--ink-2); }
+.principles a { color: var(--accent); }
+.principles.no li::marker { content: "✕  "; color: var(--muted); }
+.steps-line { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; counter-reset: st; }
+.steps-line li { counter-increment: st; border-top: 3px solid var(--accent); padding-top: 10px; display: grid; gap: 4px; }
+.steps-line li::before { content: counter(st); font-family: var(--f-mono); color: var(--accent); font-weight: 500; }
+.steps-line span { color: var(--ink-2); font-size: var(--t-sm); line-height: 1.6; }
+.about-runner { margin: 0 0 8px; line-height: 1.8; max-width: 46rem; }
+@media (max-width: 1000px) { .who-grid { grid-template-columns: minmax(0, 1fr); } .steps-line { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .glossary { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
 .glossary div { padding: 12px 0; border-top: 1px solid var(--line); }
 .glossary dt { font-weight: 700; margin-bottom: 4px; }
@@ -815,7 +832,7 @@ table.gustats td a:hover b { color: var(--accent); text-decoration: underline; t
     <div class="directory">
       <div>
         <h2>층별 안내</h2>
-        <p class="foot-note">CADENCE는 빌딩러너가 만드는 상업용 부동산 리뷰입니다. 주제를 층으로 나눠 두었으니 원하는 층을 눌러 이동하세요.</p>
+        <p class="foot-note">CADENCE는 빌딩러너가 만드는 서울 빌딩 데이터 매거진입니다. 주제를 층으로 나눠 두었으니 원하는 층을 눌러 이동하세요. <a href="/about/" style="color:var(--accent);font-weight:600">CADENCE 소개 · 데이터 원칙 →</a></p>
         <div class="footer-sns"><strong>빌딩러너 SNS</strong><div id="footer-sns"></div></div>
       </div>
       <ul class="board" id="board"></ul>
@@ -823,7 +840,7 @@ table.gustats td a:hover b { color: var(--accent); text-decoration: underline; t
     <div class="footer-gu"><strong>서울 구별 빌딩 시세</strong><nav id="footer-gu" aria-label="구별 빌딩 시세"></nav></div>
     <div class="fine">
       <span>CADENCE는 빌딩러너가 운영하는 상업용 부동산 뉴스·데이터 페이지입니다. 기사는 각 언론사와 기관의 원문으로 연결되며, 기사의 저작권은 해당 언론사와 기관에 있습니다.</span>
-      <span>데이터 출처: 금리·환율 한국은행 경제통계시스템(ECOS), 상장 리츠 시세 Yahoo Finance(지연 시세), 서울 빌딩 실거래 국토교통부 상업업무용 부동산 매매 신고 자료. 투자 판단의 근거로 쓰기 전에 원자료를 확인하세요.</span>
+      <span>데이터 출처: 서울 빌딩 실거래 국토교통부 상업업무용 부동산 매매 신고 자료, 금리·환율 한국은행 경제통계시스템(ECOS), 공실률·임대가격지수 한국부동산원(보도 기사 기준), 상장 리츠 시세 Yahoo Finance(지연 시세). 투자 판단의 근거로 쓰기 전에 원자료를 확인하세요. <a href="/about/">데이터 원칙</a></span>
     </div>
   </div>
 </footer>
@@ -1091,7 +1108,7 @@ function ctaBlock() {
     <div>
       <span class="eyebrow">빌딩러너 매도·매수 의뢰</span>
       <h2>빌딩을 팔거나 사려고 하시나요?</h2>
-      <p>위치와 조건을 남겨 주시면 빌딩러너가 시세와 매칭 가능성을 검토해 연락드립니다.</p>
+      <p>위치와 조건을 남겨 주시면 빌딩러너가 시세를 검토해 연락드립니다. 거래가 필요하면 등록된 개업공인중개사(협업 법인)와 연결합니다. <a href="/about/#process" style="text-decoration:underline">진행 방식 보기</a></p>
     </div>
     <div class="cta-btns">
       <a class="cta-btn primary" href="/sell/"><b>매도 의뢰</b><span>건물을 팔고 싶어요</span></a>
@@ -2231,7 +2248,7 @@ function setActive(slug) {
   const cur = document.querySelector(".floor-btn[aria-current]");
   if (cur) cur.scrollIntoView({ block: "nearest", inline: "nearest" });
 }
-const PATHS = { home: "/", insight: "/insight/", price: "/price/", lookup: "/lookup/", deal: "/deal/", report: "/report/", policy: "/guide/", news: "/news/", column: "/column/", inquiry: "/inquiry/", sell: "/sell/", buy: "/buy/" };
+const PATHS = { home: "/", about: "/about/", insight: "/insight/", price: "/price/", lookup: "/lookup/", deal: "/deal/", report: "/report/", policy: "/guide/", news: "/news/", column: "/column/", inquiry: "/inquiry/", sell: "/sell/", buy: "/buy/" };
 const pathOf = k => PATHS[k] || "/";
 function currentSlug() {
   const seg = location.pathname.replace(/^\/+|\/+$/g, "").split("/")[0].replace(/\.html$/, "");
@@ -2262,7 +2279,8 @@ function route(keep) {
   else if (h === "deal") { renderDeals(); active = h; }
   else if (h === "report" && /^\d{4}-\d{2}$/.test(seg2)) { active = h; }   // 월간 리포트: 빌드 때 만든 본문을 그대로 둔다
   else if (h === "deal-sheet") { active = "deal"; }
-  else if (h === "insight") { active = h; }   // 빌딩러너 인덱스: 빌드 때 계산한 본문을 그대로 둔다   // 주간 딜 시트: 빌드 때 만든 본문을 그대로 둔다
+  else if (h === "insight") { active = h; }
+  else if (h === "about") { active = null; }   // 소개: 빌드 때 만든 본문을 그대로 둔다   // 빌딩러너 인덱스: 빌드 때 계산한 본문을 그대로 둔다   // 주간 딜 시트: 빌드 때 만든 본문을 그대로 둔다
   else if (h === "lookup") { renderLookup(); active = "price"; }
   else if (h === "report") { renderReport(); active = h; }
   else if (h === "policy") { renderGuide(); active = h; }
