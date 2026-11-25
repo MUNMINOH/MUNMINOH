@@ -1,58 +1,140 @@
 {
  "quarter": "2026년 3분기",
- "checked": "2026.11.17",
+ "checked": "2026.11.25",
  "note": "기관마다 조사 대상(전체 오피스·A급 오피스·권역 범위)과 방법이 달라 같은 지표도 수치가 다릅니다. 한국부동산원은 이번 분기부터 오피스 표본을 재설계해 이전 분기와 단순 비교할 수 없다고 밝혔습니다. 숫자는 각 기관 발표를 보도한 기사 기준이며, 원문 링크에서 확인할 수 있습니다.",
  "groups": [
   {
    "source": "한국부동산원",
    "kind": "공공 통계 (상업용부동산 임대동향조사)",
    "items": [
-    {"label": "서울 오피스 공실률", "value": "5.4%"},
-    {"label": "서울 오피스 투자수익률 (분기)", "value": "2.04%"},
-    {"label": "전국 중대형 상가 공실률", "value": "14.7%"},
-    {"label": "전국 소규모 상가 공실률", "value": "8.7%"},
-    {"label": "전국 오피스 임대가격지수 (전분기 대비)", "value": "+0.16%"}
+    {
+     "label": "서울 오피스 공실률",
+     "value": "5.4%"
+    },
+    {
+     "label": "서울 오피스 투자수익률 (분기)",
+     "value": "2.04%"
+    },
+    {
+     "label": "전국 일반상가 공실률",
+     "value": "13.7% (통계 작성 이후 최고)"
+    },
+    {
+     "label": "전국 일반상가 1층 공실률",
+     "value": "6.9%"
+    },
+    {
+     "label": "전국 중대형 상가 공실률",
+     "value": "14.7%"
+    },
+    {
+     "label": "전국 소규모 상가 공실률",
+     "value": "8.7%"
+    },
+    {
+     "label": "전국 상가 임대가격지수 (전분기 대비)",
+     "value": "−0.02%"
+    },
+    {
+     "label": "전국 오피스 임대가격지수 (전분기 대비)",
+     "value": "+0.16%"
+    }
    ],
    "links": [
-    {"title": "이투데이: 서울 오피스 임대료 19분기 연속 상승…전국 상가는 침체", "url": "https://www.etoday.co.kr/news/view/2641623"},
-    {"title": "국제뉴스: 오피스 임대가격지수 0.16%↑…상가는 0.02%↓", "url": "https://www.gukjenews.com/news/articleView.html?idxno=3736953"}
+    {
+     "title": "이투데이: 서울 오피스 임대료 19분기 연속 상승…전국 상가는 침체",
+     "url": "https://www.etoday.co.kr/news/view/2641623"
+    },
+    {
+     "title": "국제뉴스: 오피스 임대가격지수 0.16%↑…상가는 0.02%↓",
+     "url": "https://www.gukjenews.com/news/articleView.html?idxno=3736953"
+    },
+    {
+     "title": "SBS Biz: 서울 상가 임대료 상승세…(3분기 상가 공실률·1층 공실률·임대가격지수)",
+     "url": "https://biz.sbs.co.kr/amp/article/20000343101"
+    },
+    {
+     "title": "법률방송뉴스: 상가 공실률 13.7% 또 역대 최고... 1층 공실도 6.9%로 늘어",
+     "url": "https://www.lawtv.kr/news/articleView.html?idxno=61285"
+    }
    ]
   },
   {
    "source": "알스퀘어",
    "kind": "민간 리서치 (서울 오피스)",
    "items": [
-    {"label": "서울 오피스 공실률", "value": "5.7% (전분기 대비 −0.8%p)"},
-    {"label": "도심권(CBD) 공실률", "value": "5.2%"},
-    {"label": "서울 오피스 거래액", "value": "약 7조 4,000억 원"},
-    {"label": "캡레이트", "value": "4.49%"}
+    {
+     "label": "서울 오피스 공실률",
+     "value": "5.7% (전분기 대비 −0.8%p)"
+    },
+    {
+     "label": "도심권(CBD) 공실률",
+     "value": "5.2%"
+    },
+    {
+     "label": "서울 오피스 거래액",
+     "value": "약 7조 4,000억 원"
+    },
+    {
+     "label": "캡레이트",
+     "value": "4.49%"
+    }
    ],
    "links": [
-    {"title": "벤처스퀘어: 알스퀘어, 서울 오피스 공실률 5.7%로 하락", "url": "https://www.venturesquare.net/1128404"},
-    {"title": "신아일보: 서울 오피스 공실률 5.7%로 하락…거래액 7조4000억원", "url": "https://www.shinailbo.co.kr/news/articleView.html?idxno=5083115"}
+    {
+     "title": "벤처스퀘어: 알스퀘어, 서울 오피스 공실률 5.7%로 하락",
+     "url": "https://www.venturesquare.net/1128404"
+    },
+    {
+     "title": "신아일보: 서울 오피스 공실률 5.7%로 하락…거래액 7조4000억원",
+     "url": "https://www.shinailbo.co.kr/news/articleView.html?idxno=5083115"
+    }
    ]
   },
   {
    "source": "JLL코리아",
    "kind": "민간 리서치 (서울 A급 오피스)",
    "items": [
-    {"label": "서울 오피스 거래금액", "value": "6조 4,077억 원"},
-    {"label": "서울 A급 오피스 공실률", "value": "5.8%"},
-    {"label": "강남 A급 오피스 공실률", "value": "0.8%"}
+    {
+     "label": "서울 오피스 거래금액",
+     "value": "6조 4,077억 원"
+    },
+    {
+     "label": "서울 A급 오피스 공실률",
+     "value": "5.8%"
+    },
+    {
+     "label": "강남 A급 오피스 공실률",
+     "value": "0.8%"
+    }
    ],
    "links": [
-    {"title": "한국경제: 서울 오피스 거래 6조4077억…강남 공실률 0.8%", "url": "https://www.hankyung.com/article/202611119943i"}
+    {
+     "title": "한국경제: 서울 오피스 거래 6조4077억…강남 공실률 0.8%",
+     "url": "https://www.hankyung.com/article/202611119943i"
+    }
    ]
   },
   {
    "source": "CBRE코리아",
    "kind": "민간 리서치 (서울 3대 권역 A급 오피스)",
    "items": [
-    {"label": "3대 권역 A급 오피스 공실률", "value": "3.1%"}
+    {
+     "label": "3대 권역 A급 오피스 공실률",
+     "value": "3.1%"
+    }
    ],
    "links": [
-    {"title": "이투데이: 3분기 서울 A급 오피스 공실률 3.1%", "url": "https://www.etoday.co.kr/news/view/2638185"}
+    {
+     "title": "이투데이: 3분기 서울 A급 오피스 공실률 3.1%",
+     "url": "https://www.etoday.co.kr/news/view/2638185"
+    }
    ]
   }
- ]
+ ],
+ "lookup": {
+  "title": "내 상권 공실률·임대료는 한국부동산원 R-ONE에서",
+  "url": "https://www.reb.or.kr/r-one/",
+  "note": "상업용부동산 임대동향조사 · 상권별(전국 385개) 분기 통계"
+ }
 }

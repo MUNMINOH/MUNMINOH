@@ -517,7 +517,7 @@ def insight_page(ins):
             + f'<section>{sec("요약", "이번 주 숫자로 본 서울 빌딩 시장")}<ul class="ix-summary">{summary}</ul>{src}</section>'
             + f'<section>{sec("01", "꼬마빌딩 평당가")}<div class="ix-split">{kcard}<div class="table-scroll"><table class="gustats"><thead><tr><th>월</th><th class="r">꼬마빌딩 거래</th>'
               f'<th class="r">토지 3.3㎡당 (만 원)</th><th class="r">연면적 3.3㎡당 (만 원)</th><th class="r">전체 거래</th></tr></thead><tbody>{krows}</tbody></table></div></div>'
-              '<p class="foot-note">꼬마빌딩은 거래금액 50억 원 미만 건물 단위 매매로 정의했습니다. 달마다 거래된 건물의 위치·연식이 달라 단순 비교에는 한계가 있습니다.</p></section>'
+              '<p class="foot-note">꼬마빌딩은 거래금액 50억 원 미만 건물 단위 매매로 정의했습니다. 평당가 변화는 그 기간에 거래된 건물들의 중위값 비교라, 거래된 건물의 위치·크기가 달라지면 오르내릴 수 있습니다. 같은 건물 값이 그만큼 변했다는 뜻은 아닙니다.</p></section>'
             + f'<section>{sec("02", "누가 팔고, 누가 사나")}{flow}</section>'
             + f'<section>{sec("03", "용도지역별 평당가")}<div class="table-scroll"><table class="gustats"><thead><tr><th>용도지역</th><th class="r">토지 3.3㎡당 (만 원)</th>'
               f'<th class="r">연면적 3.3㎡당 (만 원)</th><th class="r">중위 거래금액 (억 원)</th><th class="r">거래 건수</th></tr></thead><tbody>{zrows}</tbody></table></div>'
@@ -566,7 +566,7 @@ def prerender(slug, name, desc, data, guide, market, gu=None):
     if slug == "home":
         top = ((data.get("deals") or {}).get("top") or [None])[0]
         land = med([land_py(r) for r in rows]) if rows else 0
-        lead = ('<section class="hero"><div class="hero-head"><h1>서울 빌딩 시세와 실거래, 오늘의 숫자</h1>'
+        lead = ('<section class="hero"><div class="hero-head"><h1>서울 빌딩 시세, 우리 구는 얼마일까?</h1>'
                 f'<p>{e(desc)}</p></div><ul>'
                 + (f"<li>서울 빌딩 토지 3.3㎡당 중위값 {land / 10000:,.2f}억 원 (국토교통부 실거래 {len(rows)}건)</li>" if land else "")
                 + (f'<li>최근 두 달 최대 거래: 서울 {e(top["gu"])} {e(top["dong"])} {e(top.get("use"))} {eok(top["amount"])}억 원 ({e(top["date"])})</li>' if top else "")
