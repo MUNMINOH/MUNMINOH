@@ -155,3 +155,8 @@ Settings → Secrets and variables → Actions → **Repository secrets**에 `DA
 
 임대 시장 숫자는 `content/market.json`의 한국부동산원 항목(기사 2곳 이상에서 같은 값으로 확인한 것만)을 씁니다. 가이드(/guide/#glossary)에 용어 풀이(근거 법령 표시)가 있습니다.
 
+## 소개 (/about/)
+
+자주 올 방문자(건물주 · 예비 건물주·매수 검토 · 매도 검토)별로 "무엇을 어디서 보면 되는지", 데이터 출처·반영 주기·계산 방식·한계, 의뢰 진행 4단계와 개인정보 처리(FormSubmit·Notion 사용 명시), CADENCE가 하지 않는 것(매물 광고·감정평가·투자 권유·세무 자문), 자주 묻는 질문(FAQPage 구조화 데이터)을 담았습니다. 내용은 `build_site.py`의 `about_page`, `ABOUT_FAQ`.
+운영자 이름·경력·협업 법인 표기는 운영자가 정해 주면 "빌딩러너" 섹션에 넣습니다.
+
